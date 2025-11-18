@@ -3,8 +3,9 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Theme, ThemeContextType, LightTheme, DarkTheme } from '../theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { DarkTheme, LightTheme, Theme, ThemeContextType } from '../src/theme';
 
 // Theme storage key
 const THEME_STORAGE_KEY = '@caloritrack_theme';
@@ -31,9 +32,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   useEffect(() => {
     const loadTheme = async () => {
       try {
-        // For now, we'll use a simple approach
-        // In a real app, you'd use AsyncStorage or similar
-        const storedTheme = localStorage.getItem(storageKey);
+        const storedTheme = await AsyncStorage.getItem(storageKey);
         if (storedTheme && (storedTheme === 'light' || storedTheme === 'dark')) {
           setIsDark(storedTheme === 'dark');
           setThemeState(storedTheme === 'dark' ? DarkTheme : LightTheme);
@@ -47,28 +46,28 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   }, [storageKey]);
 
   // Toggle theme
-  const toggleTheme = () => {
+  const toggleTheme = async () => {
     const newIsDark = !isDark;
     setIsDark(newIsDark);
     setThemeState(newIsDark ? DarkTheme : LightTheme);
 
     // Save to storage
     try {
-      localStorage.setItem(storageKey, newIsDark ? 'dark' : 'light');
+      await AsyncStorage.setItem(storageKey, newIsDark ? 'dark' : 'light');
     } catch (error) {
       console.warn('Failed to save theme to storage:', error);
     }
   };
 
   // Set specific theme
-  const setTheme = (themeType: 'light' | 'dark') => {
+  const setTheme = async (themeType: 'light' | 'dark') => {
     const newIsDark = themeType === 'dark';
     setIsDark(newIsDark);
     setThemeState(newIsDark ? DarkTheme : LightTheme);
 
     // Save to storage
     try {
-      localStorage.setItem(storageKey, themeType);
+      await AsyncStorage.setItem(storageKey, themeType);
     } catch (error) {
       console.warn('Failed to save theme to storage:', error);
     }

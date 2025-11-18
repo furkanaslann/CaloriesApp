@@ -58,6 +58,11 @@ export const LetterSpacing = {
 
 // Typography Styles
 export const Typography = {
+  // Font sizes for easy access
+  fontSize: FontSize,
+  fontWeight: FontWeight,
+  fontFamily: FontFamily,
+
   // Line heights for easy access
   lineHeight: LineHeight,
 
@@ -197,4 +202,38 @@ export const TextStyles = {
   labelText: Typography.labelMedium,
   hintText: Typography.caption,
   codeText: Typography.code,
+
+  // Onboarding specific text styles
+  onboardingHero: {
+    fontSize: FontSize['4xl'],
+    fontWeight: FontWeight.bold,
+    lineHeight: LineHeight.tight,
+    letterSpacing: -1,
+    fontFamily: FontFamily.primary,
+  },
+  onboardingTitle: {
+    fontSize: FontSize['3xl'],
+    fontWeight: FontWeight.semibold,
+    lineHeight: LineHeight.tight,
+    letterSpacing: -0.5,
+    fontFamily: FontFamily.primary,
+  },
+  onboardingSubtitle: {
+    fontSize: FontSize.xl,
+    fontWeight: FontWeight.medium,
+    lineHeight: LineHeight.normal,
+    fontFamily: FontFamily.primary,
+  },
+  onboardingDescription: {
+    fontSize: FontSize.base,
+    fontWeight: FontWeight.regular,
+    lineHeight: LineHeight.relaxed,
+    fontFamily: FontFamily.primary,
+  },
+  onboardingButtonText: {
+    fontSize: FontSize.lg,
+    fontWeight: FontWeight.semibold,
+    lineHeight: LineHeight.normal,
+    fontFamily: FontFamily.primary,
+  },
 };

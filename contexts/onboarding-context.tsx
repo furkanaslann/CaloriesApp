@@ -150,7 +150,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
 
   // Calculate BMR using Harris-Benedict equation
   const calculateBMR = () => {
-    if (!profile.age || !profile.weight || !profile.height || !profile.gender) return 0;
+    if (!profile.age || !profile.currentWeight || !profile.height || !profile.gender) return 0;
 
     const { age, gender } = profile;
     const weight = profile.currentWeight || 0;
@@ -250,9 +250,18 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         setCurrentStep(data.currentStep || 0);
         setCompletedSteps(data.completedSteps || []);
         setIsCompleted(data.isCompleted || false);
+      } else {
+        // No stored data, start fresh
+        setIsCompleted(false);
+        setCurrentStep(0);
+        setCompletedSteps([]);
       }
     } catch (error) {
       console.error('Failed to load onboarding progress:', error);
+      // On error, start fresh
+      setIsCompleted(false);
+      setCurrentStep(0);
+      setCompletedSteps([]);
     }
   };
 
@@ -279,7 +288,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
 
   // Navigation functions
   const nextStep = () => {
-    const newStep = Math.min(currentStep + 1, 8); // 9 steps total (0-8)
+    const newStep = Math.min(currentStep + 1, 16); // 17 steps total (0-16)
     setCurrentStep(newStep);
 
     if (!completedSteps.includes(currentStep)) {
@@ -296,7 +305,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   };
 
   const goToStep = (step: number) => {
-    const validStep = Math.max(0, Math.min(step, 8));
+    const validStep = Math.max(0, Math.min(step, 16));
     setCurrentStep(validStep);
 
     if (validStep > 0 && !completedSteps.includes(validStep - 1)) {

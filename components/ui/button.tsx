@@ -5,14 +5,14 @@
 
 import React from 'react';
 import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
-  ActivityIndicator,
+    ActivityIndicator,
+    StyleSheet,
+    Text,
+    TextStyle,
+    TouchableOpacity,
+    ViewStyle,
 } from 'react-native';
-import { useThemeContext } from '../../contexts/theme-context';
+import { useTheme } from '../../src/theme';
 
 export interface ButtonProps {
   title: string;
@@ -37,7 +37,7 @@ export const Button: React.FC<ButtonProps> = ({
   textStyle,
   fullWidth = false,
 }) => {
-  const { theme } = useThemeContext();
+  const theme = useTheme();
 
   // Button styles based on variant
   const getButtonStyle = (): ViewStyle => {
@@ -99,9 +99,9 @@ export const Button: React.FC<ButtonProps> = ({
 
     // Size variations
     const sizeStyles = {
-      small: theme.textStyles.buttonSmall,
-      medium: theme.textStyles.buttonMedium,
-      large: theme.textStyles.buttonLarge,
+      small: theme.textStyles.body,
+      medium: theme.textStyles.labelLarge,
+      large: theme.textStyles.heading4,
     };
 
     // Variant styles

@@ -10,26 +10,41 @@ Every design decision should prioritize simplicity, visual appeal, and an intuit
 
 ### Color Palette
 
-**Primary Colors:**
-- **Primary:** `#6366F1` (Indigo-500) - Main action buttons, accents
-- **Primary Dark:** `#4F46E5` (Indigo-600) - Pressed states, active elements
-- **Primary Light:** `#818CF8` (Indigo-400) - Hover states, subtle highlights
+**Primary Colors (Modern Purple Theme):**
+- **Primary:** `#7C3AED` (Purple-600) - Main action buttons, accents
+- **Primary Dark:** `#6D28D9` (Purple-700) - Pressed states, active elements
+- **Primary Light:** `#A78BFA` (Purple-400) - Hover states, subtle highlights
+
+**Gradient Colors:**
+- **Gradient Start:** `#7C3AED` (Purple-600)
+- **Gradient End:** `#EC4899` (Pink-500) - Modern gradient effects
+- **Gradient Accent:** `#F59E0B` (Amber-500) - Accent highlights
 
 **Neutral Colors:**
 - **Background:** `#FFFFFF` (Pure white) - Main app background
-- **Surface:** `#FAFAFA` (Gray-50) - Cards, modals, elevated surfaces
-- **Border:** `#E5E7EB` (Gray-200) - Subtle dividers, input borders
-- **Text Primary:** `#111827` (Gray-900) - Main text, headings
-- **Text Secondary:** `#6B7280` (Gray-500) - Supporting text, captions
-- **Text Tertiary:** `#9CA3AF` (Gray-400) - Hints, placeholders
+- **Surface:** `#FEFEFE` (Very light gray) - Cards, elevated surfaces
+- **Surface Alt:** `#F8FAFC` (Blue-50) - Alternative surfaces
+- **Border:** `#E2E8F0` (Gray-200) - Subtle dividers, input borders
+- **Border Light:** `#F1F5F9` (Gray-100) - Light borders
+- **Text Primary:** `#1E293B` (Slate-800) - Main text, headings
+- **Text Secondary:** `#64748B` (Slate-500) - Supporting text, captions
+- **Text Tertiary:** `#94A3B8` (Slate-400) - Hints, placeholders
+- **Text Muted:** `#CBD5E1` (Slate-300) - Very subtle text
 
 **Success Colors:**
 - **Success:** `#10B981` (Emerald-500) - Positive actions, achievements
 - **Success Light:** `#D1FAE5` (Emerald-100) - Success backgrounds
+- **Success Dark:** `#047857` (Emerald-700) - Success text
 
 **Error Colors:**
 - **Error:** `#EF4444` (Red-500) - Error states, warnings
 - **Error Light:** `#FEE2E2` (Red-100) - Error backgrounds
+- **Error Dark:** `#B91C1C` (Red-700) - Error text
+
+**Onboarding Colors:**
+- **Onboarding Accent:** `#F97316` (Orange-500) - Special onboarding highlights
+- **Onboarding Text:** `#334155` (Slate-700) - Onboarding descriptions
+- **Onboarding Subtle:** `#F1F5F9` (Slate-100) - Onboarding backgrounds
 
 ### Typography
 
@@ -401,27 +416,101 @@ app/
 **Image Loading:** < 2 seconds
 **API Responses:** < 1 second
 
+## Onboarding Design Guidelines
+
+### Onboarding Flow Structure
+
+**Welcome Screen:**
+- 5 slides with hero images from Figma design
+- Modern gradient effects and smooth transitions
+- Progressive disclosure of app features
+- Clear call-to-action buttons
+
+**Data Collection Screens:**
+- Modern card-based layout with shadows
+- Focus on one piece of information per screen
+- Icon indicators for each data type
+- Quick selection options where applicable
+- Real-time validation feedback
+
+**Visual Elements:**
+- **Hero Images:** Use Figma-provided images (3216b7adc1294b15a468e83c9cae2192.webp, etc.)
+- **Icons:** Large, circular icon containers with emoji or icons
+- **Input Fields:** Modern floating labels with focus states
+- **Buttons:** Primary buttons with gradient shadows on final screens
+- **Progress Indicators:** Modern pill-shaped progress dots
+
+### Onboarding Typography
+
+**Screen Titles:**
+- Font Size: 30px (3xl)
+- Weight: 600 (Semibold)
+- Line Height: 1.25 (Tight)
+- Letter Spacing: -0.5px
+
+**Screen Subtitles:**
+- Font Size: 20px (xl)
+- Weight: 500 (Medium)
+- Line Height: 1.5 (Normal)
+
+**Descriptions:**
+- Font Size: 16px (base)
+- Weight: 400 (Regular)
+- Line Height: 1.75 (Relaxed)
+
+### Onboarding Spacing
+
+**Container Padding:** 24px horizontal (2xl)
+**Top Padding:** 48px (4xl)
+**Bottom Footer Padding:** 48px (4xl)
+**Icon Size:** 80px circular containers
+**Image Container:** 85% width, 65% height with xl border radius
+
+### Onboarding Interactions
+
+**Input Fields:**
+- Focus state with primary color border
+- Shadow effects on focused inputs
+- Smooth transitions between states
+
+**Quick Selection:**
+- Button grid with 2px borders
+- Selected state with primary background
+- Shadow effects on selected items
+
+**Progress Dots:**
+- Default: 8px circular dots
+- Active: 32px x 8px pill shape
+- Smooth transitions between states
+
 ## Review Checklist
 
 Before implementing any feature:
 
 **Design:**
-- [ ] Follows the color palette
-- [ ] Uses correct typography scale
-- [ ] Implements proper spacing
-- [ ] Includes appropriate animations
+- [ ] Follows the modern purple color palette
+- [ ] Uses gradient effects appropriately
+- [ ] Implements proper onboarding typography scale
+- [ ] Includes proper spacing and shadows
 - [ ] Works in dark mode
 
+**Onboarding Specific:**
+- [ ] Uses Figma hero images correctly
+- [ ] Implements modern card layouts
+- [ ] Includes icon indicators
+- [ ] Has proper progress indicators
+- [ ] Focus states on inputs
+
 **Accessibility:**
-- [ ] Has proper contrast ratios
+- [ ] Has proper contrast ratios (4.5:1 minimum)
 - [ ] Includes screen reader labels
 - [ ] Supports keyboard navigation
-- [ ] Has adequate touch targets
+- [ ] Has adequate touch targets (44x44px minimum)
 
 **Performance:**
 - [ ] Optimized images and assets
 - [ ] Efficient state management
-- [ ] Smooth animations
+- [ ] Smooth animations (200ms standard)
 - [ ] Fast loading times
 
 **Code Quality:**
@@ -435,3 +524,5 @@ Before implementing any feature:
 ## Remember: Minimal. Cool. Aesthetic.
 
 Every feature should feel intentional, every interaction should feel smooth, and every moment should feel like a delightful experience. Focus on the essentials, execute them beautifully, and remove everything else.
+
+**Onboarding Philosophy:** Welcome users with beautiful visuals, collect information progressively, and make every step feel effortless and delightful.

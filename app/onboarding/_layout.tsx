@@ -4,6 +4,13 @@ export default function OnboardingLayout() {
   return (
     <Stack>
       <Stack.Screen name="welcome" options={{ headerShown: false }} />
+      <Stack.Screen name="name" options={{ headerShown: false }} />
+      <Stack.Screen name="last-name" options={{ headerShown: false }} />
+      <Stack.Screen name="date-of-birth" options={{ headerShown: false }} />
+      <Stack.Screen name="gender" options={{ headerShown: false }} />
+      <Stack.Screen name="height" options={{ headerShown: false }} />
+      <Stack.Screen name="weight" options={{ headerShown: false }} />
+      <Stack.Screen name="profile-photo" options={{ headerShown: false }} />
       <Stack.Screen name="profile" options={{ headerShown: false }} />
       <Stack.Screen name="goals" options={{ headerShown: false }} />
       <Stack.Screen name="activity" options={{ headerShown: false }} />
@@ -12,6 +19,7 @@ export default function OnboardingLayout() {
       <Stack.Screen name="notifications" options={{ headerShown: false }} />
       <Stack.Screen name="privacy" options={{ headerShown: false }} />
       <Stack.Screen name="summary" options={{ headerShown: false }} />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
     </Stack>
   );
 }

@@ -118,11 +118,47 @@ export const Shadows = {
 
 // Colored shadows for different states
 export const ColoredShadows = {
-  // Primary color shadow
+  // Primary color shadow (new purple)
   primary: {
     ...Platform.select({
       ios: {
-        shadowColor: '#6366F1',
+        shadowColor: '#7C3AED',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+      web: {
+        boxShadow: '0 4px 14px 0 rgba(124, 58, 237, 0.25)',
+      },
+    }),
+  },
+
+  // Gradient shadow (mix of purple and pink)
+  gradient: {
+    ...Platform.select({
+      ios: {
+        shadowColor: '#EC4899',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.3,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 6,
+      },
+      web: {
+        boxShadow: '0 6px 20px 0 rgba(236, 72, 153, 0.3)',
+      },
+    }),
+  },
+
+  // Onboarding accent shadow (orange)
+  onboarding: {
+    ...Platform.select({
+      ios: {
+        shadowColor: '#F97316',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 8,
@@ -131,7 +167,7 @@ export const ColoredShadows = {
         elevation: 4,
       },
       web: {
-        boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.2)',
+        boxShadow: '0 4px 14px 0 rgba(249, 115, 22, 0.2)',
       },
     }),
   },
@@ -197,6 +233,7 @@ export const ShadowPatterns = {
   button: Shadows.md,
   buttonPressed: Shadows.sm,
   buttonHover: Shadows.lg,
+  buttonPrimary: ColoredShadows.primary,
 
   // Card elements
   card: Shadows.sm,
@@ -213,6 +250,8 @@ export const ShadowPatterns = {
 
   // Special elements
   hero: Shadows.xl,
-  featured: ColoredShadows.primary,
+  featured: ColoredShadows.gradient,
   floating: Shadows.lg,
+  onboardingCard: Shadows.sm,
+  onboardingButton: ColoredShadows.onboarding,
 } as const;

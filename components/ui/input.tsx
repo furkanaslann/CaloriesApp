@@ -5,15 +5,15 @@
 
 import React, { useState } from 'react';
 import {
-  TextInput,
-  View,
-  Text,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
-  TextInputProps,
+    StyleSheet,
+    Text,
+    TextInput,
+    TextInputProps,
+    TextStyle,
+    View,
+    ViewStyle,
 } from 'react-native';
-import { useThemeContext } from '../../contexts/theme-context';
+import { useTheme } from '../../src/theme';
 
 export interface InputProps extends Omit<TextInputProps, 'style'> {
   label?: string;
@@ -35,7 +35,7 @@ export const Input: React.FC<InputProps> = ({
   rightIcon,
   ...textInputProps
 }) => {
-  const { theme } = useThemeContext();
+  const theme = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
   const getInputStyle = (): TextStyle => {
@@ -71,7 +71,7 @@ export const Input: React.FC<InputProps> = ({
   });
 
   const getLabelStyle = (): TextStyle => ({
-    ...theme.textStyles.labelMedium,
+    ...theme.textStyles.labelLarge,
     color: error
       ? theme.colors.error
       : theme.semanticColors.text.primary,

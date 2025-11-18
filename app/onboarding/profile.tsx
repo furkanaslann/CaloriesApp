@@ -1,9 +1,9 @@
 /**
- * CaloriTrack - Onboarding Profile Setup Screen
+ * CaloriTrack - Onboarding Profile Summary Screen
  * Minimal. Cool. Aesthetic.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -11,112 +11,37 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { useThemeContext } from '../../contexts/theme-context';
+import { useTheme } from '../../src/theme/index';
 import { useOnboarding } from '../../contexts/onboarding-context';
 import Button from '../../components/ui/button';
-import Input from '../../components/ui/input';
 
 const ProfileScreen = () => {
-  const { theme } = useThemeContext();
-  const { profile, updateProfile, nextStep, previousStep } = useOnboarding();
-
-  const [formData, setFormData] = useState({
-    name: profile.name || '',
-    lastName: profile.lastName || '',
-    age: profile.age?.toString() || '',
-    height: profile.height?.toString() || '',
-    currentWeight: profile.currentWeight?.toString() || '',
-    gender: profile.gender || 'male' as 'male' | 'female' | 'other',
-  });
-
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [dateOfBirth, setDateOfBirth] = useState(
-    profile.dateOfBirth ? new Date(profile.dateOfBirth) : new Date()
-  );
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+  const themeResult = useTheme();
+  const theme = themeResult || {
+    semanticColors: {
+      background: { primary: '#FFFFFF', surface: '#F8FAFC' },
+      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B' },
+      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
+    },
+    colors: { primary: '#7C3AED' },
+    textStyles: {
+      heading2: { fontSize: 28, fontWeight: '600' },
+      heading3: { fontSize: 24, fontWeight: '600' },
+      heading4: { fontSize: 20, fontWeight: '600' },
+      body: { fontSize: 16, fontWeight: '400' },
+      bodyMedium: { fontSize: 16, fontWeight: '500' },
+      labelSmall: { fontSize: 13, fontWeight: '500' },
+    },
+    typography: { lineHeight: { relaxed: 24 } },
+    spacing: { lg: 24, md: 16, xl: 32, xs: 4, sm: 8, '3xl': 40 },
+    borderRadius: { md: 10 },
+    shadows: {},
   };
-
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setDateOfBirth(selectedDate);
-      const age = calculateAge(selectedDate);
-      setFormData(prev => ({
-        ...prev,
-        age: age.toString(),
-      }));
-    }
-  };
-
-  const calculateAge = (birthDate: Date): number => {
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-
-    return age;
-  };
-
-  const validateForm = (): boolean => {
-    const errors: string[] = [];
-
-    if (!formData.name.trim()) {
-      errors.push('Ad alanı zorunludur');
-    }
-
-    if (!formData.lastName.trim()) {
-      errors.push('Soyad alanı zorunludur');
-    }
-
-    const age = parseInt(formData.age);
-    if (!age || age < 14 || age > 100) {
-      errors.push('Yaş 14-100 aralığında olmalıdır');
-    }
-
-    const height = parseFloat(formData.height);
-    if (!height || height < 100 || height > 250) {
-      errors.push('Boy 100-250 cm aralığında olmalıdır');
-    }
-
-    const weight = parseFloat(formData.currentWeight);
-    if (!weight || weight < 30 || weight > 300) {
-      errors.push('Kilo 30-300 kg aralığında olmalıdır');
-    }
-
-    if (errors.length > 0) {
-      Alert.alert('Doğrulama Hatası', errors.join('\n'));
-      return false;
-    }
-
-    return true;
-  };
+  const { profile, nextStep, previousStep } = useOnboarding();
 
   const handleNext = () => {
-    if (!validateForm()) return;
-
-    const updatedProfile = {
-      name: formData.name.trim(),
-      lastName: formData.lastName.trim(),
-      age: parseInt(formData.age),
-      height: parseFloat(formData.height),
-      currentWeight: parseFloat(formData.currentWeight),
-      gender: formData.gender,
-      dateOfBirth: dateOfBirth.toISOString().split('T')[0],
-    };
-
-    updateProfile(updatedProfile);
     nextStep();
     router.push('/onboarding/goals');
   };
@@ -126,11 +51,32 @@ const ProfileScreen = () => {
     router.back();
   };
 
-  const genderOptions = [
-    { value: 'male', label: 'Erkek', icon: '👨' },
-    { value: 'female', label: 'Kadın', icon: '👩' },
-    { value: 'other', label: 'Diğer', icon: '👤' },
-  ];
+  const handleEdit = (field: string) => {
+    // Navigate to the specific edit screen
+    switch (field) {
+      case 'name':
+        router.push('/onboarding/name');
+        break;
+      case 'lastName':
+        router.push('/onboarding/last-name');
+        break;
+      case 'dateOfBirth':
+        router.push('/onboarding/date-of-birth');
+        break;
+      case 'gender':
+        router.push('/onboarding/gender');
+        break;
+      case 'height':
+        router.push('/onboarding/height');
+        break;
+      case 'weight':
+        router.push('/onboarding/weight');
+        break;
+      case 'profilePhoto':
+        router.push('/onboarding/profile-photo');
+        break;
+    }
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -150,49 +96,79 @@ const ProfileScreen = () => {
       ...theme.textStyles.heading2,
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.md,
+      textAlign: 'center',
     },
     subtitle: {
       ...theme.textStyles.body,
       color: theme.semanticColors.text.secondary,
+      textAlign: 'center',
       lineHeight: theme.typography.lineHeight.relaxed,
     },
-    section: {
+    profileContainer: {
       marginBottom: theme.spacing['3xl'],
+    },
+    profileHeader: {
+      alignItems: 'center',
+      marginBottom: theme.spacing.xl,
+    },
+    profilePhoto: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: theme.semanticColors.background.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: theme.spacing.md,
+      borderWidth: 2,
+      borderColor: theme.semanticColors.border.primary,
+    },
+    profilePhotoPlaceholder: {
+      fontSize: 40,
+    },
+    profileName: {
+      ...theme.textStyles.heading3,
+      color: theme.semanticColors.text.primary,
+      marginBottom: theme.spacing.xs,
+    },
+    profileDetails: {
+      ...theme.textStyles.body,
+      color: theme.semanticColors.text.secondary,
+    },
+    section: {
+      marginBottom: theme.spacing.xl,
     },
     sectionTitle: {
       ...theme.textStyles.heading4,
       color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.lg,
+      marginBottom: theme.spacing.md,
     },
-    genderContainer: {
+    infoItem: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      marginBottom: theme.spacing.lg,
-    },
-    genderOption: {
-      flex: 1,
+      justifyContent: 'space-between',
+      alignItems: 'center',
       padding: theme.spacing.md,
+      backgroundColor: theme.semanticColors.background.surface,
+      borderRadius: theme.borderRadius.md,
+      marginBottom: theme.spacing.sm,
       borderWidth: 1,
       borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.md,
-      alignItems: 'center',
-      backgroundColor: theme.semanticColors.background.primary,
     },
-    genderOptionSelected: {
-      borderColor: theme.colors.primary,
-      backgroundColor: `${theme.colors.primary}10`,
+    infoLabel: {
+      ...theme.textStyles.body,
+      color: theme.semanticColors.text.secondary,
+      flex: 1,
     },
-    genderIcon: {
-      fontSize: 32,
-      marginBottom: theme.spacing.sm,
-    },
-    genderLabel: {
-      ...theme.textStyles.labelMedium,
+    infoValue: {
+      ...theme.textStyles.bodyMedium,
       color: theme.semanticColors.text.primary,
+      flex: 2,
+      textAlign: 'right',
     },
-    genderLabelSelected: {
+    editButton: {
+      ...theme.textStyles.labelSmall,
       color: theme.colors.primary,
-      fontWeight: theme.typography.fontWeight.semibold,
+      textDecorationLine: 'underline',
+      marginLeft: theme.spacing.sm,
     },
     buttonContainer: {
       flexDirection: 'row',
@@ -200,119 +176,106 @@ const ProfileScreen = () => {
       paddingHorizontal: theme.spacing.lg,
       paddingBottom: theme.spacing.xl,
     },
-    dateButton: {
-      ...theme.shadows.sm,
-    },
-    dateButtonText: {
-      ...theme.textStyles.buttonMedium,
-      color: theme.semanticColors.text.primary,
-    },
   });
+
+  const getGenderLabel = (gender: string) => {
+    switch (gender) {
+      case 'male':
+        return 'Erkek';
+      case 'female':
+        return 'Kadın';
+      case 'other':
+        return 'Diğer';
+      default:
+        return gender;
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <View style={styles.header}>
-            <Text style={styles.title}>Profilinizi Oluşturun</Text>
+            <Text style={styles.title}>Profil Özeti</Text>
             <Text style={styles.subtitle}>
-              Kişisel bilgilerinizi girerek hesabınızı oluşturun. Bu bilgiler, size özel kalori hedefleri belirlememize yardımcı olacaktır.
+              Bilgilerinizi kontrol edin ve devam edin
             </Text>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Kişisel Bilgiler</Text>
-
-            <Input
-              label="Adınız"
-              value={formData.name}
-              onChangeText={(text) => handleInputChange('name', text)}
-              placeholder="Adınızı girin"
-              autoCapitalize="words"
-            />
-
-            <Input
-              label="Soyadınız"
-              value={formData.lastName}
-              onChangeText={(text) => handleInputChange('lastName', text)}
-              placeholder="Soyadınızı girin"
-              autoCapitalize="words"
-            />
-
-            <TouchableOpacity
-              style={[theme.shadows.sm, styles.dateButton]}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Input
-                label="Doğum Tarihi"
-                value={dateOfBirth.toLocaleDateString('tr-TR')}
-                placeholder="Doğum tarihinizi seçin"
-                editable={false}
-              />
-            </TouchableOpacity>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={dateOfBirth}
-                mode="date"
-                display="default"
-                maximumDate={new Date()}
-                onChange={handleDateChange}
-              />
-            )}
-
-            <Input
-              label="Yaş"
-              value={formData.age}
-              onChangeText={(text) => handleInputChange('age', text)}
-              placeholder="Yaşınız"
-              keyboardType="numeric"
-              editable={false}
-            />
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Fiziksel Bilgiler</Text>
-
-            <Text style={styles.sectionTitle}>Cinsiyet</Text>
-            <View style={styles.genderContainer}>
-              {genderOptions.map((option) => (
-                <TouchableOpacity
-                  key={option.value}
-                  style={[
-                    styles.genderOption,
-                    formData.gender === option.value && styles.genderOptionSelected,
-                  ]}
-                  onPress={() => handleInputChange('gender', option.value)}
-                >
-                  <Text style={styles.genderIcon}>{option.icon}</Text>
-                  <Text
-                    style={[
-                      styles.genderLabel,
-                      formData.gender === option.value && styles.genderLabelSelected,
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          <View style={styles.profileContainer}>
+            <View style={styles.profileHeader}>
+              <View style={styles.profilePhoto}>
+                {profile.profilePhoto ? (
+                  <></> // Image component would go here
+                ) : (
+                  <Text style={styles.profilePhotoPlaceholder}>👤</Text>
+                )}
+              </View>
+              <Text style={styles.profileName}>
+                {profile.name} {profile.lastName}
+              </Text>
+              <Text style={styles.profileDetails}>
+                {profile.age} yaş • {getGenderLabel(profile.gender || '')}
+              </Text>
             </View>
 
-            <Input
-              label="Boy (cm)"
-              value={formData.height}
-              onChangeText={(text) => handleInputChange('height', text)}
-              placeholder="Boyunuzu cm olarak girin"
-              keyboardType="numeric"
-            />
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Kişisel Bilgiler</Text>
 
-            <Input
-              label="Kilo (kg)"
-              value={formData.currentWeight}
-              onChangeText={(text) => handleInputChange('currentWeight', text)}
-              placeholder="Kilonuzu kg olarak girin"
-              keyboardType="numeric"
-            />
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Ad</Text>
+                <Text style={styles.infoValue}>{profile.name || 'Belirtilmemiş'}</Text>
+                <TouchableOpacity onPress={() => handleEdit('name')}>
+                  <Text style={styles.editButton}>Düzenle</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Soyad</Text>
+                <Text style={styles.infoValue}>{profile.lastName || 'Belirtilmemiş'}</Text>
+                <TouchableOpacity onPress={() => handleEdit('lastName')}>
+                  <Text style={styles.editButton}>Düzenle</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Doğum Tarihi</Text>
+                <Text style={styles.infoValue}>
+                  {profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString('tr-TR') : 'Belirtilmemiş'}
+                </Text>
+                <TouchableOpacity onPress={() => handleEdit('dateOfBirth')}>
+                  <Text style={styles.editButton}>Düzenle</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Cinsiyet</Text>
+                <Text style={styles.infoValue}>{getGenderLabel(profile.gender || '')}</Text>
+                <TouchableOpacity onPress={() => handleEdit('gender')}>
+                  <Text style={styles.editButton}>Düzenle</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Fiziksel Bilgiler</Text>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Boy</Text>
+                <Text style={styles.infoValue}>{profile.height} cm</Text>
+                <TouchableOpacity onPress={() => handleEdit('height')}>
+                  <Text style={styles.editButton}>Düzenle</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Kilo</Text>
+                <Text style={styles.infoValue}>{profile.currentWeight} kg</Text>
+                <TouchableOpacity onPress={() => handleEdit('weight')}>
+                  <Text style={styles.editButton}>Düzenle</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         </View>
       </ScrollView>

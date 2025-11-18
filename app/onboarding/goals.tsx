@@ -3,25 +3,47 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  TextInput,
+    Alert,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { router } from 'expo-router';
-import { useTheme } from '../../theme';
-import { useOnboarding } from '../../contexts/onboarding-context';
 import Button from '../../components/ui/button';
 import Input from '../../components/ui/input';
+import { useOnboarding } from '../../contexts/onboarding-context';
+import { useTheme } from '../../src/theme';
 
 const GoalsScreen = () => {
-  const { theme } = useTheme();
+  const themeResult = useTheme();
+  const theme = themeResult || {
+    semanticColors: {
+      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
+      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
+      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
+    },
+    colors: { primary: '#7C3AED', success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' },
+    textStyles: {
+      onboardingTitle: { fontSize: 30, fontWeight: '600' },
+      onboardingDescription: { fontSize: 16, fontWeight: '400' },
+      heading3: { fontSize: 24, fontWeight: '600' },
+      heading4: { fontSize: 20, fontWeight: '600' },
+      body: { fontSize: 16, fontWeight: '400' },
+      bodySmall: { fontSize: 14, fontWeight: '400' },
+      labelLarge: { fontSize: 18, fontWeight: '500' },
+      labelMedium: { fontSize: 15, fontWeight: '500' },
+    },
+    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8 },
+    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10 },
+    shadows: { lg: {}, md: {} },
+    coloredShadows: { primary: {} },
+  };
   const { profile, goals, updateGoals, nextStep, previousStep } = useOnboarding();
 
   const [formData, setFormData] = useState({
