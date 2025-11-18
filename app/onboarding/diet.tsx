@@ -172,12 +172,16 @@ const DietScreen = () => {
       padding: theme.spacing.lg,
     },
     header: {
+      marginTop: '10%',
       marginBottom: theme.spacing['3xl'],
     },
     title: {
       ...theme.textStyles.heading2,
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.md,
+      lineHeight: 40,
+      fontSize: 32,
+      fontWeight: '700',
     },
     subtitle: {
       ...theme.textStyles.body,

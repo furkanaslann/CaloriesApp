@@ -118,6 +118,7 @@ const CameraTutorialScreen = () => {
       marginBottom: theme.spacing['4xl'],
     },
     header: {
+      marginTop: '10%',
       alignItems: 'center',
       marginBottom: theme.spacing['3xl'],
     },
@@ -126,6 +127,9 @@ const CameraTutorialScreen = () => {
       color: theme.semanticColors.text.primary,
       textAlign: 'center',
       marginBottom: theme.spacing.md,
+      lineHeight: 40,
+      fontSize: 32,
+      fontWeight: '700',
     },
     subtitle: {
       ...theme.textStyles.heading4,

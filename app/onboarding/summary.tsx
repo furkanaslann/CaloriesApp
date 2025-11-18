@@ -103,6 +103,7 @@ const SummaryScreen = () => {
       padding: theme.spacing.lg,
     },
     header: {
+      marginTop: '10%',
       alignItems: 'center',
       marginBottom: theme.spacing['3xl'],
     },
@@ -111,6 +112,9 @@ const SummaryScreen = () => {
       color: theme.semanticColors.text.primary,
       textAlign: 'center',
       marginBottom: theme.spacing.md,
+      lineHeight: 40,
+      fontSize: 32,
+      fontWeight: '700',
     },
     subtitle: {
       ...theme.textStyles.body,

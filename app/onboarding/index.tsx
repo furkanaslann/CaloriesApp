@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
+    paddingTop: '5%',
   },
   loadingText: {
     marginTop: 16,

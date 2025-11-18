@@ -3,21 +3,21 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import * as ImagePicker from 'expo-image-picker';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-  Image,
   Alert,
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { router } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-import { useTheme } from '../../src/theme/index';
-import { useOnboarding } from '../../contexts/onboarding-context';
 import Button from '../../components/ui/button';
+import { useOnboarding } from '../../contexts/onboarding-context';
+import { useTheme } from '../../src/theme/index';
 
 const ProfilePhotoScreen = () => {
   const themeResult = useTheme();
@@ -128,22 +128,37 @@ const ProfilePhotoScreen = () => {
     content: {
       flex: 1,
       padding: theme.spacing.lg,
-      justifyContent: 'center',
+      justifyContent: 'flex-start',
     },
     header: {
       marginBottom: theme.spacing['3xl'],
+      alignItems: 'center',
     },
     title: {
-      ...theme.textStyles.heading2,
-      color: theme.semanticColors.text.primary,
+      ...theme.textStyles.onboardingTitle,
+      fontSize: 32,
+      fontWeight: '700',
+      color: '#1E293B',
       marginBottom: theme.spacing.md,
+      marginTop: theme.spacing.sm,
       textAlign: 'center',
+      lineHeight: 40,
+      //textShadowColor: 'rgba(0, 0, 0, 0.1)',
+      //textShadowOffset: { width: 0, height: 1 },
+      //textShadowRadius: 2,
     },
     subtitle: {
       ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
+      color: '#1E293B',
       textAlign: 'center',
-      lineHeight: theme.typography.lineHeight.relaxed,
+      lineHeight: 26,
+      fontWeight: '700',
+      fontSize: 20,
+      marginTop: theme.spacing.md,
+      marginBottom: theme.spacing.xl,
+      backgroundColor: '#FFFFFF',
+      paddingVertical: theme.spacing.md,
+      paddingHorizontal: theme.spacing.lg
     },
     photoContainer: {
       alignItems: 'center',
@@ -200,10 +215,19 @@ const ProfilePhotoScreen = () => {
       color: theme.colors.error,
     },
     skipText: {
-      ...theme.textStyles.bodySmall,
-      color: theme.semanticColors.text.secondary,
+      ...theme.textStyles.body,
+      color: theme.semanticColors.text.primary,
       textAlign: 'center',
-      marginTop: theme.spacing.md,
+      marginTop: theme.spacing.lg,
+      fontSize: 15,
+      fontWeight: '500',
+      lineHeight: 22,
+      backgroundColor: theme.semanticColors.background.surface,
+      paddingVertical: theme.spacing.sm,
+      paddingHorizontal: theme.spacing.md,
+      borderRadius: theme.borderRadius.md,
+      borderWidth: 1,
+      borderColor: theme.semanticColors.border.secondary,
     },
     bottomButtonContainer: {
       flexDirection: 'row',
@@ -214,7 +238,9 @@ const ProfilePhotoScreen = () => {
     progressIndicator: {
       flexDirection: 'row',
       justifyContent: 'center',
+      marginTop: '15%',
       marginBottom: theme.spacing.xl,
+      paddingTop: '5%',
     },
     dot: {
       width: 8,

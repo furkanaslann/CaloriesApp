@@ -86,18 +86,21 @@ const NameScreen = () => {
     content: {
       flex: 1,
       paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      paddingTop: theme?.spacing?.['4xl'] || 48,
       justifyContent: 'flex-start',
     },
     header: {
+      marginTop: '10%',
       marginBottom: theme?.spacing?.['4xl'] || 48,
       alignItems: 'center',
     },
     title: {
-      ...(theme?.textStyles?.onboardingTitle || {}),
+      ...theme.textStyles?.onboardingTitle,
       color: theme?.semanticColors?.text?.primary || '#1E293B',
       marginBottom: theme?.spacing?.md || 16,
       textAlign: 'center',
+      lineHeight: 40,
+      fontSize: 32,
+      fontWeight: '700',
     },
     subtitle: {
       ...(theme?.textStyles?.onboardingDescription || {}),
@@ -135,6 +138,8 @@ const NameScreen = () => {
       justifyContent: 'center',
       marginBottom: theme?.spacing?.['2xl'] || 24,
       alignItems: 'center',
+      paddingTop: '5%',
+      marginTop: '15%',
     },
     dot: {
       width: 8,

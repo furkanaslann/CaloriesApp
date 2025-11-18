@@ -90,6 +90,7 @@ const ProfileScreen = () => {
       padding: theme.spacing.lg,
     },
     header: {
+      marginTop: '10%',
       marginBottom: theme.spacing['3xl'],
     },
     title: {
@@ -97,6 +98,9 @@ const ProfileScreen = () => {
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.md,
       textAlign: 'center',
+      lineHeight: 40,
+      fontSize: 32,
+      fontWeight: '700',
     },
     subtitle: {
       ...theme.textStyles.body,

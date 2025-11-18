@@ -189,6 +189,7 @@ const NotificationsScreen = () => {
       padding: theme.spacing.lg,
     },
     header: {
+      marginTop: '10%',
       marginBottom: theme.spacing['3xl'],
       alignItems: 'center',
     },
@@ -197,6 +198,9 @@ const NotificationsScreen = () => {
       color: theme.semanticColors.text.primary,
       textAlign: 'center',
       marginBottom: theme.spacing.md,
+      lineHeight: 40,
+      fontSize: 32,
+      fontWeight: '700',
     },
     subtitle: {
       ...theme.textStyles.body,
