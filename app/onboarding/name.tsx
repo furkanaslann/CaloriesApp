@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import Button from '../../components/ui/button';
 import Input from '../../components/ui/input';
-import { useOnboarding } from '../../contexts/onboarding-context';
+import { useOnboarding, SCREEN_STEPS } from '../../contexts/onboarding-context';
 import { useTheme } from '../../src/theme/index';
 
 const NameScreen = () => {
@@ -46,7 +46,7 @@ const NameScreen = () => {
   };
 
   const theme = themeResult || defaultTheme;
-  const { profile, updateProfile, nextStep, previousStep } = useOnboarding();
+  const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [name, setName] = useState(profile.name || '');
   const [isFocused, setIsFocused] = useState(false);
@@ -171,8 +171,7 @@ const NameScreen = () => {
     },
   });
 
-  const totalSteps = 9;
-  const currentStep = 1;
+  const currentStep = getCurrentStep('name');
 
   return (
     <SafeAreaView style={styles.container}>

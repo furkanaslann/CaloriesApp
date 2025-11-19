@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useTheme } from '../../src/theme/index';
-import { useOnboarding } from '../../contexts/onboarding-context';
+import { useOnboarding, SCREEN_STEPS } from '../../contexts/onboarding-context';
 import Button from '../../components/ui/button';
 
 const GenderScreen = () => {
@@ -52,7 +52,7 @@ const GenderScreen = () => {
   };
 
   const theme = themeResult || defaultTheme;
-  const { profile, updateProfile, nextStep, previousStep } = useOnboarding();
+  const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [gender, setGender] = useState<'male' | 'female' | 'other'>(
     profile.gender || 'male'
@@ -195,8 +195,7 @@ const GenderScreen = () => {
     },
   });
 
-  const totalSteps = 9;
-  const currentStep = 4;
+  const currentStep = getCurrentStep('gender');
 
   return (
     <SafeAreaView style={styles.container}>

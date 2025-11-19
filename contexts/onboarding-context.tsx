@@ -76,6 +76,36 @@ export interface CalculatedValues {
   };
 }
 
+// Onboarding Screen Configuration
+const ONBOARDING_SCREENS = [
+  'welcome',
+  'name', 'last-name', 'date-of-birth', 'gender',
+  'height', 'weight', 'profile-photo',
+  'goals-primary', 'goals-weight', 'goals-weekly', 'goals-timeline', 'goals-motivation',
+  'activity', 'diet', 'camera-tutorial', 'notifications', 'privacy', 'summary', 'index'
+] as const;
+
+type ScreenName = typeof ONBOARDING_SCREENS[number];
+
+// Calculate step number for each screen
+const SCREEN_STEPS: Record<ScreenName, number> = ONBOARDING_SCREENS.reduce((acc, screen, index) => {
+  acc[screen] = index;
+  return acc;
+}, {} as Record<ScreenName, number>);
+
+// Total number of screens
+const TOTAL_STEPS = ONBOARDING_SCREENS.length;
+
+// Helper function for development - validates screen name
+const validateScreenName = (screenName: string): screenName is ScreenName => {
+  return ONBOARDING_SCREENS.includes(screenName as ScreenName);
+};
+
+// Development helper - get current progress percentage
+const getProgressPercentage = (currentStep: number): number => {
+  return Math.round((currentStep / (TOTAL_STEPS - 1)) * 100);
+};
+
 // Onboarding Context Type
 export interface OnboardingContextType {
   // User Data
@@ -90,6 +120,7 @@ export interface OnboardingContextType {
 
   // Navigation State
   currentStep: number;
+  totalSteps: number;
   completedSteps: number[];
   isCompleted: boolean;
 
@@ -99,6 +130,9 @@ export interface OnboardingContextType {
   updateActivity: (data: Partial<Activity>) => void;
   updateDiet: (data: Partial<Diet>) => void;
   updatePreferences: (data: Partial<Preferences>) => void;
+  getCurrentStep: (screenName: ScreenName) => number;
+  getProgressPercentage: (currentStep: number) => number;
+  validateScreenName: (screenName: string) => boolean;
   nextStep: () => void;
   previousStep: () => void;
   goToStep: (step: number) => void;
@@ -286,9 +320,24 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     setPreferences(prev => ({ ...prev, ...data }));
   };
 
+  // Get current step for specific screen
+  const getCurrentStep = (screenName: ScreenName): number => {
+    return SCREEN_STEPS[screenName] || 0;
+  };
+
+  // Validate screen name (development helper)
+  const validateScreenNameFn = (screenName: string): boolean => {
+    return validateScreenName(screenName);
+  };
+
+  // Get progress percentage (development helper)
+  const getProgressPercentageFn = (currentStep: number): number => {
+    return getProgressPercentage(currentStep);
+  };
+
   // Navigation functions
   const nextStep = () => {
-    const newStep = Math.min(currentStep + 1, 16); // 17 steps total (0-16)
+    const newStep = Math.min(currentStep + 1, TOTAL_STEPS - 1);
     setCurrentStep(newStep);
 
     if (!completedSteps.includes(currentStep)) {
@@ -305,7 +354,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   };
 
   const goToStep = (step: number) => {
-    const validStep = Math.max(0, Math.min(step, 16));
+    const validStep = Math.max(0, Math.min(step, TOTAL_STEPS - 1));
     setCurrentStep(validStep);
 
     if (validStep > 0 && !completedSteps.includes(validStep - 1)) {
@@ -340,6 +389,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     preferences,
     calculatedValues,
     currentStep,
+    totalSteps: TOTAL_STEPS,
     completedSteps,
     isCompleted,
     updateProfile,
@@ -347,6 +397,9 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     updateActivity,
     updateDiet,
     updatePreferences,
+    getCurrentStep,
+    getProgressPercentage: getProgressPercentageFn,
+    validateScreenName: validateScreenNameFn,
     nextStep,
     previousStep,
     goToStep,
@@ -371,6 +424,10 @@ export const useOnboarding = (): OnboardingContextType => {
   }
   return context;
 };
+
+// Export screen configuration for components
+export { SCREEN_STEPS, ONBOARDING_SCREENS, TOTAL_STEPS };
+export type { ScreenName };
 
 // Export for convenience
 export { OnboardingContext };

@@ -15,7 +15,7 @@ import {
 import { router } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../../src/theme/index';
-import { useOnboarding } from '../../contexts/onboarding-context';
+import { useOnboarding, SCREEN_STEPS } from '../../contexts/onboarding-context';
 import Button from '../../components/ui/button';
 import Input from '../../components/ui/input';
 
@@ -55,7 +55,7 @@ const DateOfBirthScreen = () => {
   };
 
   const theme = themeResult || defaultTheme;
-  const { profile, updateProfile, nextStep, previousStep } = useOnboarding();
+  const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState(
@@ -218,8 +218,7 @@ const DateOfBirthScreen = () => {
     },
   });
 
-  const totalSteps = 9;
-  const currentStep = 3;
+  const currentStep = getCurrentStep('date-of-birth');
   const age = calculateAge(dateOfBirth);
 
   return (

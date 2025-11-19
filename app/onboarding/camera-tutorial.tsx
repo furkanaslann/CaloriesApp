@@ -14,7 +14,7 @@ import {
   View
 } from 'react-native';
 import Button from '../../components/ui/button';
-import { useOnboarding } from '../../contexts/onboarding-context';
+import { useOnboarding, SCREEN_STEPS } from '../../contexts/onboarding-context';
 import { useTheme } from '../../src/theme';
 
 const CameraTutorialScreen = () => {
@@ -38,7 +38,7 @@ const CameraTutorialScreen = () => {
     shadows: { lg: {}, md: {} },
     coloredShadows: { gradient: {} },
   };
-  const { nextStep, previousStep } = useOnboarding();
+  const { nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -97,6 +97,7 @@ const CameraTutorialScreen = () => {
   };
 
   const currentSlideData = slides[currentSlide];
+  const currentStep = getCurrentStep('camera-tutorial');
 
   const styles = StyleSheet.create({
     container: {
@@ -181,22 +182,26 @@ const CameraTutorialScreen = () => {
       fontWeight: '400',
       lineHeight: 20,
     },
-    pagination: {
+    progressIndicator: {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: theme.spacing['2xl'],
+      marginBottom: theme.spacing['2xl'] || 24,
+      paddingTop: '5%',
+      marginTop: '15%',
     },
     dot: {
       width: 8,
       height: 8,
-      borderRadius: theme.borderRadius.full,
-      backgroundColor: theme.semanticColors.border.primary,
-      marginHorizontal: 4, 
+      borderRadius: theme.borderRadius.full || 9999,
+      backgroundColor: theme.semanticColors.border.secondary || '#E2E8F0',
+      marginHorizontal: 4,
     },
     dotActive: {
-      backgroundColor: theme.colors.primary,
-      width: 24,
+      backgroundColor: theme.colors.primary || '#7C3AED',
+      width: 32,
+      height: 8,
+      borderRadius: theme.borderRadius.sm || 8,
     },
     buttonContainer: {
       flexDirection: 'row',
@@ -228,7 +233,7 @@ const CameraTutorialScreen = () => {
             ))}
           </View>
 
-          <View style={styles.pagination}>
+          <View style={styles.progressIndicator}>
             {slides.map((_, index) => (
               <View
                 key={index}

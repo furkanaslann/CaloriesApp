@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import Button from '../../components/ui/button';
 import Input from '../../components/ui/input';
-import { useOnboarding } from '../../contexts/onboarding-context';
+import { useOnboarding, SCREEN_STEPS } from '../../contexts/onboarding-context';
 import { useTheme } from '../../src/theme/index';
 
 const WeightScreen = () => {
@@ -54,7 +54,7 @@ const WeightScreen = () => {
   };
 
   const theme = themeResult || defaultTheme;
-  const { profile, updateProfile, nextStep, previousStep } = useOnboarding();
+  const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [weight, setWeight] = useState(profile.currentWeight?.toString() || '');
 
@@ -225,8 +225,7 @@ const WeightScreen = () => {
     },
   });
 
-  const totalSteps = 9;
-  const currentStep = 6;
+  const currentStep = getCurrentStep('weight');
 
   return (
     <SafeAreaView style={styles.container}>

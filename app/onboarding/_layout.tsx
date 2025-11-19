@@ -11,8 +11,11 @@ export default function OnboardingLayout() {
       <Stack.Screen name="height" options={{ headerShown: false }} />
       <Stack.Screen name="weight" options={{ headerShown: false }} />
       <Stack.Screen name="profile-photo" options={{ headerShown: false }} />
-      <Stack.Screen name="profile" options={{ headerShown: false }} />
-      <Stack.Screen name="goals" options={{ headerShown: false }} />
+      <Stack.Screen name="goals-primary" options={{ headerShown: false }} />
+      <Stack.Screen name="goals-weight" options={{ headerShown: false }} />
+      <Stack.Screen name="goals-weekly" options={{ headerShown: false }} />
+      <Stack.Screen name="goals-timeline" options={{ headerShown: false }} />
+      <Stack.Screen name="goals-motivation" options={{ headerShown: false }} />
       <Stack.Screen name="activity" options={{ headerShown: false }} />
       <Stack.Screen name="diet" options={{ headerShown: false }} />
       <Stack.Screen name="camera-tutorial" options={{ headerShown: false }} />
@@ -23,3 +26,4 @@ export default function OnboardingLayout() {
     </Stack>
   );
 }
+//<Stack.Screen name="profile" options={{ headerShown: false }} />

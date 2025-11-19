@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useTheme } from '../../src/theme/index';
-import { useOnboarding } from '../../contexts/onboarding-context';
+import { useOnboarding, SCREEN_STEPS } from '../../contexts/onboarding-context';
 import Button from '../../components/ui/button';
 import Input from '../../components/ui/input';
 
@@ -46,7 +46,7 @@ const HeightScreen = () => {
     shadows: { lg: {}, md: {}, sm: {} },
     coloredShadows: { primary: {} },
   };
-  const { profile, updateProfile, nextStep, previousStep } = useOnboarding();
+  const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [height, setHeight] = useState(profile.height?.toString() || '');
   const [isFocused, setIsFocused] = useState(false);
@@ -222,8 +222,7 @@ const HeightScreen = () => {
     },
   });
 
-  const totalSteps = 9;
-  const currentStep = 5;
+  const currentStep = getCurrentStep('height');
 
   return (
     <SafeAreaView style={styles.container}>

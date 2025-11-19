@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useTheme } from '../../src/theme/index';
-import { useOnboarding } from '../../contexts/onboarding-context';
+import { useOnboarding, SCREEN_STEPS } from '../../contexts/onboarding-context';
 import Button from '../../components/ui/button';
 import Input from '../../components/ui/input';
 
@@ -51,7 +51,7 @@ const LastNameScreen = () => {
   };
 
   const theme = themeResult || defaultTheme;
-  const { profile, updateProfile, nextStep, previousStep } = useOnboarding();
+  const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [lastName, setLastName] = useState(profile.lastName || '');
 
@@ -175,8 +175,7 @@ const LastNameScreen = () => {
     },
   });
 
-  const totalSteps = 9;
-  const currentStep = 2;
+  const currentStep = getCurrentStep('last-name');
 
   return (
     <SafeAreaView style={styles.container}>

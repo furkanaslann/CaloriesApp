@@ -16,7 +16,7 @@ import {
   View,
 } from 'react-native';
 import Button from '../../components/ui/button';
-import { useOnboarding } from '../../contexts/onboarding-context';
+import { useOnboarding, SCREEN_STEPS } from '../../contexts/onboarding-context';
 import { useTheme } from '../../src/theme/index';
 
 const ProfilePhotoScreen = () => {
@@ -39,7 +39,7 @@ const ProfilePhotoScreen = () => {
     borderRadius: { md: 10 },
     shadows: {},
   };
-  const { profile, updateProfile, nextStep, previousStep } = useOnboarding();
+  const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [profilePhoto, setProfilePhoto] = useState(profile.profilePhoto || null);
 
@@ -112,7 +112,7 @@ const ProfilePhotoScreen = () => {
   const handleNext = () => {
     updateProfile({ profilePhoto });
     nextStep();
-    router.push('/onboarding/goals');
+    router.push('/onboarding/goals-primary');
   };
 
   const handlePrevious = () => {
@@ -255,8 +255,7 @@ const ProfilePhotoScreen = () => {
     },
   });
 
-  const totalSteps = 9;
-  const currentStep = 7;
+  const currentStep = getCurrentStep('profile-photo');
 
   return (
     <SafeAreaView style={styles.container}>
