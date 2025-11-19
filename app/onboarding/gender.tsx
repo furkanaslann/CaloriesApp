@@ -218,7 +218,18 @@ const GenderScreen = () => {
             <Text style={styles.iconText}>⚧️</Text>
           </View>
           <Text style={styles.title}>Cinsiyetiniz</Text>
-          <Text style={styles.subtitle}>
+          <Text
+            style={[
+              styles.subtitle,
+              {
+                ...(theme?.textStyles?.bodySmall || {}),
+                color: theme?.semanticColors?.text?.secondary || '#475569',
+                fontSize: 16,
+                fontWeight: '400',
+                lineHeight: 24,
+              }
+            ]}
+          >
             Cinsiyetiniz, metabolik hesaplamalar için önemlidir.
           </Text>
         </View>

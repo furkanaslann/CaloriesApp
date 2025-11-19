@@ -37,6 +37,7 @@ const PrivacyScreen = () => {
       body: { fontSize: 16, fontWeight: '400' },
       bodySmall: { fontSize: 14, fontWeight: '400' },
       buttonMedium: { fontSize: 16, fontWeight: '500' },
+      caption: { fontSize: 12, fontWeight: '400' },
     },
     spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8 },
     borderRadius: { full: 9999, xl: 16, lg: 12, md: 10 },
@@ -172,10 +173,12 @@ const PrivacyScreen = () => {
       marginBottom: theme.spacing.md,
     },
     privacyDescription: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
+      ...(theme?.textStyles?.body || { fontSize: 16, fontWeight: '400' }),
+      color: theme?.semanticColors?.text?.secondary || '#475569',
       textAlign: 'center',
-      lineHeight: theme.typography.lineHeight.relaxed,
+      lineHeight: 24,
+      fontSize: 14,
+      fontWeight: '400',
     },
     section: {
       marginBottom: theme.spacing['3xl'],
@@ -210,9 +213,11 @@ const PrivacyScreen = () => {
       fontWeight: theme.typography.fontWeight.semibold,
     },
     privacyOptionDescription: {
-      ...theme.textStyles.caption,
-      color: theme.semanticColors.text.secondary,
-      lineHeight: theme.typography.lineHeight.normal,
+      ...(theme?.textStyles?.caption || { fontSize: 12, fontWeight: '400' }),
+      color: theme?.semanticColors?.text?.secondary || '#475569',
+      lineHeight: 18,
+      fontSize: 13,
+      fontWeight: '400',
     },
     recommendedBadge: {
       backgroundColor: theme.colors.success,

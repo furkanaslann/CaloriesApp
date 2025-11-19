@@ -6,14 +6,14 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Button from '../../components/ui/button';
 import Input from '../../components/ui/input';
@@ -38,6 +38,7 @@ const GoalsScreen = () => {
       bodySmall: { fontSize: 14, fontWeight: '400' },
       labelLarge: { fontSize: 18, fontWeight: '500' },
       labelMedium: { fontSize: 15, fontWeight: '500' },
+      caption: { fontSize: 12, fontWeight: '400' },
     },
     spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8 },
     borderRadius: { full: 9999, xl: 16, lg: 12, md: 10 },
@@ -218,9 +219,11 @@ const GoalsScreen = () => {
       fontWeight: '700',
     },
     subtitle: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
-      lineHeight: theme.typography.lineHeight.relaxed,
+      ...(theme?.textStyles?.bodySmall || {}),
+      color: theme?.semanticColors?.text?.secondary || '#475569',
+      fontSize: 16,
+      fontWeight: '400',
+      lineHeight: 24,
     },
     section: {
       marginBottom: theme.spacing['3xl'],
@@ -317,13 +320,15 @@ const GoalsScreen = () => {
       marginBottom: theme.spacing.sm,
     },
     motivationLabel: {
-      ...theme.textStyles.caption,
-      color: theme.semanticColors.text.primary,
+      ...(theme?.textStyles?.caption || { fontSize: 12, fontWeight: '400' }),
+      color: theme?.semanticColors?.text?.primary || '#1E293B',
       textAlign: 'center',
+      fontSize: 14,
+      fontWeight: '500',
     },
     motivationLabelSelected: {
-      color: theme.colors.primary,
-      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme?.colors?.primary || '#7C3AED',
+      fontWeight: '600',
     },
     sliderContainer: {
       alignItems: 'center',
@@ -352,7 +357,9 @@ const GoalsScreen = () => {
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>Hedeflerinizi Belirleyin</Text>
-            <Text style={styles.subtitle}>
+            <Text
+              style={styles.subtitle}
+            >
               Ulaşmak istediğiniz hedefleri belirleyerek size özel plan oluşturalım.
             </Text>
           </View>

@@ -298,7 +298,18 @@ const WeightScreen = () => {
           </View>
         </View>
 
-        <Text style={styles.infoText}>
+        <Text
+          style={[
+            styles.infoText,
+            {
+              ...(theme?.textStyles?.bodySmall || {}),
+              color: theme?.semanticColors?.text?.secondary || '#475569',
+              fontSize: 14,
+              fontWeight: '400',
+              lineHeight: 20,
+            }
+          ]}
+        >
           Bu bilgi, günlük kalori ihtiyacınızı hesaplamak için kullanılacaktır.
         </Text>
       </View>

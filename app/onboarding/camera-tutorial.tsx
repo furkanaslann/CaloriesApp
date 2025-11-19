@@ -6,12 +6,12 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
 import Button from '../../components/ui/button';
 import { useOnboarding } from '../../contexts/onboarding-context';
@@ -139,12 +139,14 @@ const CameraTutorialScreen = () => {
       fontWeight: theme.typography.fontWeight.semibold,
     },
     description: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
+      ...(theme?.textStyles?.body || { fontSize: 16, fontWeight: '400' }),
+      color: theme?.semanticColors?.text?.secondary || '#475569',
       textAlign: 'center',
-      lineHeight: theme.typography.lineHeight.relaxed,
-      paddingHorizontal: theme.spacing.lg,
-      marginBottom: theme.spacing['3xl'],
+      lineHeight: 24,
+      paddingHorizontal: theme?.spacing?.lg || 24,
+      marginBottom: theme?.spacing?.['3xl'] || 40,
+      fontSize: 16,
+      fontWeight: '400',
     },
     tipsContainer: {
       backgroundColor: theme.semanticColors.surface,
@@ -172,9 +174,12 @@ const CameraTutorialScreen = () => {
       marginRight: theme.spacing.md,
     },
     tipText: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.primary,
+      ...(theme?.textStyles?.body || { fontSize: 16, fontWeight: '400' }),
+      color: theme?.semanticColors?.text?.primary || '#1E293B',
       flex: 1,
+      fontSize: 14,
+      fontWeight: '400',
+      lineHeight: 20,
     },
     pagination: {
       flexDirection: 'row',
@@ -187,7 +192,7 @@ const CameraTutorialScreen = () => {
       height: 8,
       borderRadius: theme.borderRadius.full,
       backgroundColor: theme.semanticColors.border.primary,
-      marginHorizontal: 4,
+      marginHorizontal: 4, 
     },
     dotActive: {
       backgroundColor: theme.colors.primary,

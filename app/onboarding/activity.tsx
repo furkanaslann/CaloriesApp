@@ -36,6 +36,7 @@ const ActivityScreen = () => {
       bodySmall: { fontSize: 14, fontWeight: '400' },
       labelLarge: { fontSize: 18, fontWeight: '500' },
       labelMedium: { fontSize: 15, fontWeight: '500' },
+      caption: { fontSize: 12, fontWeight: '400' },
     },
     spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8, xs: 4 },
     borderRadius: { full: 9999, xl: 16, lg: 12, md: 10, sm: 8 },
@@ -253,9 +254,12 @@ const ActivityScreen = () => {
       color: theme.colors.primary,
     },
     optionDescription: {
-      ...theme.textStyles.caption,
-      color: theme.semanticColors.text.secondary,
+      ...(theme?.textStyles?.caption || { fontSize: 12, fontWeight: '400' }),
+      color: theme?.semanticColors?.text?.secondary || '#475569',
       marginLeft: 36,
+      fontSize: 14,
+      fontWeight: '400',
+      lineHeight: 20,
     },
     exerciseTypesContainer: {
       flexDirection: 'row',
@@ -304,7 +308,18 @@ const ActivityScreen = () => {
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>Aktivite Seviyeniz</Text>
-            <Text style={styles.subtitle}>
+            <Text
+              style={[
+                styles.subtitle,
+                {
+                  ...(theme?.textStyles?.bodySmall || {}),
+                  color: theme?.semanticColors?.text?.secondary || '#475569',
+                  fontSize: 16,
+                  fontWeight: '400',
+                  lineHeight: 24,
+                }
+              ]}
+            >
               Günlük aktivite seviyenizi ve yaşam tarzınızı belirtin. Bu bilgiler metabolizma hızınızı hesaplamamıza yardımcı olacaktır.
             </Text>
           </View>
