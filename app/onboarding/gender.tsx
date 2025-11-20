@@ -3,18 +3,18 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
   SafeAreaView,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
-import { router } from 'expo-router';
-import { useTheme } from '../../src/theme/index';
-import { useOnboarding, SCREEN_STEPS } from '../../contexts/onboarding-context';
 import Button from '../../components/ui/button';
+import { useOnboarding } from '../../contexts/onboarding-context';
+import { useTheme } from '../../src/theme/index';
 
 const GenderScreen = () => {
   const themeResult = useTheme();

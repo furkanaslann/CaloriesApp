@@ -6,7 +6,6 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -44,10 +43,11 @@ const CameraTutorialScreen = () => {
 
   const slides = [
     {
-      title: 'Yemeklerinizi Fotoğraflayın',
-      subtitle: 'Akıllı Tanıma',
-      description: 'Yemeklerinizi çekin ve yapay zeka tarafından otomatik olarak tanımasını izleyin.',
-      image: img7Dbf04425Ad247Bfaca593A3C5C58Bc6Webp,
+      title: 'Akıllı Fotoğraf',
+      subtitle: 'Yemeklerinizi anında analiz edin',
+      description: 'Yemeklerinizi çekin, yapay zeka destekli sistemimiz kalorileri otomatik olarak hesaplasın',
+      icon: '📸',
+      hasLogo: false,
       tips: [
         'Iyi aydınlatılmış ortamda çekin',
         'Yemeğin tamamını görünür yapın',
@@ -55,10 +55,11 @@ const CameraTutorialScreen = () => {
       ]
     },
     {
-      title: 'Otomatik Kalori Hesaplama',
-      subtitle: 'Hızlı ve Doğru',
-      description: 'Yapay zeka, yemeğinizin kalori ve besin değerlerini otomatik olarak hesaplar.',
-      image: img84C0Ea078A2844B6B1B595C53Bf04137Webp,
+      title: 'Otomatik Analiz',
+      subtitle: 'Hızlı ve doğru sonuçlar',
+      description: 'Yapay zeka, yemeğinizin kalori ve besin değerlerini otomatik olarak hesaplar',
+      icon: '🧮',
+      hasLogo: false,
       tips: [
         'Porsiyon boyutunu belirtin',
         'Malzemeleri düzenleyin',
@@ -67,9 +68,10 @@ const CameraTutorialScreen = () => {
     },
     {
       title: 'Günlük Takip',
-      subtitle: 'İlerleme Gözlemi',
-      description: 'Tüm öğünlerinizi kolayca takip edin ve günlük hedeflerinize ulaşın.',
-      image: img6E99198Bc5B746798F189Eed63933EabWebp,
+      subtitle: 'İlerlemenizi izleyin',
+      description: 'Tüm öğünlerinizi kolayca takip edin ve günlük hedeflerinize ulaşın',
+      icon: '📊',
+      hasLogo: false,
       tips: [
         'Öğün zamanlarını kaydedin',
         'Su tüketimini ekleyin',
@@ -83,7 +85,7 @@ const CameraTutorialScreen = () => {
       setCurrentSlide(currentSlide + 1);
     } else {
       nextStep();
-      router.push('/onboarding/notifications');
+      router.push('/onboarding/summary');
     }
   };
 
@@ -104,56 +106,69 @@ const CameraTutorialScreen = () => {
       flex: 1,
       backgroundColor: theme.semanticColors.background.primary,
     },
-    scrollView: {
-      flex: 1,
-    },
     content: {
       flex: 1,
-      padding: theme.spacing.lg,
+      paddingHorizontal: theme.spacing['2xl'],
+      paddingTop: '15%',
+      paddingBottom: theme.spacing.xl,
+    },
+    iconContainer: {
+      width: 150,
+      height: 150,
+      borderRadius: 75,
+      backgroundColor: `${theme.colors.primary}15`,
       justifyContent: 'center',
-    },
-    image: {
-      width: '100%',
-      height: 300,
-      resizeMode: 'contain',
-      marginBottom: theme.spacing['4xl'],
-    },
-    header: {
-      marginTop: '10%',
       alignItems: 'center',
-      marginBottom: theme.spacing['3xl'],
+      alignSelf: 'center',
+      marginBottom: theme.spacing['4xl'],
+      ...theme.shadows.lg,
+    },
+    icon: {
+      fontSize: 60,
+      textAlign: 'center',
+    },
+    logo: {
+      fontSize: 48,
+      fontWeight: '800',
+      color: theme.colors.primary,
+      marginBottom: theme.spacing.md,
+      textAlign: 'center',
+      textShadowColor: 'rgba(124, 58, 237, 0.15)',
+      textShadowOffset: { width: 0, height: 2 },
+      textShadowRadius: 4,
+      letterSpacing: -1,
+      lineHeight: 56,
     },
     title: {
-      ...theme.textStyles.heading2,
+      fontSize: theme.textStyles.onboardingTitle?.fontSize || 30,
+      fontWeight: theme.textStyles.onboardingTitle?.fontWeight || '600',
       color: theme.semanticColors.text.primary,
       textAlign: 'center',
-      marginBottom: theme.spacing.md,
-      lineHeight: 40,
-      fontSize: 32,
-      fontWeight: '700',
+      marginTop: '10%',
+      marginBottom: theme.spacing.lg,
+      lineHeight: 36,
     },
     subtitle: {
-      ...theme.textStyles.heading4,
-      color: theme.colors.primary,
+      fontSize: theme.textStyles.onboardingSubtitle?.fontSize || 20,
+      fontWeight: theme.textStyles.onboardingSubtitle?.fontWeight || '500',
+      color: theme.semanticColors.text.secondary,
       textAlign: 'center',
       marginBottom: theme.spacing.lg,
-      fontWeight: theme.typography.fontWeight.semibold,
+      lineHeight: 28,
     },
     description: {
-      ...(theme?.textStyles?.body || { fontSize: 16, fontWeight: '400' }),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
-      textAlign: 'center',
-      lineHeight: 24,
-      paddingHorizontal: theme?.spacing?.lg || 24,
-      marginBottom: theme?.spacing?.['3xl'] || 40,
       fontSize: 16,
       fontWeight: '400',
+      color: theme.semanticColors.text.secondary,
+      textAlign: 'center',
+      lineHeight: 24,
+      paddingHorizontal: theme.spacing.lg,
+      marginBottom: theme.spacing['3xl'],
     },
     tipsContainer: {
       backgroundColor: theme.semanticColors.surface,
       borderRadius: theme.borderRadius.lg,
       padding: theme.spacing.lg,
-      marginBottom: theme.spacing['4xl'],
       ...theme.shadows.sm,
     },
     tipsTitle: {
@@ -161,6 +176,8 @@ const CameraTutorialScreen = () => {
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.md,
       textAlign: 'center',
+      fontSize: 16,
+      fontWeight: '600',
     },
     tipItem: {
       flexDirection: 'row',
@@ -175,96 +192,114 @@ const CameraTutorialScreen = () => {
       marginRight: theme.spacing.md,
     },
     tipText: {
-      ...(theme?.textStyles?.body || { fontSize: 16, fontWeight: '400' }),
-      color: theme?.semanticColors?.text?.primary || '#1E293B',
+      color: theme.semanticColors.text.primary,
       flex: 1,
       fontSize: 14,
       fontWeight: '400',
       lineHeight: 20,
     },
+    footer: {
+      paddingHorizontal: theme.spacing['2xl'],
+      paddingBottom: theme.spacing['4xl'],
+      paddingTop: theme.spacing.xl,
+      backgroundColor: theme.semanticColors.background.primary,
+      borderTopLeftRadius: theme.borderRadius.xl,
+      borderTopRightRadius: theme.borderRadius.xl,
+      ...theme.shadows.lg,
+    },
     progressIndicator: {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: theme.spacing['2xl'] || 24,
-      paddingTop: '5%',
-      marginTop: '15%',
+      marginBottom: theme.spacing['2xl'],
     },
     dot: {
       width: 8,
       height: 8,
-      borderRadius: theme.borderRadius.full || 9999,
-      backgroundColor: theme.semanticColors.border.secondary || '#E2E8F0',
+      borderRadius: theme.borderRadius.full,
+      backgroundColor: '#CBD5E1',
       marginHorizontal: 4,
+      opacity: 0.7,
     },
     dotActive: {
-      backgroundColor: theme.colors.primary || '#7C3AED',
+      backgroundColor: theme.colors.primary,
       width: 32,
       height: 8,
-      borderRadius: theme.borderRadius.sm || 8,
+      borderRadius: 4,
+      opacity: 1,
     },
     buttonContainer: {
-      flexDirection: 'row',
       gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
     },
   });
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
-          <Image source={{ uri: currentSlideData.image }} style={styles.image} />
-
-          <View style={styles.header}>
-            <Text style={styles.title}>{currentSlideData.title}</Text>
-            <Text style={styles.subtitle}>{currentSlideData.subtitle}</Text>
-            <Text style={styles.description}>{currentSlideData.description}</Text>
+      <View style={styles.content}>
+        {currentSlideData.hasLogo ? (
+          <View>
+            <Text style={styles.logo}>CaloriTrack</Text>
+            <Text style={[styles.subtitle, {
+              marginBottom: theme.spacing['2xl'],
+              fontSize: 16,
+              fontWeight: '400',
+              fontStyle: 'italic',
+              color: theme.semanticColors.text.tertiary
+            }]}>
+              Minimal. Cool. Aesthetic.
+            </Text>
           </View>
-
-          <View style={styles.tipsContainer}>
-            <Text style={styles.tipsTitle}>💡 İpuçları</Text>
-            {currentSlideData.tips.map((tip, index) => (
-              <View key={index} style={styles.tipItem}>
-                <View style={styles.tipBullet} />
-                <Text style={styles.tipText}>{tip}</Text>
-              </View>
-            ))}
+        ) : (
+          <View style={styles.iconContainer}>
+            <Text style={styles.icon}>{currentSlideData.icon}</Text>
           </View>
+        )}
 
-          <View style={styles.progressIndicator}>
-            {slides.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.dot,
-                  index === currentSlide && styles.dotActive,
-                ]}
-              />
-            ))}
-          </View>
+        <Text style={styles.title}>{currentSlideData.title}</Text>
+        <Text style={styles.subtitle}>{currentSlideData.subtitle}</Text>
+        <Text style={styles.description}>{currentSlideData.description}</Text>
+
+        <View style={styles.tipsContainer}>
+          <Text style={styles.tipsTitle}>💡 İpuçları</Text>
+          {currentSlideData.tips.map((tip, index) => (
+            <View key={index} style={styles.tipItem}>
+              <View style={styles.tipBullet} />
+              <Text style={styles.tipText}>{tip}</Text>
+            </View>
+          ))}
         </View>
-      </ScrollView>
+      </View>
 
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Geri"
-          onPress={handlePrevious}
-          variant="secondary"
-        />
-        <Button
-          title={currentSlide < slides.length - 1 ? 'Sonraki' : 'Anladım'}
-          onPress={handleNext}
-        />
+      <View style={styles.footer}>
+        <View style={styles.progressIndicator}>
+          {slides.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                index === currentSlide && styles.dotActive,
+              ]}
+            />
+          ))}
+        </View>
+
+        <View style={styles.buttonContainer}>
+          {currentSlide > 0 && (
+            <Button
+              title="Geri"
+              onPress={handlePrevious}
+              variant="secondary"
+            />
+          )}
+          <Button
+            title={currentSlide < slides.length - 1 ? 'Sonraki' : 'Anladım'}
+            onPress={handleNext}
+            fullWidth={currentSlide === 0}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
 };
-
-// Placeholder images - will be replaced with proper assets
-const img7Dbf04425Ad247Bfaca593A3C5C58Bc6Webp = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' fill='%23666' text-anchor='middle' dy='.3em'%3E📷 Camera%3C/text%3E%3C/svg%3E";
-const img84C0Ea078A2844B6B1B595C53Bf04137Webp = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' fill='%23666' text-anchor='middle' dy='.3em'%3E🧮 Analytics%3C/text%3E%3C/svg%3E";
-const img6E99198Bc5B746798F189Eed63933EabWebp = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' fill='%23666' text-anchor='middle' dy='.3em'%3E📊 Progress%3C/text%3E%3C/svg%3E";
 
 export default CameraTutorialScreen;

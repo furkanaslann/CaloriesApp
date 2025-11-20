@@ -66,8 +66,7 @@ const SummaryScreen = () => {
   }, []);
 
   const handleComplete = () => {
-    completeOnboarding();
-    router.replace('/(tabs)');
+    router.push('/onboarding/commitment');
   };
 
   const getGoalLabel = (goal: string) => {
@@ -397,7 +396,7 @@ const SummaryScreen = () => {
 
       <View style={styles.buttonContainer}>
         <Button
-          title="CaloriTrack'i Başlat!"
+          title="Taahhütte Bulun"
           onPress={handleComplete}
           fullWidth
           style={styles.finishButton}

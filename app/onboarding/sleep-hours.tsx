@@ -1,23 +1,22 @@
 /**
- * CaloriTrack - Onboarding Activity Level Screen
+ * CaloriTrack - Onboarding Sleep Hours Screen
  * Minimal. Cool. Aesthetic.
  */
 
-import { router } from 'expo-router';
+import { Alert, router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import Button from '../../components/ui/button';
-import { useOnboarding, SCREEN_STEPS } from '../../contexts/onboarding-context';
+import { useOnboarding } from '../../contexts/onboarding-context';
 import { useTheme } from '../../src/theme';
 
-const ActivityScreen = () => {
+const SleepHoursScreen = () => {
   const themeResult = useTheme();
   const theme = themeResult || {
     semanticColors: {
@@ -27,71 +26,56 @@ const ActivityScreen = () => {
     },
     colors: { primary: '#7C3AED', success: '#10B981', warning: '#F59E0B', info: '#3B82F6' },
     textStyles: {
-      onboardingTitle: { fontSize: 30, fontWeight: '600' },
+      heading2: { fontSize: 32, fontWeight: '700' },
       onboardingDescription: { fontSize: 16, fontWeight: '400' },
-      heading3: { fontSize: 24, fontWeight: '600' },
+      heading4: { fontSize: 20, fontWeight: '600' },
       body: { fontSize: 16, fontWeight: '400' },
       bodySmall: { fontSize: 14, fontWeight: '400' },
       labelLarge: { fontSize: 18, fontWeight: '500' },
-      labelMedium: { fontSize: 15, fontWeight: '500' },
-      caption: { fontSize: 12, fontWeight: '400' },
+      labelSmall: { fontSize: 13, fontWeight: '500' },
     },
+    typography: { lineHeight: { relaxed: 1.75 } },
     spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8, xs: 4 },
     borderRadius: { full: 9999, xl: 16, lg: 12, md: 10, sm: 8 },
     shadows: { lg: {}, md: {}, sm: {} },
-    coloredShadows: { primary: {} },
   };
   const { activity, updateActivity, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
-  const [level, setLevel] = useState(activity.level || 'sedentary');
+  const [sleepHours, setSleepHours] = useState<string>(activity.sleepHours?.toString() || '7');
 
-  const currentStep = getCurrentStep('activity');
+  const currentStep = getCurrentStep('sleep-hours');
+
+  const sleepOptions = [
+    { value: '4', label: '4 saat', description: 'Yetersiz uyku', icon: '😴' },
+    { value: '5', label: '5 saat', description: 'Yetersiz uyku', icon: '😴' },
+    { value: '6', label: '6 saat', description: 'Biraz kısa', icon: '😐' },
+    { value: '7', label: '7 saat', description: 'İdeal süresine yakın', icon: '😊' },
+    { value: '8', label: '8 saat', description: 'İdeal süre', icon: '😌' },
+    { value: '9', label: '9 saat', description: 'İyi', icon: '🌙' },
+    { value: '10', label: '10+ saat', description: 'Uzun süre', icon: '💤' },
+  ];
+
+  const validateForm = (): boolean => {
+    const hours = parseFloat(sleepHours);
+    if (isNaN(hours) || hours < 4 || hours > 12) {
+      Alert.alert('Doğrulama Hatası', 'Uyku süresi 4-12 saat aralığında olmalıdır');
+      return false;
+    }
+    return true;
+  };
 
   const handleNext = () => {
-    updateActivity({
-      level: level as 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active'
-    });
+    if (!validateForm()) return;
+
+    updateActivity({ sleepHours: parseFloat(sleepHours) });
     nextStep();
-    router.push('/onboarding/occupation');
+    router.push('/onboarding/diet');
   };
 
   const handlePrevious = () => {
     previousStep();
     router.back();
   };
-
-  const activityLevels = [
-    {
-      value: 'sedentary',
-      label: 'Hareketsiz',
-      description: 'Çok az veya hiç egzersiz yapmıyorum, masa başı iş',
-      icon: '🪑',
-    },
-    {
-      value: 'lightly_active',
-      label: 'Hafif Aktif',
-      description: 'Haftada 1-3 gün hafif egzersiz',
-      icon: '🚶',
-    },
-    {
-      value: 'moderately_active',
-      label: 'Orta Aktif',
-      description: 'Haftada 3-5 gün orta egzersiz',
-      icon: '🏃',
-    },
-    {
-      value: 'very_active',
-      label: 'Çok Aktif',
-      description: 'Haftada 6-7 gün yoğun egzersiz',
-      icon: '💪',
-    },
-    {
-      value: 'extremely_active',
-      label: 'Son Derece Aktif',
-      description: 'Günlük çok yoğun fiziksel aktivite',
-      icon: '🔥',
-    },
-  ];
 
   const styles = StyleSheet.create({
     container: {
@@ -129,11 +113,9 @@ const ActivityScreen = () => {
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.md,
       lineHeight: 40,
-      fontSize: 32,
-      fontWeight: '700',
     },
     subtitle: {
-      ...theme.textStyles.body,
+      ...theme.textStyles.onboardingDescription,
       color: theme.semanticColors.text.secondary,
       lineHeight: theme.typography.lineHeight.relaxed,
     },
@@ -167,15 +149,14 @@ const ActivityScreen = () => {
     optionLabel: {
       ...theme.textStyles.labelLarge,
       color: theme.semanticColors.text.primary,
-      fontWeight: theme.typography.fontWeight.semibold,
+      fontWeight: '600',
     },
     optionLabelSelected: {
       color: theme.colors.primary,
     },
     optionDescription: {
-      ...(theme?.textStyles?.caption || { fontSize: 12, fontWeight: '400' }),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
-      marginLeft: 36,
+      ...theme.textStyles.bodySmall,
+      color: theme.semanticColors.text.secondary,
       fontSize: 14,
       fontWeight: '400',
       lineHeight: 20,
@@ -185,6 +166,20 @@ const ActivityScreen = () => {
       gap: theme.spacing.md,
       paddingHorizontal: theme.spacing.lg,
       paddingBottom: theme.spacing.xl,
+    },
+    noteContainer: {
+      backgroundColor: theme.semanticColors.background.surface,
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.md,
+      marginTop: theme.spacing.md,
+      borderLeftWidth: 4,
+      borderLeftColor: theme.colors.info,
+    },
+    noteText: {
+      ...theme.textStyles.bodySmall,
+      color: theme.semanticColors.text.secondary,
+      fontSize: 13,
+      lineHeight: 18,
     },
   });
 
@@ -204,51 +199,46 @@ const ActivityScreen = () => {
         </View>
 
         <View style={styles.header}>
-            <Text style={styles.title}>Aktivite Seviyeniz</Text>
-            <Text
-              style={[
-                styles.subtitle,
-                {
-                  ...(theme?.textStyles?.bodySmall || {}),
-                  color: theme?.semanticColors?.text?.secondary || '#475569',
-                  fontSize: 16,
-                  fontWeight: '400',
-                  lineHeight: 24,
-                }
-              ]}
-            >
-              Genel aktivite seviyenizi belirtin. Bu bilgi, günlük kalori ihtiyacınızı hesaplamamıza yardımcı olacaktır.
+            <Text style={styles.title}>Uyku Süresi</Text>
+            <Text style={styles.subtitle}>
+              Günde ortalama kaç saat uyuduğunuzu belirtin. Uyku süresi metabolizma hızınızı ve genel sağlık durumunuzu etkiler.
             </Text>
           </View>
 
           <View style={styles.section}>
             <View style={styles.optionGrid}>
-              {activityLevels.map((activityLevel) => (
+              {sleepOptions.map((option) => (
                 <TouchableOpacity
-                  key={activityLevel.value}
+                  key={option.value}
                   style={[
                     styles.optionCard,
-                    level === activityLevel.value && styles.optionCardSelected,
+                    sleepHours === option.value && styles.optionCardSelected,
                   ]}
-                  onPress={() => setLevel(activityLevel.value)}
+                  onPress={() => setSleepHours(option.value)}
                 >
                   <View style={styles.optionHeader}>
-                    <Text style={styles.optionIcon}>{activityLevel.icon}</Text>
+                    <Text style={styles.optionIcon}>{option.icon}</Text>
                     <Text
                       style={[
                         styles.optionLabel,
-                        level === activityLevel.value && styles.optionLabelSelected,
+                        sleepHours === option.value && styles.optionLabelSelected,
                       ]}
                     >
-                      {activityLevel.label}
+                      {option.label}
                     </Text>
                   </View>
-                  <Text style={styles.optionDescription}>{activityLevel.description}</Text>
+                  <Text style={styles.optionDescription}>{option.description}</Text>
                 </TouchableOpacity>
               ))}
             </View>
+
+            <View style={styles.noteContainer}>
+              <Text style={styles.noteText}>
+                Yetişkinler için önerilen uyku süresi 7-9 saattir. Yeterli uyku, kilo kontrolü ve genel sağlık için önemlidir.
+              </Text>
+            </View>
           </View>
-      </View>
+        </View>
 
       <View style={styles.buttonContainer}>
         <Button
@@ -265,4 +255,4 @@ const ActivityScreen = () => {
   );
 };
 
-export default ActivityScreen;
+export default SleepHoursScreen;

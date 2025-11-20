@@ -1,5 +1,5 @@
 /**
- * CaloriTrack - Onboarding Diet Preferences Screen
+ * CaloriTrack - Onboarding Occupation Screen
  * Minimal. Cool. Aesthetic.
  */
 
@@ -10,13 +10,13 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import Button from '../../components/ui/button';
 import { useOnboarding } from '../../contexts/onboarding-context';
 import { useTheme } from '../../src/theme';
 
-const DietScreen = () => {
+const OccupationScreen = () => {
   const themeResult = useTheme();
   const theme = themeResult || {
     semanticColors: {
@@ -24,9 +24,10 @@ const DietScreen = () => {
       text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
       border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
     },
-    colors: { primary: '#7C3AED', success: '#10B981', error: '#EF4444' },
+    colors: { primary: '#7C3AED', success: '#10B981', warning: '#F59E0B', info: '#3B82F6' },
     textStyles: {
       heading2: { fontSize: 32, fontWeight: '700' },
+      onboardingDescription: { fontSize: 16, fontWeight: '400' },
       heading4: { fontSize: 20, fontWeight: '600' },
       body: { fontSize: 16, fontWeight: '400' },
       bodySmall: { fontSize: 14, fontWeight: '400' },
@@ -34,40 +35,23 @@ const DietScreen = () => {
       labelMedium: { fontSize: 15, fontWeight: '500' },
       caption: { fontSize: 12, fontWeight: '400' },
     },
+    typography: { lineHeight: { relaxed: 1.75 } },
     spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8, xs: 4 },
     borderRadius: { full: 9999, xl: 16, lg: 12, md: 10, sm: 8 },
     shadows: { lg: {}, md: {}, sm: {} },
-    coloredShadows: { primary: {} },
   };
+  const { activity, updateActivity, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
-  const { diet, updateDiet, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
+  const [occupation, setOccupation] = useState<string>(activity.occupation || 'office');
 
-  const [type, setType] = useState(diet.type || '');
-
-  const dietTypes = [
-    { value: 'omnivore', label: 'Herşeyci', icon: '🍽️', description: 'Her tür besini tüketirim' },
-    { value: 'vegetarian', label: 'Vejetaryen', icon: '🥗', description: 'Et tüketmem' },
-    { value: 'vegan', label: 'Vegan', icon: '🌱', description: 'Hayvansal ürün tüketmem' },
-    { value: 'pescatarian', label: 'Pesketaryen', icon: '🐟', description: 'Balık tüketirim, et tüketmem' },
-    { value: 'keto', label: 'Ketojenik', icon: '🥑', description: 'Düşük karbonhidrat, yüksek yağ' },
-    { value: 'paleo', label: 'Paleo', icon: '🦴', description: 'İlkel beslenme' },
-    { value: 'mediterranean', label: 'Akdeniz', icon: '🫒', description: 'Akdeniz beslenmesi' },
-    { value: 'glutenFree', label: 'Glutensiz', icon: '🌾', description: 'Glüten tüketmem' },
-  ];
-
-  const handleTypeSelect = (selectedType: string) => {
-    setType(selectedType);
-  };
+  const currentStep = getCurrentStep('occupation');
 
   const handleNext = () => {
-    const updatedDiet = {
-      ...diet,
-      type,
-    };
-
-    updateDiet(updatedDiet);
+    updateActivity({
+      occupation: occupation as 'office' | 'physical' | 'mixed'
+    });
     nextStep();
-    router.push('/onboarding/camera-tutorial');
+    router.push('/onboarding/exercise-types');
   };
 
   const handlePrevious = () => {
@@ -75,61 +59,71 @@ const DietScreen = () => {
     router.back();
   };
 
-  const currentStep = getCurrentStep('diet');
+  const occupationTypes = [
+    {
+      value: 'office',
+      label: 'Ofis İşleri',
+      description: 'Masa başı, bilgisayar başında çalışıyorum',
+      icon: '💻',
+    },
+    {
+      value: 'physical',
+      label: 'Fiziksel İş',
+      description: 'Ayakta, fiziksel çaba gerektiren iş',
+      icon: '🏗️',
+    },
+    {
+      value: 'mixed',
+      label: 'Karma',
+      description: 'Hem ofis hem fiziksel aktivite',
+      icon: '🔄',
+    },
+  ];
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.semanticColors.background.primary,
     },
+    content: {
+      flex: 1,
+      padding: theme.spacing.lg,
+      justifyContent: 'flex-start',
+    },
     progressIndicator: {
       flexDirection: 'row',
       justifyContent: 'center',
-      marginBottom: theme.spacing['2xl'],
       alignItems: 'center',
+      marginBottom: theme.spacing['2xl'] || 24,
       paddingTop: '5%',
       marginTop: '15%',
     },
     dot: {
       width: 8,
       height: 8,
-      borderRadius: theme.borderRadius.full,
-      backgroundColor: theme.semanticColors.border.secondary,
+      borderRadius: theme.borderRadius.full || 9999,
+      backgroundColor: theme.semanticColors.border.secondary || '#E2E8F0',
       marginHorizontal: 4,
     },
     dotActive: {
-      backgroundColor: theme.colors.primary,
+      backgroundColor: theme.colors.primary || '#7C3AED',
       width: 32,
       height: 8,
-      borderRadius: theme.borderRadius.sm,
-    },
-    content: {
-      flex: 1,
-      padding: theme.spacing.lg,
-    },
-    header: {
-      marginBottom: theme.spacing['3xl'],
+      borderRadius: theme.borderRadius.sm || 8,
     },
     title: {
       ...theme.textStyles.heading2,
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.md,
       lineHeight: 40,
-      fontSize: 32,
-      fontWeight: '700',
     },
     subtitle: {
-      ...theme.textStyles.body,
+      ...theme.textStyles.onboardingDescription,
       color: theme.semanticColors.text.secondary,
-      lineHeight: 24,
+      lineHeight: theme.typography.lineHeight.relaxed,
     },
     section: {
       marginBottom: theme.spacing['3xl'],
-    },
-    sectionTitle: {
-      ...theme.textStyles.heading4,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.lg,
     },
     optionGrid: {
       gap: theme.spacing.md,
@@ -164,8 +158,8 @@ const DietScreen = () => {
       color: theme.colors.primary,
     },
     optionDescription: {
-      ...(theme?.textStyles?.caption || { fontSize: 12, fontWeight: '400' }),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
+      ...theme.textStyles.bodySmall,
+      color: theme.semanticColors.text.secondary,
       marginLeft: 36,
       fontSize: 14,
       fontWeight: '400',
@@ -195,41 +189,40 @@ const DietScreen = () => {
         </View>
 
         <View style={styles.header}>
-          <Text style={styles.title}>Beslenme Tercihleriniz</Text>
-          <Text style={styles.subtitle}>
-            Beslenme tarzınızı seçin. Bu bilgi, size özel beslenme planı oluşturmamıza yardımcı olacaktır.
-          </Text>
-        </View>
+            <Text style={styles.title}>Mesleğiniz</Text>
+            <Text style={styles.subtitle}>
+              Mesleki aktivitenizi belirtin. Bu bilgiler günlük kalori ihtiyacınızı daha doğru hesaplamamıza yardımcı olacaktır.
+            </Text>
+          </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Beslenme Türü</Text>
-          <View style={styles.optionGrid}>
-            {dietTypes.map((dietType) => (
-              <TouchableOpacity
-                key={dietType.value}
-                style={[
-                  styles.optionCard,
-                  type === dietType.value && styles.optionCardSelected,
-                ]}
-                onPress={() => handleTypeSelect(dietType.value)}
-              >
-                <View style={styles.optionHeader}>
-                  <Text style={styles.optionIcon}>{dietType.icon}</Text>
-                  <Text
-                    style={[
-                      styles.optionLabel,
-                      type === dietType.value && styles.optionLabelSelected,
-                    ]}
-                  >
-                    {dietType.label}
-                  </Text>
-                </View>
-                <Text style={styles.optionDescription}>{dietType.description}</Text>
-              </TouchableOpacity>
-            ))}
+          <View style={styles.section}>
+            <View style={styles.optionGrid}>
+              {occupationTypes.map((occupationType) => (
+                <TouchableOpacity
+                  key={occupationType.value}
+                  style={[
+                    styles.optionCard,
+                    occupation === occupationType.value && styles.optionCardSelected,
+                  ]}
+                  onPress={() => setOccupation(occupationType.value)}
+                >
+                  <View style={styles.optionHeader}>
+                    <Text style={styles.optionIcon}>{occupationType.icon}</Text>
+                    <Text
+                      style={[
+                        styles.optionLabel,
+                        occupation === occupationType.value && styles.optionLabelSelected,
+                      ]}
+                    >
+                      {occupationType.label}
+                    </Text>
+                  </View>
+                  <Text style={styles.optionDescription}>{occupationType.description}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         </View>
-      </View>
 
       <View style={styles.buttonContainer}>
         <Button
@@ -246,4 +239,4 @@ const DietScreen = () => {
   );
 };
 
-export default DietScreen;
+export default OccupationScreen;

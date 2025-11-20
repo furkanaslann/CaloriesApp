@@ -64,6 +64,29 @@ export interface Preferences {
   };
 }
 
+// Commitment Types
+export interface Commitment {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  commitmentStatement: string;
+  timestamp: string;
+}
+
+// Account Types
+export interface Account {
+  username: string;
+  email: string;
+  passwordHash: string; // In real app, this should be hashed
+  createdAt: string;
+  preferences: {
+    agreeToTerms: boolean;
+    agreeToPrivacy: boolean;
+    subscribeToNewsletter: boolean;
+  };
+}
+
 // Calculated Values Types
 export interface CalculatedValues {
   bmr: number; // Basal Metabolic Rate
@@ -82,7 +105,8 @@ const ONBOARDING_SCREENS = [
   'name', 'last-name', 'date-of-birth', 'gender',
   'height', 'weight', 'profile-photo',
   'goals-primary', 'goals-weight', 'goals-weekly', 'goals-timeline', 'goals-motivation',
-  'activity', 'diet', 'camera-tutorial', 'notifications', 'privacy', 'summary', 'index'
+  'activity', 'occupation', 'exercise-types', 'exercise-frequency', 'sleep-hours',
+  'diet', 'camera-tutorial', 'notifications', 'privacy', 'summary', 'commitment', 'account-creation', 'index'
 ] as const;
 
 type ScreenName = typeof ONBOARDING_SCREENS[number];
@@ -114,6 +138,8 @@ export interface OnboardingContextType {
   activity: Partial<Activity>;
   diet: Partial<Diet>;
   preferences: Partial<Preferences>;
+  commitment: Partial<Commitment>;
+  account: Partial<Account>;
 
   // Calculated values (computed)
   calculatedValues: CalculatedValues;
@@ -130,6 +156,8 @@ export interface OnboardingContextType {
   updateActivity: (data: Partial<Activity>) => void;
   updateDiet: (data: Partial<Diet>) => void;
   updatePreferences: (data: Partial<Preferences>) => void;
+  updateCommitment: (data: Partial<Commitment>) => void;
+  updateAccount: (data: Partial<Account>) => void;
   getCurrentStep: (screenName: ScreenName) => number;
   getProgressPercentage: (currentStep: number) => number;
   validateScreenName: (screenName: string) => boolean;
@@ -149,6 +177,8 @@ interface OnboardingStorage {
   activity: Partial<Activity>;
   diet: Partial<Diet>;
   preferences: Partial<Preferences>;
+  commitment: Partial<Commitment>;
+  account: Partial<Account>;
   currentStep: number;
   completedSteps: number[];
   isCompleted: boolean;
@@ -166,6 +196,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [activity, setActivity] = useState<Partial<Activity>>({});
   const [diet, setDiet] = useState<Partial<Diet>>({});
   const [preferences, setPreferences] = useState<Partial<Preferences>>({});
+  const [commitment, setCommitment] = useState<Partial<Commitment>>({});
+  const [account, setAccount] = useState<Partial<Account>>({});
 
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -256,6 +288,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         activity,
         diet,
         preferences,
+        commitment,
+        account,
         currentStep,
         completedSteps,
         isCompleted,
@@ -281,6 +315,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         setActivity(data.activity || {});
         setDiet(data.diet || {});
         setPreferences(data.preferences || {});
+        setCommitment(data.commitment || {});
+        setAccount(data.account || {});
         setCurrentStep(data.currentStep || 0);
         setCompletedSteps(data.completedSteps || []);
         setIsCompleted(data.isCompleted || false);
@@ -318,6 +354,14 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const updatePreferences = (data: Partial<Preferences>) => {
     setPreferences(prev => ({ ...prev, ...data }));
+  };
+
+  const updateCommitment = (data: Partial<Commitment>) => {
+    setCommitment(prev => ({ ...prev, ...data }));
+  };
+
+  const updateAccount = (data: Partial<Account>) => {
+    setAccount(prev => ({ ...prev, ...data }));
   };
 
   // Get current step for specific screen
@@ -375,6 +419,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     setActivity({});
     setDiet({});
     setPreferences({});
+    setCommitment({});
+    setAccount({});
     setCurrentStep(0);
     setCompletedSteps([]);
     setIsCompleted(false);
@@ -387,6 +433,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     activity,
     diet,
     preferences,
+    commitment,
+    account,
     calculatedValues,
     currentStep,
     totalSteps: TOTAL_STEPS,
@@ -397,6 +445,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     updateActivity,
     updateDiet,
     updatePreferences,
+    updateCommitment,
+    updateAccount,
     getCurrentStep,
     getProgressPercentage: getProgressPercentageFn,
     validateScreenName: validateScreenNameFn,

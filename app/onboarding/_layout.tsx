@@ -17,11 +17,21 @@ export default function OnboardingLayout() {
       <Stack.Screen name="goals-timeline" options={{ headerShown: false }} />
       <Stack.Screen name="goals-motivation" options={{ headerShown: false }} />
       <Stack.Screen name="activity" options={{ headerShown: false }} />
+      <Stack.Screen name="occupation" options={{ headerShown: false }} />
+      <Stack.Screen name="exercise-types" options={{ headerShown: false }} />
+      <Stack.Screen name="exercise-frequency" options={{ headerShown: false }} />
+      <Stack.Screen name="sleep-hours" options={{ headerShown: false }} />
       <Stack.Screen name="diet" options={{ headerShown: false }} />
+      <Stack.Screen name="allergies" options={{ headerShown: false }} />
+      <Stack.Screen name="intolerances" options={{ headerShown: false }} />
+      <Stack.Screen name="disliked-foods" options={{ headerShown: false }} />
+      <Stack.Screen name="cultural-restrictions" options={{ headerShown: false }} />
       <Stack.Screen name="camera-tutorial" options={{ headerShown: false }} />
       <Stack.Screen name="notifications" options={{ headerShown: false }} />
       <Stack.Screen name="privacy" options={{ headerShown: false }} />
       <Stack.Screen name="summary" options={{ headerShown: false }} />
+      <Stack.Screen name="commitment" options={{ headerShown: false }} />
+      <Stack.Screen name="account-creation" options={{ headerShown: false }} />
       <Stack.Screen name="index" options={{ headerShown: false }} />
     </Stack>
   );
