@@ -1,0 +1,373 @@
+# Project Architecture Rules for CaloriTrack
+
+## File Organization Structure
+```
+app/
+├── (tabs)/                    # Main app navigation tabs
+│   ├── _layout.tsx           # Tab navigation layout
+│   ├── index.tsx             # Home/Dashboard screen
+│   ├── camera.tsx            # Camera screen for food recognition
+│   ├── meals.tsx             # Meal tracking screen
+│   ├── explore.tsx           # Food exploration/discovery
+│   └── profile.tsx           # User profile screen
+├── onboarding/               # User onboarding flow
+│   ├── welcome.tsx           # Welcome screens
+│   ├── profile.tsx           # Profile setup
+│   ├── goals.tsx             # Goal setting
+│   ├── activity.tsx          # Activity level selection
+│   ├── diet.tsx              # Diet preferences
+│   ├── camera-tutorial.tsx   # Camera usage tutorial
+│   ├── notifications.tsx     # Notification preferences
+│   ├── privacy.tsx           # Privacy settings
+│   └── summary.tsx           # Onboarding completion
+├── modal.tsx                 # Global modal component
+├── _layout.tsx               # Root layout configuration
+└── splash.tsx                # Splash screen
+components/
+├── common/                   # Shared UI components
+│   ├── button.tsx           # Reusable button component
+│   ├── input.tsx            # Text input component
+│   ├── card.tsx             # Card container component
+│   ├── modal.tsx            # Modal wrapper component
+│   └── loading.tsx          # Loading indicators
+├── food/                     # Food-related components
+│   ├── food-card.tsx        # Food item display card
+│   ├── meal-item.tsx        # Individual meal entry
+│   ├── nutrition-label.tsx  # Nutrition information display
+│   └── food-search.tsx      # Food search component
+├── charts/                   # Data visualization components
+│   ├── progress-chart.tsx   # User progress charts
+│   ├── macro-chart.tsx      # Macronutrient distribution
+│   └── calorie-chart.tsx    # Calorie tracking visualizations
+├── camera/                   # Camera-specific components
+│   ├── camera-view.tsx      # Camera preview component
+│   ├── image-preview.tsx    # Captured image preview
+│   └── photo-capture.tsx    # Photo capture controls
+└── ui/                       # Base UI components
+    ├── themed-text.tsx      # Text component with theme support
+    ├── themed-view.tsx      # View component with theme support
+    ├── icon-symbol.tsx      # Icon component
+    └── collapsible.tsx      # Collapsible content component
+contexts/                   # React contexts for state management
+├── onboarding-context.tsx   # Onboarding flow state
+├── user-context.tsx         # User data and preferences
+├── camera-context.tsx       # Camera state and permissions
+└── theme-context.tsx        # Theme and appearance settings
+hooks/                      # Custom React hooks
+├── use-onboarding.ts       # Onboarding logic
+├── use-camera.ts           # Camera functionality
+├── use-theme.ts            # Theme management
+├── use-storage.ts          # Local storage operations
+└── use-food-data.ts        # Food data management
+utils/                      # Utility functions
+├── calculations.ts         # Calorie and nutrition calculations
+├── validation.ts           # Form validation logic
+├── storage.ts              # AsyncStorage helpers
+├── api.ts                  # API communication utilities
+├── permissions.ts          # Camera and storage permissions
+├── image-processing.ts     # Image optimization and processing
+└── formatting.ts           # Data formatting utilities
+types/                      # TypeScript type definitions
+├── user.ts                 # User-related types
+├── onboarding.ts           # Onboarding flow types
+├── food.ts                 # Food and meal types
+├── camera.ts               # Camera-related types
+├── api.ts                  # API response types
+└── navigation.ts           # Navigation parameter types
+```
+
+## Component Architecture Principles
+
+### Component Structure
+- **Functional Components Only:** Use React.FC with proper typing
+- **Props Interface:** Always define interface for component props
+- **Default Props:** Use TypeScript optional props or default parameters
+- **Component Composition:** Prefer composition over inheritance
+- **Single Responsibility:** Each component should have one clear purpose
+
+### Component Template
+```typescript
+// 1. Imports (React, dependencies)
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { useTheme } from '@/contexts/theme-context';
+
+// 2. Types (Props interface)
+interface Props {
+  title: string;
+  subtitle?: string;
+  onPress: () => void;
+  disabled?: boolean;
+}
+
+// 3. Component implementation
+const Component: React.FC<Props> = ({
+  title,
+  subtitle,
+  onPress,
+  disabled = false
+}) => {
+  const { theme } = useTheme();
+
+  // Component logic
+  const handlePress = () => {
+    if (!disabled) {
+      onPress();
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>{title}</Text>
+      {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+    </View>
+  );
+};
+
+// 4. Styles
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    borderRadius: 8,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  subtitle: {
+    fontSize: 14,
+    marginTop: 4,
+  },
+});
+
+export default Component;
+```
+
+## State Management Patterns
+
+### Context Structure
+```typescript
+// Context with reducer pattern
+interface State {
+  user: User | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+type Action =
+  | { type: 'SET_USER'; payload: User }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'CLEAR_USER' };
+
+const initialState: State = {
+  user: null,
+  isLoading: false,
+  error: null,
+};
+
+const reducer = (state: State, action: Action): State => {
+  // Reducer logic
+};
+
+const UserContext = createContext<{
+  state: State;
+  dispatch: React.Dispatch<Action>;
+}>({ state: initialState, dispatch: () => {} });
+```
+
+### Custom Hook Pattern
+```typescript
+// Custom hook for complex logic
+const useFoodTracking = () => {
+  const [foods, setFoods] = useState<Food[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const addFood = useCallback(async (food: FoodData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await foodAPI.addFood(food);
+      setFoods(prev => [...prev, result]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return {
+    foods,
+    loading,
+    error,
+    addFood,
+  };
+};
+```
+
+## Navigation Architecture
+
+### Expo Router Structure
+- **File-based routing:** Use file names as routes
+- **Layout components:** _layout.tsx for navigation structure
+- **Typed navigation:** Use TypeScript for route parameters
+- **Deep linking:** Configure linking for external navigation
+- **Tab navigation:** Bottom tabs for main app sections
+
+### Navigation Types
+```typescript
+// Navigation parameter types
+type RootStackParamList = {
+  Home: undefined;
+  Camera: {
+    mode: 'food' | 'barcode';
+    onCapture: (image: string) => void;
+  };
+  FoodDetail: { foodId: string };
+  Profile: undefined;
+};
+
+type NavigationProp = StackNavigationProp<RootStackParamList>;
+```
+
+## Data Flow Architecture
+
+### Data Layer
+- **API Layer:** Centralized API communication
+- **Storage Layer:** AsyncStorage for local data
+- **Cache Layer:** In-memory caching for performance
+- **Validation Layer:** Data validation and sanitization
+
+### Service Pattern
+```typescript
+// Service for business logic
+class FoodService {
+  async recognizeFood(imageUri: string): Promise<FoodRecognitionResult> {
+    const processedImage = await this.processImage(imageUri);
+    const result = await this.callVisionAPI(processedImage);
+    return this.formatRecognitionResult(result);
+  }
+
+  private async processImage(imageUri: string): Promise<string> {
+    // Image processing logic
+  }
+
+  private async callVisionAPI(imageData: string): Promise<RawAPIResult> {
+    // API call logic
+  }
+
+  private formatRecognitionResult(raw: RawAPIResult): FoodRecognitionResult {
+    // Data formatting logic
+  }
+}
+```
+
+## Error Handling Architecture
+
+### Error Boundaries
+```typescript
+class ErrorBoundary extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
+    // Log to error reporting service
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallback error={this.state.error} />;
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+### Error Types
+```typescript
+type AppError =
+  | { type: 'NETWORK_ERROR'; message: string }
+  | { type: 'PERMISSION_ERROR'; message: string }
+  | { type: 'VALIDATION_ERROR'; field: string; message: string }
+  | { type: 'UNKNOWN_ERROR'; message: string };
+```
+
+## Performance Architecture
+
+### Code Splitting
+- **Lazy loading:** Use React.lazy for heavy components
+- **Route-based splitting:** Load screens on demand
+- **Component splitting:** Large components split into smaller ones
+- **Asset optimization:** Image and font optimization
+
+### Memory Management
+- **Cleanup:** useEffect cleanup for subscriptions
+- **Image optimization:** Compress and cache images
+- **List optimization:** FlatList with proper props
+- **State cleanup:** Remove unused state and listeners
+
+## Testing Architecture
+
+### Component Testing
+- **Unit tests:** Individual component testing
+- **Integration tests:** Component interaction testing
+- **Snapshot tests:** UI regression testing
+- **Accessibility tests:** Screen reader and navigation testing
+
+### Test Structure
+```typescript
+describe('FoodCard Component', () => {
+  const mockProps = {
+    food: mockFood,
+    onPress: jest.fn(),
+  };
+
+  it('renders food information correctly', () => {
+    render(<FoodCard {...mockProps} />);
+    expect(screen.getByText(mockFood.name)).toBeTruthy();
+  });
+
+  it('calls onPress when tapped', () => {
+    render(<FoodCard {...mockProps} />);
+    fireEvent.press(screen.getByRole('button'));
+    expect(mockProps.onPress).toHaveBeenCalled();
+  });
+});
+```
+
+## Security Architecture
+
+### Data Protection
+- **Input validation:** Sanitize all user inputs
+- **API security:** Proper authentication and headers
+- **Local storage:** Encrypt sensitive data
+- **Permission handling:** Proper camera and storage permissions
+
+### Privacy Considerations
+- **Data minimization:** Collect only necessary data
+- **User consent:** Clear permission requests
+- **Data retention:** Clean up old data appropriately
+- **Transparency:** Clear privacy policy and data usage
+
+## Deployment Architecture
+
+### Build Configuration
+- **Environment variables:** Different configs for dev/staging/prod
+- **Bundle optimization:** Code splitting and tree shaking
+- **Asset optimization:** Image compression and lazy loading
+- **Performance monitoring:** Build size and runtime performance
+
+### Release Management
+- **Version control:** Semantic versioning
+- **Release notes:** Clear changelog for updates
+- **Rollback strategy:** Quick rollback capability
+- **OTA updates:** Expo over-the-air updates

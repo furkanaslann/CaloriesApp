@@ -1,0 +1,412 @@
+/**
+ * CaloriTrack - Onboarding Summary Screen
+ * Minimal. Cool. Aesthetic.
+ */
+
+import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+    Image,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View
+} from 'react-native';
+import Button from '../../components/ui/button';
+import { useOnboarding } from '../../context/onboarding-context';
+import { useTheme } from '@/constants';
+
+const SummaryScreen = () => {
+  const themeResult = useTheme();
+  const theme = themeResult || {
+    semanticColors: {
+      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
+      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
+      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
+    },
+    colors: { primary: '#7C3AED', success: '#10B981', warning: '#F59E0B', info: '#3B82F6', gradientStart: '#7C3AED', gradientEnd: '#EC4899' },
+    textStyles: {
+      onboardingHero: { fontSize: 36, fontWeight: '700' },
+      onboardingTitle: { fontSize: 30, fontWeight: '600' },
+      onboardingDescription: { fontSize: 16, fontWeight: '400' },
+      heading2: { fontSize: 28, fontWeight: '600' },
+      heading3: { fontSize: 24, fontWeight: '600' },
+      heading4: { fontSize: 20, fontWeight: '600' },
+      body: { fontSize: 16, fontWeight: '400' },
+      bodySmall: { fontSize: 14, fontWeight: '400' },
+      bodyMedium: { fontSize: 16, fontWeight: '500' },
+    },
+    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8 },
+    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10 },
+    shadows: { lg: {}, md: {} },
+    coloredShadows: { gradient: {}, primary: {} },
+  };
+  const {
+    profile,
+    goals,
+    activity,
+    diet,
+    preferences,
+    calculatedValues,
+    completeOnboarding
+  } = useOnboarding();
+
+  const [isCalculating, setIsCalculating] = useState(true);
+  const [showResults, setShowResults] = useState(false);
+
+  useEffect(() => {
+    // Simulate calculation delay for dramatic effect
+    const timer = setTimeout(() => {
+      setIsCalculating(false);
+      setShowResults(true);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleComplete = () => {
+    router.push('/onboarding/commitment');
+  };
+
+  const getGoalLabel = (goal: string) => {
+    const goalLabels: Record<string, string> = {
+      weight_loss: 'Kilo Verme',
+      maintenance: 'Koruma',
+      muscle_gain: 'Kas Kazanma',
+      healthy_eating: 'Sağlıklı Beslenme',
+    };
+    return goalLabels[goal] || goal;
+  };
+
+  const getActivityLabel = (level: string) => {
+    const activityLabels: Record<string, string> = {
+      sedentary: 'Hareketsiz',
+      lightly_active: 'Hafif Aktif',
+      moderately_active: 'Orta Aktif',
+      very_active: 'Çok Aktif',
+      extremely_active: 'Son Derece Aktif',
+    };
+    return activityLabels[level] || level;
+  };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.semanticColors.background.primary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    content: {
+      padding: theme.spacing.lg,
+    },
+    header: {
+      marginTop: '10%',
+      alignItems: 'center',
+      marginBottom: theme.spacing['3xl'],
+    },
+    title: {
+      ...theme.textStyles.heading2,
+      color: theme.semanticColors.text.primary,
+      textAlign: 'center',
+      marginBottom: theme.spacing.md,
+      lineHeight: 40,
+      fontSize: 32,
+      fontWeight: '700',
+    },
+    subtitle: {
+      ...theme.textStyles.body,
+      color: theme.semanticColors.text.secondary,
+      textAlign: 'center',
+      lineHeight: theme.typography.lineHeight.relaxed,
+    },
+    calculatingCard: {
+      backgroundColor: theme.semanticColors.surface,
+      borderRadius: theme.borderRadius.lg,
+      padding: theme.spacing['3xl'],
+      alignItems: 'center',
+      marginBottom: theme.spacing['3xl'],
+      ...theme.shadows.md,
+    },
+    calculatingImage: {
+      width: 200,
+      height: 200,
+      resizeMode: 'contain',
+      marginBottom: theme.spacing['2xl'],
+    },
+    calculatingTitle: {
+      ...theme.textStyles.heading3,
+      color: theme.semanticColors.text.primary,
+      textAlign: 'center',
+      marginBottom: theme.spacing.md,
+    },
+    calculatingDescription: {
+      ...theme.textStyles.body,
+      color: theme.semanticColors.text.secondary,
+      textAlign: 'center',
+      lineHeight: theme.typography.lineHeight.relaxed,
+    },
+    resultsCard: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.borderRadius.lg,
+      padding: theme.spacing['2xl'],
+      marginBottom: theme.spacing['3xl'],
+      ...theme.shadows.lg,
+    },
+    resultsTitle: {
+      ...theme.textStyles.heading3,
+      color: theme.semanticColors.text.onPrimary,
+      textAlign: 'center',
+      marginBottom: theme.spacing.lg,
+    },
+    caloriesContainer: {
+      alignItems: 'center',
+      marginBottom: theme.spacing.lg,
+    },
+    caloriesNumber: {
+      fontSize: 64,
+      fontWeight: '700',
+      color: theme.semanticColors.text.onPrimary,
+      marginBottom: theme.spacing.sm,
+    },
+    caloriesLabel: {
+      ...theme.textStyles.labelLarge,
+      color: theme.semanticColors.text.onPrimary,
+      opacity: 0.9,
+    },
+    macrosContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingTop: theme.spacing.lg,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    macroItem: {
+      alignItems: 'center',
+    },
+    macroValue: {
+      ...theme.textStyles.heading4,
+      color: theme.semanticColors.text.onPrimary,
+      marginBottom: theme.spacing.xs,
+    },
+    macroLabel: {
+      ...theme.textStyles.caption,
+      color: theme.semanticColors.text.onPrimary,
+      opacity: 0.8,
+    },
+    summarySection: {
+      marginBottom: theme.spacing['2xl'],
+    },
+    summaryTitle: {
+      ...theme.textStyles.heading4,
+      color: theme.semanticColors.text.primary,
+      marginBottom: theme.spacing.lg,
+    },
+    profileCard: {
+      backgroundColor: theme.semanticColors.surface,
+      borderRadius: theme.borderRadius.lg,
+      padding: theme.spacing.lg,
+      marginBottom: theme.spacing.lg,
+      ...theme.shadows.sm,
+    },
+    profileRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.spacing.sm,
+    },
+    profileLabel: {
+      ...theme.textStyles.body,
+      color: theme.semanticColors.text.secondary,
+    },
+    profileValue: {
+      ...theme.textStyles.body,
+      color: theme.semanticColors.text.primary,
+      fontWeight: theme.typography.fontWeight.semibold,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: theme.spacing.md,
+    },
+    statCard: {
+      flex: 1,
+      minWidth: '45%',
+      backgroundColor: theme.semanticColors.surface,
+      borderRadius: theme.borderRadius.lg,
+      padding: theme.spacing.lg,
+      alignItems: 'center',
+      ...theme.shadows.sm,
+    },
+    statIcon: {
+      fontSize: 32,
+      marginBottom: theme.spacing.sm,
+    },
+    statValue: {
+      ...theme.textStyles.heading4,
+      color: theme.semanticColors.text.primary,
+      marginBottom: theme.spacing.xs,
+    },
+    statLabel: {
+      ...theme.textStyles.caption,
+      color: theme.semanticColors.text.secondary,
+      textAlign: 'center',
+    },
+    buttonContainer: {
+      paddingHorizontal: theme.spacing.lg,
+      paddingBottom: theme.spacing.xl,
+    },
+    finishButton: {
+      backgroundColor: theme.colors.success,
+    },
+  });
+
+  if (isCalculating) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          <View style={styles.content}>
+            <View style={styles.header}>
+              <Text style={styles.title}>Kişisel Planınız Hazırlanıyor</Text>
+              <Text style={styles.subtitle}>
+                Sağlık verilerinize göre size özel beslenme planınızı oluşturuyoruz...
+              </Text>
+            </View>
+
+            <View style={styles.calculatingCard}>
+              <Image source={{ uri: img4Dd87D5500484Ca1Add51872F8E2F05FWebp }} style={styles.calculatingImage} />
+              <Text style={styles.calculatingTitle}>🧮 Hesaplanıyor...</Text>
+              <Text style={styles.calculatingDescription}>
+                Metabolizma hızınız, kalori ihtiyacınız ve makro dağılımınız hesaplanıyor.
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.title}>🎉 Planınız Hazır!</Text>
+            <Text style={styles.subtitle}>
+              İşte size özel hazırlanan beslenme planınız. Bu hedeflere ulaşmak için size destek olacağız.
+            </Text>
+          </View>
+
+          {showResults && (
+            <View style={styles.resultsCard}>
+              <Text style={styles.resultsTitle}>Günlük Kalori Hedefiniz</Text>
+              <View style={styles.caloriesContainer}>
+                <Text style={styles.caloriesNumber}>{calculatedValues.dailyCalorieGoal}</Text>
+                <Text style={styles.caloriesLabel}>kcal/gün</Text>
+              </View>
+              <View style={styles.macrosContainer}>
+                <View style={styles.macroItem}>
+                  <Text style={styles.macroValue}>{calculatedValues.macros.protein}g</Text>
+                  <Text style={styles.macroLabel}>Protein</Text>
+                </View>
+                <View style={styles.macroItem}>
+                  <Text style={styles.macroValue}>{calculatedValues.macros.carbs}g</Text>
+                  <Text style={styles.macroLabel}>Karbonhidrat</Text>
+                </View>
+                <View style={styles.macroItem}>
+                  <Text style={styles.macroValue}>{calculatedValues.macros.fats}g</Text>
+                  <Text style={styles.macroLabel}>Yağ</Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          <View style={styles.summarySection}>
+            <Text style={styles.summaryTitle}>📋 Profil Özeti</Text>
+            <View style={styles.profileCard}>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>İsim</Text>
+                <Text style={styles.profileValue}>{profile.name} {profile.lastName}</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>Yaş</Text>
+                <Text style={styles.profileValue}>{profile.age} yaş</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>Boy/Kilo</Text>
+                <Text style={styles.profileValue}>{profile.height}cm / {profile.currentWeight}kg</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>Cinsiyet</Text>
+                <Text style={styles.profileValue}>{profile.gender === 'male' ? 'Erkek' : profile.gender === 'female' ? 'Kadın' : 'Diğer'}</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.summarySection}>
+            <Text style={styles.summaryTitle}>🎯 Hedefleriniz</Text>
+            <View style={styles.statsGrid}>
+              <View style={styles.statCard}>
+                <Text style={styles.statIcon}>🎯</Text>
+                <Text style={styles.statValue}>{getGoalLabel(goals.primaryGoal)}</Text>
+                <Text style={styles.statLabel}>Ana Hedef</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statIcon}>⚖️</Text>
+                <Text style={styles.statValue}>{goals.targetWeight}kg</Text>
+                <Text style={styles.statLabel}>Hedef Kilo</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statIcon}>🏃</Text>
+                <Text style={styles.statValue}>{getActivityLabel(activity.level)}</Text>
+                <Text style={styles.statLabel}>Aktivite</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statIcon}>🔥</Text>
+                <Text style={styles.statValue}>{calculatedValues.bmr}</Text>
+                <Text style={styles.statLabel}>BMR</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.summarySection}>
+            <Text style={styles.summaryTitle}>📊 Metabolik Değerleriniz</Text>
+            <View style={styles.profileCard}>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>Bazal Metabolizma Hızı (BMR)</Text>
+                <Text style={styles.profileValue}>{calculatedValues.bmr} kcal</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>Günlük Enerji Harcaması (TDEE)</Text>
+                <Text style={styles.profileValue}>{calculatedValues.tdee} kcal</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>Haftalık Hedef</Text>
+                <Text style={styles.profileValue}>{goals.weeklyGoal} kg/hafta</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.profileLabel}>Motivasyon Seviyesi</Text>
+                <Text style={styles.profileValue}>{goals.motivation}/10</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Taahhütte Bulun"
+          onPress={handleComplete}
+          fullWidth
+          style={styles.finishButton}
+        />
+      </View>
+    </SafeAreaView>
+  );
+};
+
+// Placeholder image - will be replaced with proper assets
+const img4Dd87D5500484Ca1Add51872F8E2F05FWebp = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' fill='%23666' text-anchor='middle' dy='.3em'%3E✨ Calculating...%3C/text%3E%3C/svg%3E";
+
+export default SummaryScreen;

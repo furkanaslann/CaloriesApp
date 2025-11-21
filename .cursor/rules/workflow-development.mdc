@@ -1,0 +1,315 @@
+# Development Workflow Rules for CaloriTrack
+
+## Git Workflow
+
+### Branching Strategy
+- **main:** Production-ready code
+- **develop:** Integration branch for features
+- **feature/**: Individual feature branches
+- **hotfix/**: Critical bug fixes
+- **release/**: Release preparation
+
+### Commit Message Format
+```
+type(scope): description
+
+feat(camera): add food recognition functionality
+fix(auth): resolve login validation error
+docs(readme): update installation instructions
+style(ui): improve button component styling
+refactor(storage): optimize data persistence
+test(camera): add image capture unit tests
+chore(deps): update expo dependencies
+```
+
+### Git Hooks Configuration
+- **Pre-commit:** ESLint, Prettier, TypeScript checks
+- **Pre-push:** Unit tests, build verification
+- **Commit-msg:** Commit message validation
+
+## Code Review Process
+
+### Pull Request Requirements
+- **Description:** Clear description of changes and purpose
+- **Screenshots:** Visual changes require screenshots
+- **Testing:** Evidence of testing performed
+- **Breaking Changes:** Explicitly noted if applicable
+- **Documentation:** Updated docs for API changes
+
+### Review Checklist
+- [ ] Code follows project style guidelines
+- [ ] TypeScript types are properly defined
+- [ ] Components are accessible and responsive
+- [ ] Tests are written for new functionality
+- [ ] Documentation is updated
+- [ ] Performance impact considered
+- [ ] Security implications assessed
+
+## Development Environment Setup
+
+### Required Tools
+- **Node.js:** Latest LTS version
+- **Expo CLI:** Latest stable version
+- **VS Code:** Recommended IDE with extensions
+- **Git:** Version control
+- **Device/emulator:** iOS Simulator or Android Emulator
+
+### VS Code Extensions
+```json
+{
+  "recommendations": [
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-eslint",
+    "ms-vscode.vscode-json",
+    "expo.vscode-expo-tools",
+    "ms-vscode.vscode-react-native",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense"
+  ]
+}
+```
+
+### Environment Configuration
+```bash
+# Environment variables (.env)
+EXPO_PUBLIC_API_URL=https://api.example.com
+EXPO_PUBLIC_ENVIRONMENT=development
+EXPO_PUBLIC_ENABLE_DEBUG=true
+```
+
+## Code Quality Standards
+
+### ESLint Configuration
+```json
+{
+  "extends": [
+    "expo",
+    "@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/explicit-function-return-type": "warn",
+    "react-hooks/exhaustive-deps": "error",
+    "react-native/no-inline-styles": "warn"
+  }
+}
+```
+
+### Prettier Configuration
+```json
+{
+  "semi": true,
+  "trailingComma": "es5",
+  "singleQuote": true,
+  "printWidth": 80,
+  "tabWidth": 2,
+  "useTabs": false
+}
+```
+
+## Testing Workflow
+
+### Testing Pyramid
+- **Unit Tests (70%):** Component and utility function testing
+- **Integration Tests (20%):** Component interaction testing
+- **E2E Tests (10%):** Critical user journey testing
+
+### Testing Commands
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run specific test file
+npm test FoodCard.test.tsx
+```
+
+### Test File Naming
+- Component tests: `ComponentName.test.tsx`
+- Hook tests: `HookName.test.ts`
+- Utility tests: `utilityName.test.ts`
+- Integration tests: `featureName.integration.test.tsx`
+
+## Performance Workflow
+
+### Performance Monitoring
+- **Bundle size:** Monitor with `expo-bundle-analyzer`
+- **Animation performance:** Use Flipper for profiling
+- **Memory usage:** Track memory leaks with React DevTools
+- **Network requests:** Optimize API calls and caching
+
+### Performance Checks
+```bash
+# Analyze bundle size
+npx expo-bundle-analyzer
+
+# Check for performance issues
+npx expo start --tunnel
+
+# Profile animations
+# Use Flipper with React DevTools
+```
+
+## Debugging Workflow
+
+### Debugging Tools
+- **React DevTools:** Component state and props inspection
+- **Flipper:** Network, storage, and performance debugging
+- **Expo DevTools:** Hot reloading and error handling
+- **Console debugging:** Strategic console.log placement
+
+### Common Debugging Techniques
+```typescript
+// Debug component renders
+useEffect(() => {
+  console.log('Component rendered with props:', props);
+}, [props]);
+
+// Debug async operations
+const fetchData = async () => {
+  try {
+    console.log('Fetching data...');
+    const result = await api.getData();
+    console.log('Data received:', result);
+    return result;
+  } catch (error) {
+    console.error('Fetch error:', error);
+    throw error;
+  }
+};
+```
+
+## Deployment Workflow
+
+### Pre-deployment Checklist
+- [ ] All tests passing
+- [ ] TypeScript compilation successful
+- [ ] Bundle size within limits
+- [ ] Performance metrics acceptable
+- [ ] Security scan completed
+- [ ] Documentation updated
+- [ ] Changelog updated
+
+### Build Process
+```bash
+# Development build
+expo start
+
+# Production build for Android
+expo build:android
+
+# Production build for iOS
+expo build:ios
+
+# Preview build
+expo build:android --preview
+```
+
+### Environment Management
+- **Development:** Local development with hot reload
+- **Staging:** Pre-production testing environment
+- **Production:** Live application environment
+
+## Documentation Workflow
+
+### Code Documentation
+- **JSDoc:** Document functions and components
+- **README:** Project setup and usage instructions
+- **API Docs:** Auto-generated from TypeScript definitions
+- **Component Stories:** Storybook for component documentation
+
+### Documentation Standards
+```typescript
+/**
+ * Component description
+ * @example
+ * ```tsx
+ * <Button title="Click me" onPress={() => {}} />
+ * ```
+ */
+interface ButtonProps {
+  /** Button title text */
+  title: string;
+  /** Click handler function */
+  onPress: () => void;
+  /** Optional disabled state */
+  disabled?: boolean;
+}
+```
+
+## Collaboration Workflow
+
+### Team Communication
+- **Daily standups:** Progress updates and blockers
+- **Sprint planning:** Feature prioritization and estimation
+- **Retrospectives:** Process improvement and lessons learned
+- **Code reviews:** Peer review process for all changes
+
+### Issue Tracking
+- **Bug reports:** Detailed reproduction steps and expected behavior
+- **Feature requests:** Clear requirements and acceptance criteria
+- **Technical debt:** Prioritized refactoring tasks
+- **Documentation:** Missing or outdated documentation issues
+
+## Continuous Integration
+
+### CI/CD Pipeline
+- **Automated testing:** Run tests on every commit
+- **Code quality:** ESLint, Prettier, TypeScript checks
+- **Security scanning:** Dependency vulnerability checks
+- **Build verification:** Ensure builds succeed
+- **Deployment:** Automated deployment to staging
+
+### GitHub Actions Workflow
+```yaml
+name: CI/CD Pipeline
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+      - run: npm install
+      - run: npm test
+      - run: npm run lint
+      - run: npm run build
+```
+
+## Monitoring and Maintenance
+
+### Application Monitoring
+- **Crash reporting:** Sentry or similar service
+- **Performance monitoring:** Frame rate and memory usage
+- **User analytics:** Feature usage and engagement metrics
+- **Error tracking:** Automatic error reporting and alerts
+
+### Maintenance Tasks
+- **Dependency updates:** Regular security and feature updates
+- **Code refactoring:** Address technical debt
+- **Performance optimization:** Continuous improvement
+- **Documentation updates:** Keep docs current with code changes
+
+## Release Management
+
+### Version Control
+- **Semantic versioning:** Follow SemVer principles
+- **Release notes:** Detailed changelog for each version
+- **Tagging:** Git tags for release points
+- **Branching:** Maintain stable release branches
+
+### Release Process
+1. **Feature freeze:** Stop new feature development
+2. **Testing:** Comprehensive testing and bug fixing
+3. **Documentation:** Update all relevant documentation
+4. **Build:** Create production builds
+5. **Release:** Deploy to app stores
+6. **Monitoring:** Watch for post-release issues

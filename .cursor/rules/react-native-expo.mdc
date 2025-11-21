@@ -1,0 +1,92 @@
+# React Native & Expo Specific Rules for CaloriTrack
+
+## Expo Router Configuration
+- Use file-based routing with expo-router
+- Implement proper navigation types
+- Use linking configuration for deep linking
+- Handle tab navigation with correct hierarchy
+
+## Camera & Image Processing
+- Always check camera permissions before accessing
+- Use expo-camera for camera functionality
+- Use expo-image-picker for gallery selection
+- Implement proper image optimization and compression
+- Handle different image formats and orientations
+- Provide fallback for camera disabled devices
+
+## Performance Optimization
+- Use react-native-reanimated for smooth animations
+- Implement lazy loading for long lists with FlatList
+- Optimize image loading with expo-image
+- Use useMemo and useCallback for expensive operations
+- Implement proper component memoization
+
+## Platform-Specific Considerations
+- Platform-specific code with Platform.select()
+- iOS vs Android handling for permissions
+- Different UI patterns for each platform
+- Status bar and safe area handling
+- Keyboard avoidance for forms
+
+## State Management
+- Use React Context for global state
+- Local state with useState and useReducer
+- Async storage for persistence
+- Implement proper loading and error states
+- Handle offline scenarios gracefully
+
+## Component Architecture
+- Functional components only
+- Props interfaces for type safety
+- Custom hooks for reusable logic
+- Component composition over inheritance
+- Proper key props for lists
+
+## Styling Best Practices
+- StyleSheet.create for performance
+- Responsive design with Dimensions API
+- Use typography scale consistently
+- Implement dark mode support
+- Platform-specific styling when needed
+
+## Accessibility
+- Proper accessibility labels and hints
+- Minimum touch targets (44x44px)
+- Screen reader support
+- High contrast support
+- Focus management
+
+## Error Handling
+- Implement error boundaries
+- Network request error handling
+- Camera permission error handling
+- User-friendly error messages
+- Logging for debugging
+
+## Testing Requirements
+- Test on both iOS and Android
+- Different screen sizes and orientations
+- Camera functionality testing
+- Performance testing
+- Accessibility testing
+
+## Security Considerations
+- Secure data storage with AsyncStorage
+- API key protection
+- User data privacy
+- Secure image handling
+- Input validation and sanitization
+
+## Development Workflow
+- Use expo start for development
+- Hot reloading enabled
+- Proper TypeScript configuration
+- ESLint and Prettier configuration
+- Git hooks for code quality
+
+## Build and Deployment
+- Expo build process configuration
+- Environment variable management
+- App store optimization
+- Version management
+- OTA update strategy

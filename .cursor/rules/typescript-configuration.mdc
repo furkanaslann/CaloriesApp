@@ -1,0 +1,124 @@
+# TypeScript Configuration for CaloriTrack
+
+## Strict Mode Rules
+- Always enable strict mode in TypeScript
+- Use explicit return types for functions
+- Prefer interface over type for object shapes
+- Use readonly for immutable properties
+- Implement proper null checking
+
+## Type Definitions
+- Create comprehensive type definitions in types/ directory
+- Use generics for reusable components
+- Union types for state management
+- Enum for constants and configuration
+- Proper typing for API responses
+
+## Component Typing
+- Use React.FC for functional components
+- Define props interfaces with JSDoc comments
+- Use children props typing correctly
+- Implement proper event handler types
+- Use forwardRef with proper typing
+
+## Navigation Typing
+- Type navigation parameters correctly
+- Use Expo Router navigation types
+- Type route names and parameters
+- Implement proper tab navigation typing
+- Use navigation hooks with typing
+
+## State Management Typing
+- Type context values and providers
+- Use reducer types for complex state
+- Type custom hooks return values
+- Implement proper loading state typing
+- Type API request/response data
+
+## API Typing
+- Create interfaces for API responses
+- Type fetch requests and responses
+- Implement error type definitions
+- Use async/await with proper typing
+- Type external API integrations
+
+## Utility Function Typing
+- Type all utility functions
+- Use generic functions where appropriate
+- Type array operations and transformations
+- Implement proper date/time typing
+- Type calculation functions
+
+## Best Practices
+- Avoid any type unless absolutely necessary
+- Use type guards for runtime type checking
+- Implement proper async/await typing
+- Use const assertions for literals
+- Type React Native components correctly
+
+## Common Patterns
+```typescript
+// Component typing
+interface Props {
+  title: string;
+  onPress: () => void;
+  disabled?: boolean;
+}
+
+const Button: React.FC<Props> = ({ title, onPress, disabled = false }) => {
+  // Component implementation
+};
+
+// Hook typing
+interface UseCameraReturn {
+  hasPermission: boolean;
+  takePicture: () => Promise<string | null>;
+  error: string | null;
+}
+
+const useCamera = (): UseCameraReturn => {
+  // Hook implementation
+};
+
+// API typing
+interface FoodResponse {
+  id: string;
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+const fetchFoodData = async (id: string): Promise<FoodResponse> => {
+  // API implementation
+};
+```
+
+## Import/Export Rules
+- Use named exports for utilities
+- Default export for main components
+- Type-only imports when possible
+- Proper barrel exports for index files
+- Avoid circular dependencies
+
+## ESLint Configuration
+- Enable @typescript-eslint rules
+- Configure no-explicit-any rule
+- Use strict null checks
+- Implement proper naming conventions
+- Type-safe prop validation
+
+## Testing Typing
+- Type test files properly
+- Use jest types for testing
+- Type mock functions correctly
+- Implement proper test utilities typing
+- Type test scenarios and fixtures
+
+## Error Handling Typing
+- Type error objects correctly
+- Use discriminated unions for errors
+- Type fallback error messages
+- Implement proper error logging typing
+- Type user-friendly error messages

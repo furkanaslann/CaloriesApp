@@ -1,0 +1,78 @@
+# CaloriTrack - Calorie Tracking App
+
+## Project Overview
+This is a React Native & Expo-based calorie tracking application built with TypeScript. The app helps users track their daily calorie intake through camera-based food recognition, manual meal logging, and progress visualization.
+
+## Tech Stack
+- **Framework:** React Native with Expo Router (~6.0.14)
+- **Language:** TypeScript (~5.9.2)
+- **UI:** Custom components with design system
+- **Navigation:** React Navigation with Expo Router
+- **State Management:** React Context API
+- **Storage:** AsyncStorage
+- **Camera:** Expo Camera & Image Picker
+- **Notifications:** Expo Notifications
+
+## Core Features
+- Camera-based food recognition
+- Manual meal logging
+- Daily calorie tracking
+- Progress visualization with charts
+- User profile and goal setting
+- Onboarding flow
+- Haptic feedback
+
+## Design System
+- **Primary Colors:** Purple-based palette (#7C3AED, #EC4899)
+- **Typography:** Inter font family with consistent spacing
+- **Components:** Modern card-based layouts with shadows
+- **Theme:** Light and dark mode support
+
+## File Structure
+```
+app/
+├── (tabs)/           # Main app navigation
+├── onboarding/       # Onboarding screens
+├── components/       # Reusable components
+│   ├── common/       # Shared UI components
+│   ├── food/         # Food-related components
+│   └── ui/           # Base UI components
+├── contexts/         # React contexts
+├── hooks/           # Custom hooks
+├── utils/           # Utility functions
+└── types/           # TypeScript type definitions
+```
+
+## Code Style
+- TypeScript strict mode enabled
+- ES6+ syntax with React hooks
+- Functional components with props interface
+- Consistent naming conventions (PascalCase for components, camelCase for variables)
+- Absolute imports using @ alias
+
+## Key Dependencies
+- expo-camera (~17.0.9) for camera functionality
+- expo-image-picker (~17.0.8) for image selection
+- @react-navigation/* for navigation
+- react-native-reanimated (~4.1.1) for animations
+- expo-notifications (~0.32.13) for push notifications
+
+## Development Rules
+1. Always use TypeScript with strict mode
+2. Follow the established design system and color palette
+3. Use functional components with React hooks
+4. Implement proper error handling and loading states
+5. Ensure accessibility with proper ARIA labels and touch targets
+6. Write reusable components in the components directory
+7. Use React Context for global state management
+8. Follow React Native and Expo best practices
+9. Test on both iOS and Android platforms
+10. Optimize images and performance for mobile devices
+
+## Special Considerations
+- Camera permissions handling
+- Image processing and optimization
+- Cross-platform compatibility
+- Responsive design for different screen sizes
+- Offline data synchronization
+- User privacy and data protection
