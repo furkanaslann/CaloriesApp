@@ -3,21 +3,21 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 import { FIREBASE_CONFIG } from '@/constants';
 
 // Import existing onboarding types
 import {
-  UserProfile,
-  Goals,
   Activity,
-  Diet,
-  Preferences,
+  CalculatedValues,
   Commitment,
-  CalculatedValues
+  Diet,
+  Goals,
+  Preferences,
+  UserProfile
 } from './onboarding-context';
 
 // User data structure for Firestore
@@ -108,7 +108,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .doc(userId)
         .get();
 
-      if (userDoc.exists) {
+      if (userDoc.exists()) {
         const data = userDoc.data() as UserDocument;
         setUserData(data);
       } else {
@@ -123,9 +123,23 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Create initial user document
   const createInitialUserDocument = async (userId: string) => {
     try {
-      const initialData: UserDocument = {
+      // Check if document already exists first
+      const existingDoc = await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(userId)
+        .get();
+
+      if (existingDoc.exists()) {
+        const data = existingDoc.data() as UserDocument;
+        setUserData(data);
+        return data;
+      }
+
+      // Create new document if it doesn't exist
+      const currentUser = auth().currentUser;
+      const initialData: any = {
         uid: userId,
-        isAnonymous: true,
+        isAnonymous: currentUser?.isAnonymous || true,
         onboardingCompleted: false,
         profile: {},
         goals: {},
@@ -134,18 +148,28 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         preferences: {},
         commitment: {},
         calculatedValues: defaultCalculatedValues,
-        createdAt: firestore.FieldValue.serverTimestamp() as FirebaseFirestore.Timestamp,
-        updatedAt: firestore.FieldValue.serverTimestamp() as FirebaseFirestore.Timestamp,
+        createdAt: firestore.FieldValue.serverTimestamp() as FirebaseFirestoreTypes.Timestamp,
+        updatedAt: firestore.FieldValue.serverTimestamp() as FirebaseFirestoreTypes.Timestamp,
       };
+
+      // Only add email and displayName if they exist
+      if (currentUser?.email) {
+        initialData.email = currentUser.email;
+      }
+      if (currentUser?.displayName) {
+        initialData.displayName = currentUser.displayName;
+      }
 
       await firestore()
         .collection(FIREBASE_CONFIG.collections.users)
         .doc(userId)
         .set(initialData);
 
-      setUserData(initialData);
+      setUserData(initialData as UserDocument);
+      return initialData;
     } catch (error) {
       console.error('Error creating initial user document:', error);
+      throw error;
     }
   };
 
@@ -181,13 +205,23 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) throw new Error('No user authenticated');
 
     try {
-      await firestore()
+      const userDocRef = firestore()
         .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid)
-        .update({
-          profile: { ...userData?.profile, ...data },
-          updatedAt: firestore.FieldValue.serverTimestamp(),
-        });
+        .doc(user.uid);
+
+      // Use set with merge to create or update the document
+      const updateData: any = {
+        uid: user.uid,
+        isAnonymous: user.isAnonymous || true,
+        profile: { ...userData?.profile, ...data },
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      };
+
+      // Only add email and displayName if they exist
+      if (user.email) updateData.email = user.email;
+      if (user.displayName) updateData.displayName = user.displayName;
+
+      await userDocRef.set(updateData, { merge: true });
 
       // Refresh user data
       await refreshUserData();
@@ -202,13 +236,23 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) throw new Error('No user authenticated');
 
     try {
-      await firestore()
+      const userDocRef = firestore()
         .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid)
-        .update({
-          goals: { ...userData?.goals, ...data },
-          updatedAt: firestore.FieldValue.serverTimestamp(),
-        });
+        .doc(user.uid);
+
+      // Use set with merge to create or update the document
+      const updateData: any = {
+        uid: user.uid,
+        isAnonymous: user.isAnonymous || true,
+        goals: { ...userData?.goals, ...data },
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      };
+
+      // Only add email and displayName if they exist
+      if (user.email) updateData.email = user.email;
+      if (user.displayName) updateData.displayName = user.displayName;
+
+      await userDocRef.set(updateData, { merge: true });
 
       await refreshUserData();
     } catch (error) {
@@ -222,13 +266,23 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) throw new Error('No user authenticated');
 
     try {
-      await firestore()
+      const userDocRef = firestore()
         .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid)
-        .update({
-          activity: { ...userData?.activity, ...data },
-          updatedAt: firestore.FieldValue.serverTimestamp(),
-        });
+        .doc(user.uid);
+
+      // Use set with merge to create or update the document
+      const updateData: any = {
+        uid: user.uid,
+        isAnonymous: user.isAnonymous || true,
+        activity: { ...userData?.activity, ...data },
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      };
+
+      // Only add email and displayName if they exist
+      if (user.email) updateData.email = user.email;
+      if (user.displayName) updateData.displayName = user.displayName;
+
+      await userDocRef.set(updateData, { merge: true });
 
       await refreshUserData();
     } catch (error) {
@@ -242,13 +296,23 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) throw new Error('No user authenticated');
 
     try {
-      await firestore()
+      const userDocRef = firestore()
         .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid)
-        .update({
-          diet: { ...userData?.diet, ...data },
-          updatedAt: firestore.FieldValue.serverTimestamp(),
-        });
+        .doc(user.uid);
+
+      // Use set with merge to create or update the document
+      const updateData: any = {
+        uid: user.uid,
+        isAnonymous: user.isAnonymous || true,
+        diet: { ...userData?.diet, ...data },
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      };
+
+      // Only add email and displayName if they exist
+      if (user.email) updateData.email = user.email;
+      if (user.displayName) updateData.displayName = user.displayName;
+
+      await userDocRef.set(updateData, { merge: true });
 
       await refreshUserData();
     } catch (error) {
@@ -262,13 +326,23 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) throw new Error('No user authenticated');
 
     try {
-      await firestore()
+      const userDocRef = firestore()
         .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid)
-        .update({
-          preferences: { ...userData?.preferences, ...data },
-          updatedAt: firestore.FieldValue.serverTimestamp(),
-        });
+        .doc(user.uid);
+
+      // Use set with merge to create or update the document
+      const updateData: any = {
+        uid: user.uid,
+        isAnonymous: user.isAnonymous || true,
+        preferences: { ...userData?.preferences, ...data },
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      };
+
+      // Only add email and displayName if they exist
+      if (user.email) updateData.email = user.email;
+      if (user.displayName) updateData.displayName = user.displayName;
+
+      await userDocRef.set(updateData, { merge: true });
 
       await refreshUserData();
     } catch (error) {
@@ -282,13 +356,23 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) throw new Error('No user authenticated');
 
     try {
-      await firestore()
+      const userDocRef = firestore()
         .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid)
-        .update({
-          commitment: { ...userData?.commitment, ...data },
-          updatedAt: firestore.FieldValue.serverTimestamp(),
-        });
+        .doc(user.uid);
+
+      // Use set with merge to create or update the document
+      const updateData: any = {
+        uid: user.uid,
+        isAnonymous: user.isAnonymous || true,
+        commitment: { ...userData?.commitment, ...data },
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      };
+
+      // Only add email and displayName if they exist
+      if (user.email) updateData.email = user.email;
+      if (user.displayName) updateData.displayName = user.displayName;
+
+      await userDocRef.set(updateData, { merge: true });
 
       await refreshUserData();
     } catch (error) {

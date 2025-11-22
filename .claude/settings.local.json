@@ -10,7 +10,12 @@
       "Bash(npx expo r:*)",
       "Bash(npx metro:*)",
       "Bash(find:*)",
-      "WebFetch(domain:expo.dev)"
+      "WebFetch(domain:expo.dev)",
+      "Bash(java:*)",
+      "Bash(echo:*)",
+      "Bash(dir \"C:\\Users\\furka\\AppData\\Local\\Android\\Sdk\" 2)",
+      "Bash(nul)",
+      "Bash(dir \"C:\\Program Files\\Android\\Android Studio\" 2)"
     ],
     "deny": [],
     "ask": []

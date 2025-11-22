@@ -68,12 +68,13 @@ export const useOnboardingSync = () => {
     }
   }, [preferences, user, isLoading, updatePreferences]);
 
-  // Sync commitment data to Firestore
+  // Sync commitment data to Firestore - but only from onboarding context
+  // Skip if we already have commitment data in user context (to avoid race conditions)
   useEffect(() => {
-    if (user && !isLoading && Object.keys(commitment).length > 0) {
+    if (user && !isLoading && Object.keys(commitment).length > 0 && !userData?.commitment) {
       updateCommitment(commitment);
     }
-  }, [commitment, user, isLoading, updateCommitment]);
+  }, [commitment, user, isLoading, userData?.commitment, updateCommitment]);
 
   // Complete onboarding in both contexts
   const completeOnboarding = useCallback(async () => {
