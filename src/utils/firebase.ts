@@ -9,12 +9,39 @@
  * No manual initialization is required.
  */
 
-import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
 // Uncomment when you need Firebase Storage
 // import storage from '@react-native-firebase/storage';
 
 import { FIREBASE_CONFIG } from '@/constants/firebase';
+
+// ============================================================================
+// FIREBASE INSTANCE HELPERS
+// ============================================================================
+
+/**
+ * Get Firebase App instance
+ */
+const getFirebaseApp = (): FirebaseApp => {
+  const apps = getApps();
+  if (apps.length > 0) {
+    return getApp();
+  }
+  throw new Error('Firebase app not initialized');
+};
+
+/**
+ * Get Auth instance
+ */
+const getAuthInstance = () => {
+  return getAuth(getFirebaseApp());
+};
+
+/**
+ * Get Firestore instance
+ */
+const getFirestoreInstance = (): Firestore => {
+  return getFirestore(getFirebaseApp());
+};
 
 // ============================================================================
 // AUTHENTICATION FUNCTIONS
@@ -100,7 +127,7 @@ export const updateUserProfile = async (displayName: string, photoURL?: string) 
   } catch (error: any) {
     console.error('Update profile error:', error);
     throw new Error(error.message);
-  }
+  }const auth = getAuthInstance();
 };
 
 // ============================================================================

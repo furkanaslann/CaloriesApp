@@ -15,8 +15,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import { useOnboarding } from '../../context/onboarding-context';
+import { useOnboardingSync } from '../../hooks/use-onboarding-sync';
+import { useUser } from '../../context/user-context';
 
 const AccountCreationScreen = () => {
   // Theme object using constants
@@ -99,7 +102,10 @@ const AccountCreationScreen = () => {
     },
   };
 
-  const { profile, completeOnboarding } = useOnboarding();
+  const { profile, goals, completeOnboarding: completeOnboardingLocal, updateAccount } = useOnboarding();
+  const { completeOnboarding: completeOnboardingInFirestore } = useUser();
+  // Temporarily disable sync to avoid infinite loop
+  // const { completeOnboarding: completeOnboardingWithSync } = useOnboardingSync();
 
   const [accountData, setAccountData] = useState({
     username: '',
@@ -164,15 +170,55 @@ const AccountCreationScreen = () => {
     setIsCreating(true);
 
     try {
+      // Update account data in onboarding context
+      const accountUpdate = {
+        username: accountData.username,
+        email: accountData.email,
+        passwordHash: 'hashed_password', // In real app, this should be properly hashed
+        createdAt: new Date().toISOString(),
+        preferences: {
+          agreeToTerms: accountData.agreeToTerms,
+          agreeToPrivacy: accountData.agreeToPrivacy,
+          subscribeToNewsletter: accountData.subscribeToNewsletter,
+        },
+      };
+
+      updateAccount(accountUpdate);
+
       // Simulate API call for account creation
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Complete onboarding process
-      completeOnboarding();
+      // Complete onboarding process locally first
+      try {
+        console.log('Starting completeOnboardingLocal...');
+        console.log('Current profile data:', profile);
+        console.log('Current goals data:', goals);
 
-      // Navigate to main app
-      router.replace('/(tabs)');
+        // Complete in onboarding context
+        completeOnboardingLocal();
+        console.log('completeOnboardingLocal completed successfully');
+
+        // Try to complete in Firestore but don't block navigation
+        try {
+          console.log('Starting completeOnboardingInFirestore...');
+          await completeOnboardingInFirestore();
+          console.log('completeOnboardingInFirestore completed successfully');
+        } catch (firestoreError) {
+          console.error('Firestore completion failed, but continuing:', firestoreError);
+        }
+
+      } catch (error) {
+        console.error('Error in completeOnboarding:', error);
+      }
+
+      console.log('About to navigate to main app...');
+      // Force navigation after a short delay
+      setTimeout(() => {
+        console.log('Forcing navigation to main app...');
+        router.replace('/(tabs)');
+      }, 1000);
     } catch (error) {
+      console.error('Error creating account:', error);
       Alert.alert('Hata', 'Hesap oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setIsCreating(false);

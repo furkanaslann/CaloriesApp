@@ -101,12 +101,12 @@ const CommitmentScreen = () => {
     },
   };
 
-  const { updateProfile, nextStep, calculatedValues } = useOnboarding();
+  const { profile, updateProfile, nextStep, calculatedValues, updateCommitment } = useOnboarding();
   const { completeOnboarding, isReadyToComplete } = useOnboardingSync();
 
   const [commitmentData, setCommitmentData] = useState({
-    firstName: '',
-    lastName: '',
+    firstName: profile.name || '',
+    lastName: profile.lastName || '',
     email: '',
     phone: '',
     commitmentStatement: '',
@@ -150,9 +150,11 @@ const CommitmentScreen = () => {
   };
 
   const handleSubmit = async () => {
+    console.log('Commitment form submission started');
     if (!validateForm()) return;
 
     // Check if user is ready to complete onboarding
+    console.log('Checking if ready to complete:', isReadyToComplete());
     if (!isReadyToComplete()) {
       Alert.alert('Hata', 'Lütfen önce tüm gerekli profil ve hedef bilgilerini doldurun.');
       return;
@@ -167,12 +169,27 @@ const CommitmentScreen = () => {
         lastName: commitmentData.lastName,
       };
 
+      console.log('Updating profile with:', profileUpdate);
       updateProfile(profileUpdate);
+
+      // Update commitment data
+      const commitmentUpdate = {
+        firstName: commitmentData.firstName,
+        lastName: commitmentData.lastName,
+        email: commitmentData.email,
+        phone: commitmentData.phone,
+        commitmentStatement: commitmentData.commitmentStatement,
+        timestamp: new Date().toISOString(),
+      };
+
+      console.log('Updating commitment with:', commitmentUpdate);
+      updateCommitment(commitmentUpdate);
 
       // Log calculated values for debugging
       console.log('Calculated values being saved:', calculatedValues);
 
       // Navigate to account creation screen
+      console.log('Navigating to account-creation...');
       router.push('/onboarding/account-creation');
     } catch (error) {
       console.error('Error submitting commitment:', error);

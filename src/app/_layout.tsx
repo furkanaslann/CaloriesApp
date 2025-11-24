@@ -2,7 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack, useRouter, useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { OnboardingProvider, useOnboarding } from '@/context/onboarding-context';
@@ -18,36 +18,46 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
   const { isLoading, isOnboardingCompleted, createAnonymousUser, user } = useUser();
   const router = useRouter();
 
-  // Initialize user and handle routing
+  // Initialize user and handle routing - but don't interfere with ongoing onboarding
   useEffect(() => {
     const initializeApp = async () => {
       try {
         // If still loading, wait
         if (isLoading) {
+          console.log('Still loading user...');
           return;
         }
 
         // Create anonymous user if needed
         if (!user) {
+          console.log('Creating anonymous user...');
           await createAnonymousUser();
           return;
         }
 
-        // Handle routing based on onboarding status
+        console.log('User initialized:', user.uid);
+        console.log('Onboarding completed:', isOnboardingCompleted);
+
+        // Route based on onboarding status
         if (isOnboardingCompleted) {
+          console.log('Routing to main app (tabs)');
           router.replace('/(tabs)');
         } else {
+          console.log('Routing to onboarding welcome screen');
           router.replace('/onboarding/welcome');
         }
       } catch (error) {
         console.error('Error initializing app:', error);
-        // Fallback to onboarding screen on error
+        // Only fallback to welcome screen on first load
         router.replace('/onboarding/welcome');
       }
     };
 
-    initializeApp();
-  }, [isLoading, user, isOnboardingCompleted, createAnonymousUser, router]);
+    // Only run this once on mount, or when loading/user state changes significantly
+    if (isLoading === false) {
+      initializeApp();
+    }
+  }, [isLoading, user, isOnboardingCompleted]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
