@@ -6,20 +6,20 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    SafeAreaView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import { useOnboarding } from '../../context/onboarding-context';
-import { useTheme } from '@/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 
 const AllergiesScreen = () => {
-  const themeResult = useTheme();
-  const theme = themeResult || {
+  // Modern theme system using constants
+  const theme = {
     semanticColors: {
       background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
       text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },

@@ -3,24 +3,22 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import { useOnboarding } from '../../context/onboarding-context';
-import { useTheme } from '@/constants';
 
 const GenderScreen = () => {
-  const themeResult = useTheme();
-
-  // Default theme fallback - name.tsx ile uyumlu
-  const defaultTheme = {
+  // Modern theme system using constants
+  const theme = {
     semanticColors: {
       background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
       text: {
@@ -50,8 +48,6 @@ const GenderScreen = () => {
     shadows: { lg: {}, md: {}, sm: {} },
     coloredShadows: { primary: {} },
   };
-
-  const theme = themeResult || defaultTheme;
   const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [gender, setGender] = useState<'male' | 'female' | 'other'>(

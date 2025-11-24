@@ -3,12 +3,12 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Switch,
@@ -16,9 +16,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import { useOnboarding } from '../../context/onboarding-context';
-import { useTheme } from '@/constants';
 
 // Check if running in Expo Go
 const isExpoGo = Constants.executionEnvironment === 'storeClient';
@@ -34,8 +34,8 @@ if (!isExpoGo) {
 }
 
 const NotificationsScreen = () => {
-  const themeResult = useTheme();
-  const theme = themeResult || {
+  // Modern theme system using constants
+  const theme = {
     semanticColors: {
       background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
       text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },

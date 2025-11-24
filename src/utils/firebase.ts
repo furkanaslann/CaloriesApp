@@ -1,17 +1,20 @@
 /**
  * Firebase Utility Functions
  *
- * This file contains helper functions for Firebase services.
+ * This file contains helper functions for Firebase services using react-native-firebase.
  * Currently configured for Authentication and Firestore.
+ * 
+ * Note: react-native-firebase automatically initializes Firebase using the
+ * GoogleService-Info.plist (iOS) and google-services.json (Android) files.
+ * No manual initialization is required.
  */
 
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-
-import { FIREBASE_CONFIG } from '@/constants';
-
-// Uncomment when you install Firebase Storage
+// Uncomment when you need Firebase Storage
 // import storage from '@react-native-firebase/storage';
+
+import { FIREBASE_CONFIG } from '@/constants/firebase';
 
 // ============================================================================
 // AUTHENTICATION FUNCTIONS
@@ -63,6 +66,14 @@ export const getCurrentUser = () => {
 };
 
 /**
+ * Listen to authentication state changes
+ * Returns an unsubscribe function
+ */
+export const onAuthStateChanged = (callback: (user: any) => void) => {
+  return auth().onAuthStateChanged(callback);
+};
+
+/**
  * Send a password reset email
  */
 export const resetPassword = async (email: string) => {
@@ -81,7 +92,7 @@ export const updateUserProfile = async (displayName: string, photoURL?: string) 
   try {
     const user = auth().currentUser;
     if (!user) throw new Error('No user signed in');
-    
+
     await user.updateProfile({
       displayName,
       photoURL,
@@ -144,6 +155,28 @@ export const getUserProfile = async (userId: string) => {
     console.error('Error getting user profile:', error);
     throw new Error(error.message);
   }
+};
+
+/**
+ * Listen to user profile changes in real-time
+ * Returns an unsubscribe function
+ */
+export const onUserProfileChanged = (userId: string, callback: (profile: any) => void) => {
+  return firestore()
+    .collection(FIREBASE_CONFIG.collections.users)
+    .doc(userId)
+    .onSnapshot(
+      (doc) => {
+        if (doc.exists) {
+          callback({ id: doc.id, ...doc.data() });
+        } else {
+          callback(null);
+        }
+      },
+      (error) => {
+        console.error('Error listening to user profile:', error);
+      }
+    );
 };
 
 // ============================================================================
@@ -216,8 +249,8 @@ export const getMealsByDate = async (userId: string, date: Date) => {
       .collection(FIREBASE_CONFIG.collections.users)
       .doc(userId)
       .collection(FIREBASE_CONFIG.collections.meals)
-      .where('createdAt', '>=', startOfDay)
-      .where('createdAt', '<=', endOfDay)
+      .where('createdAt', '>=', firestore.Timestamp.fromDate(startOfDay))
+      .where('createdAt', '<=', firestore.Timestamp.fromDate(endOfDay))
       .orderBy('createdAt', 'desc')
       .get();
     
@@ -229,6 +262,31 @@ export const getMealsByDate = async (userId: string, date: Date) => {
     console.error('Error getting meals by date:', error);
     throw new Error(error.message);
   }
+};
+
+/**
+ * Listen to meals in real-time for a user
+ * Returns an unsubscribe function
+ */
+export const onMealsChanged = (userId: string, callback: (meals: any[]) => void, limit: number = 50) => {
+  return firestore()
+    .collection(FIREBASE_CONFIG.collections.users)
+    .doc(userId)
+    .collection(FIREBASE_CONFIG.collections.meals)
+    .orderBy('createdAt', 'desc')
+    .limit(limit)
+    .onSnapshot(
+      (snapshot) => {
+        const meals = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        callback(meals);
+      },
+      (error) => {
+        console.error('Error listening to meals:', error);
+      }
+    );
 };
 
 /**
@@ -346,4 +404,3 @@ export const deleteMeal = async (userId: string, mealId: string) => {
 
 // Export auth and firestore instances for direct use
 export { auth, firestore };
-

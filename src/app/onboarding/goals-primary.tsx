@@ -3,23 +3,22 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
-import { useOnboarding, SCREEN_STEPS } from '../../context/onboarding-context';
-import { useTheme } from '@/constants';
+import { useOnboarding } from '../../context/onboarding-context';
 
 const PrimaryGoalScreen = () => {
-  const themeResult = useTheme();
-  const theme = themeResult || {
+  // Modern theme system using constants
+  const theme = {
     semanticColors: {
       background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
       text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },

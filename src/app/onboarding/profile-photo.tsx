@@ -3,41 +3,48 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
   Image,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
-import { useOnboarding, SCREEN_STEPS } from '../../context/onboarding-context';
-import { useTheme } from '@/constants';
+import { useOnboarding } from '../../context/onboarding-context';
 
 const ProfilePhotoScreen = () => {
-  const themeResult = useTheme();
-  const theme = themeResult || {
+  // Modern theme system using constants
+  const theme = {
     semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
+      background: { primary: COLORS.background, surface: COLORS.surfaceAlt },
+      text: { primary: COLORS.textPrimary, secondary: COLORS.textSecondary, tertiary: COLORS.textTertiary },
+      border: { primary: COLORS.border, secondary: COLORS.border },
     },
-    colors: { primary: '#7C3AED', error: '#EF4444' },
+    colors: { primary: COLORS.primary, error: COLORS.error },
     textStyles: {
-      heading2: { fontSize: 28, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
-      buttonMedium: { fontSize: 16, fontWeight: '500' },
+      heading2: { fontSize: TYPOGRAPHY.fontSizes['2xl'], fontWeight: '600' },
+      body: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' },
+      bodySmall: { fontSize: TYPOGRAPHY.fontSizes.sm, fontWeight: '400' },
+      buttonMedium: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '500' },
     },
-    typography: { lineHeight: { relaxed: 24 } },
-    spacing: { lg: 24, md: 16, xl: 32, sm: 8, '3xl': 40 },
-    borderRadius: { md: 10 },
-    shadows: {},
+    typography: { lineHeight: { relaxed: TYPOGRAPHY.lineHeights.relaxed } },
+    spacing: {
+      ...SPACING,
+      sm: SPACING[2],
+      md: SPACING[3],
+      lg: SPACING[4],
+      xl: SPACING[5],
+      '3xl': SPACING[10],
+    },
+    borderRadius: BORDER_RADIUS,
+    shadows: SHADOWS,
   };
   const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 

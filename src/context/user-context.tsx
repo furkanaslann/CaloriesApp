@@ -4,10 +4,9 @@
  */
 
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import firestore from '@react-native-firebase/firestore';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-
-import { FIREBASE_CONFIG } from '@/constants';
+import { FIREBASE_CONFIG } from '@/constants/firebase';
 
 // Import existing onboarding types
 import {
@@ -34,8 +33,8 @@ export interface UserDocument {
   preferences: Partial<Preferences>;
   commitment: Partial<Commitment>;
   calculatedValues: CalculatedValues;
-  createdAt: FirebaseFirestoreTypes.Timestamp;
-  updatedAt: FirebaseFirestoreTypes.Timestamp;
+  createdAt: any; // Firestore Timestamp
+  updatedAt: any; // Firestore Timestamp
 }
 
 // User Context Type
@@ -89,7 +88,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (firebaseUser) {
         // Load user data from Firestore
-        await loadUserData(firebaseUser.uid);
+        loadUserData(firebaseUser.uid).catch(console.error);
       } else {
         setUserData(null);
       }
@@ -108,7 +107,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .doc(userId)
         .get();
 
-      if (userDoc.exists()) {
+      if (userDoc.exists) {
         const data = userDoc.data() as UserDocument;
         setUserData(data);
       } else {
@@ -129,7 +128,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .doc(userId)
         .get();
 
-      if (existingDoc.exists()) {
+      if (existingDoc.exists) {
         const data = existingDoc.data() as UserDocument;
         setUserData(data);
         return data;
@@ -148,8 +147,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         preferences: {},
         commitment: {},
         calculatedValues: defaultCalculatedValues,
-        createdAt: firestore.FieldValue.serverTimestamp() as FirebaseFirestoreTypes.Timestamp,
-        updatedAt: firestore.FieldValue.serverTimestamp() as FirebaseFirestoreTypes.Timestamp,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
       };
 
       // Only add email and displayName if they exist
@@ -196,7 +195,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   // Sign in anonymously (alias for createAnonymousUser)
-  const signInAnonymously = async (): Promise<FirebaseAuthTypes.User> => {
+  const signInAnonymouslyFn = async (): Promise<FirebaseAuthTypes.User> => {
     return createAnonymousUser();
   };
 
@@ -205,10 +204,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) throw new Error('No user authenticated');
 
     try {
-      const userDocRef = firestore()
-        .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid);
-
       // Use set with merge to create or update the document
       const updateData: any = {
         uid: user.uid,
@@ -221,7 +216,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (user.email) updateData.email = user.email;
       if (user.displayName) updateData.displayName = user.displayName;
 
-      await userDocRef.set(updateData, { merge: true });
+      await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .set(updateData, { merge: true });
 
       // Refresh user data
       await refreshUserData();
@@ -236,10 +234,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) throw new Error('No user authenticated');
 
     try {
-      const userDocRef = firestore()
-        .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid);
-
       // Use set with merge to create or update the document
       const updateData: any = {
         uid: user.uid,
@@ -252,7 +246,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (user.email) updateData.email = user.email;
       if (user.displayName) updateData.displayName = user.displayName;
 
-      await userDocRef.set(updateData, { merge: true });
+      await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .set(updateData, { merge: true });
 
       await refreshUserData();
     } catch (error) {
@@ -266,10 +263,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) throw new Error('No user authenticated');
 
     try {
-      const userDocRef = firestore()
-        .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid);
-
       // Use set with merge to create or update the document
       const updateData: any = {
         uid: user.uid,
@@ -282,7 +275,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (user.email) updateData.email = user.email;
       if (user.displayName) updateData.displayName = user.displayName;
 
-      await userDocRef.set(updateData, { merge: true });
+      await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .set(updateData, { merge: true });
 
       await refreshUserData();
     } catch (error) {
@@ -296,10 +292,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) throw new Error('No user authenticated');
 
     try {
-      const userDocRef = firestore()
-        .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid);
-
       // Use set with merge to create or update the document
       const updateData: any = {
         uid: user.uid,
@@ -312,7 +304,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (user.email) updateData.email = user.email;
       if (user.displayName) updateData.displayName = user.displayName;
 
-      await userDocRef.set(updateData, { merge: true });
+      await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .set(updateData, { merge: true });
 
       await refreshUserData();
     } catch (error) {
@@ -326,10 +321,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) throw new Error('No user authenticated');
 
     try {
-      const userDocRef = firestore()
-        .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid);
-
       // Use set with merge to create or update the document
       const updateData: any = {
         uid: user.uid,
@@ -342,7 +333,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (user.email) updateData.email = user.email;
       if (user.displayName) updateData.displayName = user.displayName;
 
-      await userDocRef.set(updateData, { merge: true });
+      await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .set(updateData, { merge: true });
 
       await refreshUserData();
     } catch (error) {
@@ -356,10 +350,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) throw new Error('No user authenticated');
 
     try {
-      const userDocRef = firestore()
-        .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid);
-
       // Use set with merge to create or update the document
       const updateData: any = {
         uid: user.uid,
@@ -372,7 +362,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (user.email) updateData.email = user.email;
       if (user.displayName) updateData.displayName = user.displayName;
 
-      await userDocRef.set(updateData, { merge: true });
+      await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .set(updateData, { merge: true });
 
       await refreshUserData();
     } catch (error) {
@@ -483,7 +476,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   // Sign out
-  const signOut = async () => {
+  const signOutFn = async () => {
     try {
       await auth().signOut();
     } catch (error) {
@@ -517,8 +510,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     updatePreferences,
     updateCommitment,
     completeOnboarding,
-    signInAnonymously,
-    signOut,
+    signInAnonymously: signInAnonymouslyFn,
+    signOut: signOutFn,
     refreshUserData,
   };
 

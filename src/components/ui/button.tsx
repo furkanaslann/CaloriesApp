@@ -12,7 +12,7 @@ import {
     TouchableOpacity,
     ViewStyle,
 } from 'react-native';
-import { useTheme } from '@/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 
 export interface ButtonProps {
   title: string;
@@ -37,12 +37,10 @@ export const Button: React.FC<ButtonProps> = ({
   textStyle,
   fullWidth = false,
 }) => {
-  const theme = useTheme();
-
   // Button styles based on variant
   const getButtonStyle = (): ViewStyle => {
     const baseStyle = {
-      borderRadius: theme.borderRadius.sm,
+      borderRadius: BORDER_RADIUS.md,
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
     };
@@ -50,31 +48,29 @@ export const Button: React.FC<ButtonProps> = ({
     // Size variations
     const sizeStyles = {
       small: {
-        paddingVertical: theme.spacing.sm,
-        paddingHorizontal: theme.spacing.md,
+        paddingVertical: SPACING[2],
+        paddingHorizontal: SPACING[4],
       },
       medium: {
-        paddingVertical: theme.spacing.md,
-        paddingHorizontal: theme.spacing.xl,
+        paddingVertical: SPACING[3],
+        paddingHorizontal: SPACING[6],
       },
       large: {
-        paddingVertical: theme.spacing.lg,
-        paddingHorizontal: theme.spacing['2xl'],
+        paddingVertical: SPACING[4],
+        paddingHorizontal: SPACING[8],
       },
     };
 
     // Variant styles
     const variantStyles = {
       primary: {
-        backgroundColor: disabled
-          ? theme.semanticColors.border.primary
-          : theme.colors.primary,
-        ...theme.shadows.md,
+        backgroundColor: disabled ? COLORS.border : COLORS.primary,
+        ...SHADOWS.md,
       },
       secondary: {
         backgroundColor: 'transparent',
         borderWidth: 1,
-        borderColor: theme.semanticColors.border.primary,
+        borderColor: COLORS.border,
       },
       ghost: {
         backgroundColor: 'transparent',
@@ -85,7 +81,7 @@ export const Button: React.FC<ButtonProps> = ({
       ...baseStyle,
       ...sizeStyles[size],
       ...variantStyles[variant],
-      ...theme.shadows.sm,
+      ...SHADOWS.sm,
       ...(fullWidth && { width: '100%' }),
       ...style,
     };
@@ -99,27 +95,33 @@ export const Button: React.FC<ButtonProps> = ({
 
     // Size variations
     const sizeStyles = {
-      small: theme.textStyles.body,
-      medium: theme.textStyles.labelLarge,
-      large: theme.textStyles.heading4,
+      small: {
+        fontSize: TYPOGRAPHY.fontSizes.sm,
+        fontWeight: TYPOGRAPHY.fontWeights.medium,
+        lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.sm,
+      },
+      medium: {
+        fontSize: TYPOGRAPHY.fontSizes.base,
+        fontWeight: TYPOGRAPHY.fontWeights.medium,
+        lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.base,
+      },
+      large: {
+        fontSize: TYPOGRAPHY.fontSizes.lg,
+        fontWeight: TYPOGRAPHY.fontWeights.semibold,
+        lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.lg,
+      },
     };
 
     // Variant styles
     const variantStyles = {
       primary: {
-        color: disabled
-          ? theme.semanticColors.text.tertiary
-          : theme.semanticColors.text.onPrimary,
+        color: disabled ? COLORS.textTertiary : '#FFFFFF',
       },
       secondary: {
-        color: disabled
-          ? theme.semanticColors.text.tertiary
-          : theme.semanticColors.text.primary,
+        color: disabled ? COLORS.textTertiary : COLORS.textPrimary,
       },
       ghost: {
-        color: disabled
-          ? theme.semanticColors.text.tertiary
-          : theme.colors.primary,
+        color: disabled ? COLORS.textTertiary : COLORS.primary,
       },
     };
 
@@ -148,8 +150,8 @@ export const Button: React.FC<ButtonProps> = ({
           size="small"
           color={
             variant === 'primary'
-              ? theme.semanticColors.text.onPrimary
-              : theme.colors.primary
+              ? '#FFFFFF'
+              : COLORS.primary
           }
         />
       ) : (

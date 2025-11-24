@@ -18,48 +18,36 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
   const { isLoading, isOnboardingCompleted, createAnonymousUser, user } = useUser();
   const router = useRouter();
 
-  // Create anonymous user if not authenticated
+  // Initialize user and handle routing
   useEffect(() => {
-    const initializeUser = async () => {
+    const initializeApp = async () => {
       try {
-        if (!user && !isLoading) {
+        // If still loading, wait
+        if (isLoading) {
+          return;
+        }
+
+        // Create anonymous user if needed
+        if (!user) {
           await createAnonymousUser();
+          return;
+        }
+
+        // Handle routing based on onboarding status
+        if (isOnboardingCompleted) {
+          router.replace('/(tabs)');
+        } else {
+          router.replace('/onboarding/welcome');
         }
       } catch (error) {
-        console.error('Error initializing user:', error);
+        console.error('Error initializing app:', error);
+        // Fallback to onboarding screen on error
+        router.replace('/onboarding/welcome');
       }
     };
 
-    initializeUser();
-  }, [user, isLoading, createAnonymousUser]);
-
-  // Handle navigation based on onboarding status
-  useEffect(() => {
-    if (!isLoading) {
-      if (!isOnboardingCompleted) {
-        // If onboarding is not completed, redirect to onboarding
-        router.replace('/onboarding/welcome');
-      } else {
-        // If onboarding is completed, redirect to main app
-        router.replace('/(tabs)');
-      }
-    }
-  }, [isOnboardingCompleted, isLoading, router]);
-
-  // Show loading screen while checking authentication status
-  if (isLoading) {
-    return (
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen
-            name="loading"
-            options={{ headerShown: false, presentation: 'modal' }}
-          />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    );
-  }
+    initializeApp();
+  }, [isLoading, user, isOnboardingCompleted, createAnonymousUser, router]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -67,7 +55,6 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
         <Stack.Screen
           name="onboarding"
           options={{ headerShown: false }}
-          // Only show onboarding screen if not completed
         />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />

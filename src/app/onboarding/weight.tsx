@@ -3,57 +3,64 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import Input from '../../components/ui/input';
-import { useOnboarding, SCREEN_STEPS } from '../../context/onboarding-context';
-import { useTheme } from '@/constants';
+import { useOnboarding } from '../../context/onboarding-context';
 
 const WeightScreen = () => {
-  const themeResult = useTheme();
+  // Modern theme system using constants
 
-  // Default theme fallback - name.tsx ile uyumlu
-  const defaultTheme = {
+  // Theme object using constants
+  const theme = {
     semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
+      background: { primary: COLORS.background, surface: COLORS.surfaceAlt, primarySurface: COLORS.primaryLight + '25' },
       text: {
-        primary: '#1E293B',
-        secondary: '#475569',
-        tertiary: '#64748B',
+        primary: COLORS.textPrimary,
+        secondary: COLORS.textSecondary,
+        tertiary: COLORS.textTertiary,
         onPrimary: '#FFFFFF'
       },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
+      border: { primary: COLORS.border, secondary: COLORS.border },
     },
     colors: {
-      primary: '#7C3AED',
-      gradientStart: '#7C3AED',
-      gradientEnd: '#EC4899',
+      primary: COLORS.primary,
+      gradientStart: COLORS.gradientStart,
+      gradientEnd: COLORS.gradientEnd,
     },
     textStyles: {
-      onboardingTitle: { fontSize: 30, fontWeight: '600' },
-      onboardingDescription: { fontSize: 16, fontWeight: '400' },
-      heading2: { fontSize: 28, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
+      onboardingTitle: { fontSize: TYPOGRAPHY.fontSizes['3xl'], fontWeight: '600' },
+      onboardingDescription: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' },
+      heading2: { fontSize: TYPOGRAPHY.fontSizes['2xl'], fontWeight: '600' },
+      body: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' },
+      bodySmall: { fontSize: TYPOGRAPHY.fontSizes.sm, fontWeight: '400' },
       labelMedium: { fontSize: 15, fontWeight: '500' },
     },
-    typography: { lineHeight: { relaxed: 24 }, fontWeight: { semibold: '600' } },
-    spacing: { lg: 24, md: 16, xl: 32, sm: 8, '3xl': 40, '4xl': 48, '2xl': 24 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, sm: 8, md: 10 },
-    shadows: { lg: {}, md: {}, sm: {} },
-    coloredShadows: { primary: {} },
+    typography: { lineHeight: { relaxed: TYPOGRAPHY.lineHeights.relaxed }, fontWeight: { semibold: '600' } },
+    spacing: {
+      ...SPACING,
+      sm: SPACING[2],
+      md: SPACING[3],
+      lg: SPACING[4],
+      xl: SPACING[5],
+      '2xl': SPACING[6],
+      '3xl': SPACING[10],
+      '4xl': SPACING[12],
+    },
+    borderRadius: BORDER_RADIUS,
+    shadows: SHADOWS,
+    coloredShadows: { primary: SHADOWS.lg },
   };
-
-  const theme = themeResult || defaultTheme;
   const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [weight, setWeight] = useState(profile.currentWeight?.toString() || '');

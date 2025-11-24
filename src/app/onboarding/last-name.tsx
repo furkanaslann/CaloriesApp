@@ -3,26 +3,23 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
   Alert,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
-import { router } from 'expo-router';
-import { useTheme } from '@/constants';
-import { useOnboarding, SCREEN_STEPS } from '../../context/onboarding-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import Input from '../../components/ui/input';
+import { useOnboarding } from '../../context/onboarding-context';
 
 const LastNameScreen = () => {
-  const themeResult = useTheme();
-
-  // Default theme fallback - name.tsx ile uyumlu
-  const defaultTheme = {
+  // Modern theme system using constants
+  const theme = {
     semanticColors: {
       background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
       text: {
@@ -50,7 +47,6 @@ const LastNameScreen = () => {
     coloredShadows: { primary: {} },
   };
 
-  const theme = themeResult || defaultTheme;
   const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [lastName, setLastName] = useState(profile.lastName || '');

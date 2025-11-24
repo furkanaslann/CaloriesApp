@@ -1,110 +1,360 @@
 /**
- * CaloriTrack - Complete Theme System
+ * CaloriTrack - Constants
  * Minimal. Cool. Aesthetic.
  */
 
-import { useColorScheme } from 'react-native';
+import { TextStyle, ViewStyle } from 'react-native';
 
-// Import all theme modules
-export * from './colors';
-export * from './typography';
-export * from './spacing';
-export * from './border-radius';
-export * from './shadows';
-export * from './animations';
-export * from './firebase';
+// Theme Types
+export type Theme = {
+  colors: {
+    primary: string;
+    primaryDark: string;
+    primaryLight: string;
+    background: string;
+    surface: string;
+    surfaceAlt: string;
+    border: string;
+    borderLight: string;
+    textPrimary: string;
+    textSecondary: string;
+    textTertiary: string;
+    textMuted: string;
+    success: string;
+    successLight: string;
+    successDark: string;
+    error: string;
+    errorLight: string;
+    errorDark: string;
+    onboardingAccent: string;
+    onboardingText: string;
+    onboardingSubtle: string;
+  };
+  semanticColors: {
+    background: {
+      primary: string;
+      secondary: string;
+    };
+    border: {
+      primary: string;
+      secondary: string;
+    };
+    text: {
+      primary: string;
+      secondary: string;
+      tertiary: string;
+      onPrimary: string;
+    };
+  };
+  spacing: {
+    xs: number;
+    sm: number;
+    md: number;
+    lg: number;
+    xl: number;
+    '2xl': number;
+    '3xl': number;
+    '4xl': number;
+    '5xl': number;
+    '6xl': number;
+    '8xl': number;
+    '10xl': number;
+    '12xl': number;
+    '16xl': number;
+    '20xl': number;
+  };
+  borderRadius: {
+    sm: number;
+    md: number;
+    lg: number;
+    xl: number;
+    full: number;
+  };
+  typography: {
+    xs: TextStyle;
+    sm: TextStyle;
+    base: TextStyle;
+    lg: TextStyle;
+    xl: TextStyle;
+    '2xl': TextStyle;
+    '3xl': TextStyle;
+    '4xl': TextStyle;
+  };
+  shadows: {
+    sm: ViewStyle;
+    md: ViewStyle;
+    lg: ViewStyle;
+    xl: ViewStyle;
+  };
+};
 
-// Import specific values for themes
-import {
-  Colors,
-  DarkColors,
-  SemanticColors,
-  DarkSemanticColors,
-  ColoredShadows,
-} from './colors';
-import {
-  Typography,
-  TextStyles
-} from './typography';
-import {
-  Spacing,
-  SpacingPatterns
-} from './spacing';
-import {
-  BorderRadius,
-  BorderPatterns
-} from './border-radius';
-import {
-  Shadows
-} from './shadows';
-import {
-  Animations,
-  PageTransitions,
-  LoadingAnimations,
-  SuccessAnimations
-} from './animations';
-
-// Combined theme interface
-export interface Theme {
-  colors: typeof Colors;
-  semanticColors: typeof SemanticColors;
-  typography: typeof Typography;
-  textStyles: typeof TextStyles;
-  spacing: typeof Spacing;
-  spacingPatterns: typeof SpacingPatterns;
-  borderRadius: typeof BorderRadius;
-  borderPatterns: typeof BorderPatterns;
-  shadows: typeof Shadows;
-  coloredShadows: typeof ColoredShadows;
-  animations: typeof Animations;
-  pageTransitions: typeof PageTransitions;
-  loadingAnimations: typeof LoadingAnimations;
-  successAnimations: typeof SuccessAnimations;
-}
-
-// Light theme
+// Light Theme
 export const LightTheme: Theme = {
-  colors: Colors,
-  semanticColors: SemanticColors,
-  typography: Typography,
-  textStyles: TextStyles,
-  spacing: Spacing,
-  spacingPatterns: SpacingPatterns,
-  borderRadius: BorderRadius,
-  borderPatterns: BorderPatterns,
-  shadows: Shadows,
-  coloredShadows: ColoredShadows,
-  animations: Animations,
-  pageTransitions: PageTransitions,
-  loadingAnimations: LoadingAnimations,
-  successAnimations: SuccessAnimations,
+  colors: {
+    primary: '#7C3AED',
+    primaryDark: '#6D28D9',
+    primaryLight: '#A78BFA',
+    background: '#FFFFFF',
+    surface: '#FEFEFE',
+    surfaceAlt: '#F8FAFC',
+    border: '#E2E8F0',
+    borderLight: '#F1F5F9',
+    textPrimary: '#1E293B',
+    textSecondary: '#64748B',
+    textTertiary: '#94A3B8',
+    textMuted: '#CBD5E1',
+    success: '#10B981',
+    successLight: '#D1FAE5',
+    successDark: '#047857',
+    error: '#EF4444',
+    errorLight: '#FEE2E2',
+    errorDark: '#B91C1C',
+    onboardingAccent: '#F97316',
+    onboardingText: '#334155',
+    onboardingSubtle: '#F1F5F9',
+  },
+  semanticColors: {
+    background: {
+      primary: '#FFFFFF',
+      secondary: '#FEFEFE',
+    },
+    border: {
+      primary: '#E2E8F0',
+      secondary: '#F1F5F9',
+    },
+    text: {
+      primary: '#1E293B',
+      secondary: '#64748B',
+      tertiary: '#94A3B8',
+      onPrimary: '#FFFFFF',
+    },
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 20,
+    '2xl': 24,
+    '3xl': 30,
+    '4xl': 36,
+    '5xl': 40,
+    '6xl': 48,
+    '8xl': 32,
+    '10xl': 40,
+    '12xl': 48,
+    '16xl': 64,
+    '20xl': 80,
+  },
+  borderRadius: {
+    sm: 4,
+    md: 8,
+    lg: 12,
+    xl: 16,
+    full: 9999,
+  },
+  typography: {
+    xs: {
+      fontSize: 12,
+      lineHeight: 16,
+    },
+    sm: {
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    base: {
+      fontSize: 16,
+      lineHeight: 24,
+    },
+    lg: {
+      fontSize: 18,
+      lineHeight: 28,
+    },
+    xl: {
+      fontSize: 20,
+      lineHeight: 30,
+    },
+    '2xl': {
+      fontSize: 24,
+      lineHeight: 32,
+    },
+    '3xl': {
+      fontSize: 30,
+      lineHeight: 38,
+      letterSpacing: -0.5,
+    },
+    '4xl': {
+      fontSize: 36,
+      lineHeight: 44,
+      letterSpacing: -1,
+    },
+  },
+  shadows: {
+    sm: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    md: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    lg: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.1,
+      shadowRadius: 15,
+      elevation: 5,
+    },
+    xl: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 20 },
+      shadowOpacity: 0.1,
+      shadowRadius: 25,
+      elevation: 8,
+    },
+  },
 };
 
-// Dark theme
+// Dark Theme
 export const DarkTheme: Theme = {
-  colors: DarkColors,
-  semanticColors: DarkSemanticColors,
-  typography: Typography,
-  textStyles: TextStyles,
-  spacing: Spacing,
-  spacingPatterns: SpacingPatterns,
-  borderRadius: BorderRadius,
-  borderPatterns: BorderPatterns,
-  shadows: Shadows,
-  coloredShadows: ColoredShadows,
-  animations: Animations,
-  pageTransitions: PageTransitions,
-  loadingAnimations: LoadingAnimations,
-  successAnimations: SuccessAnimations,
+  colors: {
+    primary: '#7C3AED',
+    primaryDark: '#6D28D9',
+    primaryLight: '#A78BFA',
+    background: '#0F172A',
+    surface: '#1E293B',
+    surfaceAlt: '#334155',
+    border: '#475569',
+    borderLight: '#475569',
+    textPrimary: '#F8FAFC',
+    textSecondary: '#CBD5E1',
+    textTertiary: '#94A3B8',
+    textMuted: '#64748B',
+    success: '#10B981',
+    successLight: '#065F46',
+    successDark: '#34D399',
+    error: '#EF4444',
+    errorLight: '#7F1D1D',
+    errorDark: '#F87171',
+    onboardingAccent: '#F97316',
+    onboardingText: '#F8FAFC',
+    onboardingSubtle: '#334155',
+  },
+  semanticColors: {
+    background: {
+      primary: '#0F172A',
+      secondary: '#1E293B',
+    },
+    border: {
+      primary: '#475569',
+      secondary: '#475569',
+    },
+    text: {
+      primary: '#F8FAFC',
+      secondary: '#CBD5E1',
+      tertiary: '#94A3B8',
+      onPrimary: '#FFFFFF',
+    },
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 20,
+    '2xl': 24,
+    '3xl': 30,
+    '4xl': 36,
+    '5xl': 40,
+    '6xl': 48,
+    '8xl': 32,
+    '10xl': 40,
+    '12xl': 48,
+    '16xl': 64,
+    '20xl': 80,
+  },
+  borderRadius: {
+    sm: 4,
+    md: 8,
+    lg: 12,
+    xl: 16,
+    full: 9999,
+  },
+  typography: {
+    xs: {
+      fontSize: 12,
+      lineHeight: 16,
+    },
+    sm: {
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    base: {
+      fontSize: 16,
+      lineHeight: 24,
+    },
+    lg: {
+      fontSize: 18,
+      lineHeight: 28,
+    },
+    xl: {
+      fontSize: 20,
+      lineHeight: 30,
+    },
+    '2xl': {
+      fontSize: 24,
+      lineHeight: 32,
+    },
+    '3xl': {
+      fontSize: 30,
+      lineHeight: 38,
+      letterSpacing: -0.5,
+    },
+    '4xl': {
+      fontSize: 36,
+      lineHeight: 44,
+      letterSpacing: -1,
+    },
+  },
+  shadows: {
+    sm: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    md: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    lg: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.1,
+      shadowRadius: 15,
+      elevation: 5,
+    },
+    xl: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 20 },
+      shadowOpacity: 0.1,
+      shadowRadius: 25,
+      elevation: 8,
+    },
+  },
 };
 
-// Theme hook
-export const useTheme = () => {
-  const colorScheme = useColorScheme();
-  return colorScheme === 'dark' ? DarkTheme : LightTheme;
-};
-
-// Theme provider type
+// Theme Context Type
 export type ThemeContextType = {
   theme: Theme;
   isDark: boolean;
@@ -112,38 +362,10 @@ export type ThemeContextType = {
   setTheme: (theme: 'light' | 'dark') => void;
 };
 
-// Utility functions
-export const hexToRgb = (hex: string) => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16),
-  } : null;
-};
-
-export const rgba = (hex: string, alpha: number) => {
-  const rgb = hexToRgb(hex);
-  return rgb ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})` : hex;
-};
-
-export const getContrastColor = (hex: string) => {
-  const rgb = hexToRgb(hex);
-  if (!rgb) return '#000000';
-
-  // Calculate luminance
-  const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
-
-  // Return black for light colors, white for dark colors
-  return luminance > 0.5 ? '#000000' : '#FFFFFF';
-};
-
-// Default export
-export default {
-  LightTheme,
-  DarkTheme,
-  useTheme,
-  hexToRgb,
-  rgba,
-  getContrastColor,
+// Export theme hook (deprecated - use useThemeContext instead)
+export const useTheme = () => {
+  // This is a placeholder to prevent import errors
+  // Components should use useThemeContext() from the theme context provider
+  console.warn('useTheme is deprecated. Use useThemeContext() from theme context instead.');
+  return LightTheme; // Default fallback
 };

@@ -3,19 +3,19 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
   Dimensions,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import { useOnboarding } from '../../context/onboarding-context';
-import { useTheme } from '@/constants';
 
 // Placeholder icons for onboarding screens
 const WELCOME_ICONS = {
@@ -28,34 +28,42 @@ const WELCOME_ICONS = {
 const { width } = Dimensions.get('window');
 
 const WelcomeScreen = () => {
-  const themeResult = useTheme();
-  const theme = themeResult || {
+  // Create theme object that matches expected structure
+  const theme = {
     semanticColors: {
-      background: { primary: '#FFFFFF' },
+      background: { primary: COLORS.background },
       text: {
-        primary: '#1E293B',
-        secondary: '#475569',
-        tertiary: '#64748B',
+        primary: COLORS.textPrimary,
+        secondary: COLORS.textSecondary,
+        tertiary: COLORS.textTertiary,
         onPrimary: '#FFFFFF'
       },
-      border: { primary: '#E2E8F0' },
+      border: { primary: COLORS.border },
       onPrimary: '#FFFFFF',
     },
     colors: {
-      primary: '#7C3AED',
-      gradientStart: '#7C3AED',
+      primary: COLORS.primary,
+      gradientStart: COLORS.primary,
       gradientEnd: '#EC4899',
     },
     textStyles: {
-      onboardingHero: { fontSize: 36, fontWeight: '700' },
-      onboardingTitle: { fontSize: 30, fontWeight: '600' },
-      onboardingSubtitle: { fontSize: 20, fontWeight: '500' },
-      onboardingDescription: { fontSize: 16, fontWeight: '400' },
+      onboardingHero: { fontSize: TYPOGRAPHY.fontSizes['4xl'] },
+      onboardingTitle: { fontSize: TYPOGRAPHY.fontSizes['3xl'], fontWeight: '600' },
+      onboardingSubtitle: { fontSize: TYPOGRAPHY.fontSizes['xl'], fontWeight: '500' },
+      onboardingDescription: { fontSize: TYPOGRAPHY.fontSizes.base },
     },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '2xl': 24 },
-    borderRadius: { full: 9999, xl: 16, lg: 12 },
-    shadows: { lg: {}, md: {} },
-    coloredShadows: { gradient: {} },
+    spacing: {
+      ...SPACING,
+      sm: SPACING[2],
+      md: SPACING[3],
+      lg: SPACING[4],
+      xl: SPACING[5],
+      '2xl': SPACING[6],
+      '4xl': SPACING[12],
+    },
+    borderRadius: BORDER_RADIUS,
+    shadows: SHADOWS,
+    coloredShadows: { gradient: SHADOWS.lg },
   };
 
   const { nextStep } = useOnboarding();

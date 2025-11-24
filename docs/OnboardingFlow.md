@@ -2,25 +2,25 @@
 
 ## Overview
 
-CaloriTrack uygulaması için kapsamlı bir onboarding süreci geliştirilmektedir. Kullanıcıların uygulama ile tanışması, kişisel hedefler belirlemesi ve temel özellikleri öğrenmesi için tasarlanan bu akış, kullanıcıların uygulamayı etkili bir şekilde kullanmasını ve uzun vadeli etkileşim sağlamayı amaçlamaktadır.
+A comprehensive onboarding process is being developed for the CaloriTrack application to help users get acquainted with the app, set personal goals, and learn basic features. This flow is designed to enable users to effectively use the application and achieve long-term engagement.
 
 **Current Implementation Status: %20 Complete** (5/28 screens implemented)
 
 ## 🎨 Design System Implementation
 
-**TAMAMLANDI:** Kapsamlı tasarım sistemi aşağıdaki yapıyla uygulanmıştır:
+**COMPLETED:** Comprehensive design system has been implemented with the following structure:
 
 ### UI Components (`/components/ui/`)
-- **button.tsx:** ✅ Tamamlandı - Temalı bileşen 3 varyant (primary, secondary, ghost)
-- **input.tsx:** ✅ Tamamlandı - Modern floating label tasarımı ve validation
+- **button.tsx:** ✅ COMPLETED - Themed component with 3 variants (primary, secondary, ghost)
+- **input.tsx:** ✅ COMPLETED - Modern floating label design with validation
 
 ### Context Providers (`/contexts/`)
-- **onboarding-context.tsx:** ✅ Tamamlandı - 28 ekran için complete state yönetimi
-- **user-context.tsx:** ✅ Tamamlandı - Firestore senkronizasyonu
-- **theme-context.tsx:** ✅ Tamamlandı - Tema sağlayıcısı
+- **onboarding-context.tsx:** ✅ COMPLETED - Complete state management for 28 screens
+- **user-context.tsx:** ✅ COMPLETED - Firestore synchronization
+- **theme-context.tsx:** ✅ COMPLETED - Theme provider
 
 ### Hooks (`/hooks/`)
-- **use-onboarding-sync.ts:** ✅ Tamamlandı - Onboarding ile User context senkronizasyonu
+- **use-onboarding-sync.ts:** ✅ COMPLETED - Onboarding with User context synchronization
 
 ## Technical Infrastructure
 
@@ -33,16 +33,16 @@ CaloriTrack uygulaması için kapsamlı bir onboarding süreci geliştirilmekted
 
 ## 🎯 Onboarding Flow Implementation Status
 
-### ✅ Tamamlanan Ekranlar (5/28)
+### ✅ Completed Screens (5/28)
 
 #### 1. Welcome Screen
-**Dosya:** `app/onboarding/welcome.tsx` ✅ **TAMAMLANDI**
+**File:** `app/onboarding/welcome.tsx` ✅ **COMPLETED**
 
-**Özellikler:**
-- Modern 5 slayt onboarding flow
-- Smooth transitions ve pagination
+**Features:**
+- Modern 5-slide onboarding flow
+- Smooth transitions and pagination
 - Progress indicators
-- Theme entegrasyonu
+- Theme integration
 
 **UI Elements:**
 - Horizontal scrollable slides
@@ -51,85 +51,85 @@ CaloriTrack uygulaması için kapsamlı bir onboarding süreci geliştirilmekted
 - Themed button components
 
 #### 2. Name Input Screen
-**Dosya:** `app/onboarding/name.tsx` ✅ **TAMAMLANDI**
+**File:** `app/onboarding/name.tsx` ✅ **COMPLETED**
 
-**Özellikler:**
+**Features:**
 - Modern input design
 - Progress indicators
 - Validation logic
 - Theme integration
 
 #### 3. Primary Goals Screen
-**Dosya:** `app/onboarding/goals-primary.tsx` ✅ **TAMAMLANDI**
+**File:** `app/onboarding/goals-primary.tsx` ✅ **COMPLETED**
 
-**Özellikler:**
+**Features:**
 - Interactive goal selection cards
 - Color-coded goals
 - Icon integration
 - Visual goal selection
 
 #### 4. Summary Screen
-**Dosya:** `app/onboarding/summary.tsx` ✅ **TAMAMLANDI**
+**File:** `app/onboarding/summary.tsx` ✅ **COMPLETED**
 
-**Özellikler:**
+**Features:**
 - Dynamic calculation display
 - Progress visualization
 - Figma image integration
 - Results preview
 
 #### 5. Commitment Screen
-**Dosya:** `app/onboarding/commitment.tsx` ✅ **TAMAMLANDI**
+**File:** `app/onboarding/commitment.tsx` ✅ **COMPLETED**
 
-**Özellikler:**
+**Features:**
 - Form validation
 - Firestore integration
 - Preview functionality
 - Final confirmation
 
-### 🚧 Tamamlanmamış Ekranlar (23/28)
+### 🚧 Incomplete Screens (23/28)
 
-#### Profile Bilgileri Ekranları
-- **`last-name.tsx`** - Soy isim girişi
-- **`date-of-birth.tsx`** - Doğum tarihi ve yaş hesaplama
-- **`gender.tsx`** - Cinsiyet seçimi
-- **`height.tsx`** - Boy bilgisi
-- **`weight.tsx`** - Kilo bilgisi
-- **`profile-photo.tsx`** - Profil fotoğrafı
+#### Profile Information Screens
+- **`last-name.tsx`** - Last name input
+- **`date-of-birth.tsx`** - Date of birth and age calculation
+- **`gender.tsx`** - Gender selection
+- **`height.tsx`** - Height information
+- **`weight.tsx`** - Weight information
+- **`profile-photo.tsx`** - Profile photo
 
-#### Goals Detay Ekranları
-- **`goals-weight.tsx`** - Hedef kilo belirleme
-- **`goals-weekly.tsx`** - Haftalık hedefler
-- **`goals-timeline.tsx`** - Zaman çizelgesi
-- **`goals-motivation.tsx`** - Motivasyon seviyesi
+#### Goals Detail Screens
+- **`goals-weight.tsx`** - Target weight setting
+- **`goals-weekly.tsx`** - Weekly goals
+- **`goals-timeline.tsx`** - Timeline
+- **`goals-motivation.tsx`** - Motivation level
 
-#### Activity Bilgileri Ekranları
-- **`activity.tsx`** - Aktivite seviyesi
-- **`occupation.tsx`** - Meslek tipi
-- **`exercise-types.tsx`** - Egzersiz tipleri
-- **`exercise-frequency.tsx`** - Egzersiz sıklığı
-- **`sleep-hours.tsx`** - Uyku düzeni
+#### Activity Information Screens
+- **`activity.tsx`** - Activity level
+- **`occupation.tsx`** - Occupation type
+- **`exercise-types.tsx`** - Exercise types
+- **`exercise-frequency.tsx`** - Exercise frequency
+- **`sleep-hours.tsx`** - Sleep pattern
 
-#### Diet Bilgileri Ekranları
-- **`diet.tsx`** - Diyet tipi
-- **`allergies.tsx`** - Alerjiler
-- **`intolerances.tsx`** - İntoleranslar
-- **`disliked-foods.tsx`** - Sevilmediği yiyecekler
-- **`cultural-restrictions.tsx`** - Kültürel kısıtlamalar
+#### Diet Information Screens
+- **`diet.tsx`** - Diet type
+- **`allergies.tsx`** - Allergies
+- **`intolerances.tsx`** - Intolerances
+- **`disliked-foods.tsx`** - Disliked foods
+- **`cultural-restrictions.tsx`** - Cultural restrictions
 
-#### Diğer Ekranlar
-- **`camera-tutorial.tsx`** - Kamera izni ve tutorial
-- **`notifications.tsx`** - Bildirim tercihleri
-- **`privacy.tsx`** - Gizlilik ayarları
-- **`account-creation.tsx`** - Hesap oluşturma
-## 🔄 State Management ve Veri Yapısı
+#### Other Screens
+- **`camera-tutorial.tsx`** - Camera permission and tutorial
+- **`notifications.tsx`** - Notification preferences
+- **`privacy.tsx`** - Privacy settings
+- **`account-creation.tsx`** - Account creation
+## 🔄 State Management and Data Structure
 
-### Onboarding Context Structure (✅ Tamamlanmış)
-**Dosya:** `contexts/onboarding-context.tsx`
+### Onboarding Context Structure (✅ COMPLETED)
+**File:** `contexts/onboarding-context.tsx`
 
-**28 ekran için complete veri yapısı:**
+**Complete data structure for 28 screens:**
 ```typescript
 interface OnboardingContextType {
-  // Profile bilgileri (6 ekran)
+  // Profile information (6 screens)
   profile: {
     firstName: string;
     lastName: string;
@@ -141,7 +141,7 @@ interface OnboardingContextType {
     profilePhoto?: string;
   };
 
-  // Goals bilgileri (5 ekran)
+  // Goals information (5 screens)
   goals: {
     primaryGoal: 'weight_loss' | 'maintenance' | 'muscle_gain' | 'healthy_eating';
     targetWeight?: number;
@@ -150,7 +150,7 @@ interface OnboardingContextType {
     motivation: number;
   };
 
-  // Activity bilgileri (5 ekran)
+  // Activity information (5 screens)
   activity: {
     level: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active';
     occupation: 'office' | 'physical' | 'mixed';
@@ -159,7 +159,7 @@ interface OnboardingContextType {
     sleepHours: number;
   };
 
-  // Diet bilgileri (5 ekran)
+  // Diet information (5 screens)
   diet: {
     type: string;
     allergies: string[];
@@ -168,7 +168,7 @@ interface OnboardingContextType {
     culturalRestrictions: string[];
   };
 
-  // Preferences (4 ekran)
+  // Preferences (4 screens)
   preferences: {
     notifications: {
       mealReminders: boolean;
@@ -184,7 +184,7 @@ interface OnboardingContextType {
     };
   };
 
-  // Hesaplanan değerler
+  // Calculated values
   calculatedValues: {
     bmr: number;
     tdee: number;
@@ -203,92 +203,92 @@ interface OnboardingContextType {
 }
 ```
 
-### Veri Senkronizasyonu (✅ Tamamlanmış)
-- **Local Storage:** AsyncStorage ile offline persistence
-- **Cloud Sync:** Firestore ile senkronizasyon
-- **Auto-save:** Her adımda otomatik kayıt
-- **Recovery:** Kesintiden sonra devam etme
+### Data Synchronization (✅ COMPLETED)
+- **Local Storage:** AsyncStorage for offline persistence
+- **Cloud Sync:** Firestore synchronization
+- **Auto-save:** Automatic save after each step
+- **Recovery:** Resume from where left off
 
-### Hesaplama Mantığı (✅ Tamamlanmış)
-- **BMR:** Harris-Benedict denklemi
-- **TDEE:** Aktivite seviyesi çarpanları
-- **Calorie Goals:** Hedeflere göre ayarlanmış
-- **Macros:** Dinamik makro dağılımı
-- **Validation:** Tüm alanlar için validation logic
+### Calculation Logic (✅ COMPLETED)
+- **BMR:** Harris-Benedict equation
+- **TDEE:** Activity level multipliers
+- **Calorie Goals:** Adjusted based on goals
+- **Macros:** Dynamic macro distribution
+- **Validation:** Validation logic for all fields
 
-## 🚀 Öncelikli Geliştirme Adımları
+## 🚀 Priority Development Steps
 
-### Kritik (P0) - Acil Tamamlanması Gerekenler
-1. **Profile Ekranları (6)**
-   - `last-name.tsx` - Soy isim girişi
-   - `date-of-birth.tsx` - Doğum tarihi ve yaş hesaplama
-   - `gender.tsx` - Cinsiyet seçimi
-   - `height.tsx` - Boy bilgisi (cm)
-   - `weight.tsx` - Kilo bilgisi (kg)
-   - `profile-photo.tsx` - Profil fotoğrafı
+### Critical (P0) - Urgent Completion Needed
+1. **Profile Screens (6)**
+   - `last-name.tsx` - Last name input
+   - `date-of-birth.tsx` - Date of birth and age calculation
+   - `gender.tsx` - Gender selection
+   - `height.tsx` - Height information (cm)
+   - `weight.tsx` - Weight information (kg)
+   - `profile-photo.tsx` - Profile photo
 
-2. **Goals Detay Ekranları (4)**
-   - `goals-weight.tsx` - Hedef kilo belirleme
-   - `goals-weekly.tsx` - Haftalık hedefler
-   - `goals-timeline.tsx` - Zaman çizelgesi
-   - `goals-motivation.tsx` - Motivasyon seviyesi
+2. **Goals Detail Screens (4)**
+   - `goals-weight.tsx` - Target weight setting
+   - `goals-weekly.tsx` - Weekly goals
+   - `goals-timeline.tsx` - Timeline
+   - `goals-motivation.tsx` - Motivation level
 
-3. **Activity Ekranları (3)**
-   - `activity.tsx` - Aktivite seviyesi
-   - `exercise-frequency.tsx` - Egzersiz sıklığı
-   - `sleep-hours.tsx` - Uyku düzeni
+3. **Activity Screens (3)**
+   - `activity.tsx` - Activity level
+   - `exercise-frequency.tsx` - Exercise frequency
+   - `sleep-hours.tsx` - Sleep pattern
 
-### Orta Öncelik (P1)
-4. **Diet Ekranları (3)**
-   - `diet.tsx` - Diyet tipi
-   - `allergies.tsx` - Alerjiler
-   - `disliked-foods.tsx` - Sevilmediği yiyecekler
+### Medium Priority (P1)
+4. **Diet Screens (3)**
+   - `diet.tsx` - Diet type
+   - `allergies.tsx` - Allergies
+   - `disliked-foods.tsx` - Disliked foods
 
-5. **Kritik Entegrasyon Ekranları (2)**
-   - `account-creation.tsx` - Hesap oluşturma
-   - `notifications.tsx` - Bildirim tercihleri
+5. **Critical Integration Screens (2)**
+   - `account-creation.tsx` - Account creation
+   - `notifications.tsx` - Notification preferences
 
-### Düşük Öncelik (P2)
-6. **Kalan Ekranlar (5)**
+### Low Priority (P2)
+6. **Remaining Screens (5)**
    - `occupation.tsx`, `exercise-types.tsx`
    - `intolerances.tsx`, `cultural-restrictions.tsx`
    - `camera-tutorial.tsx`, `privacy.tsx`
 
-## 🔧 Teknik Gereksinimler
+## 🔧 Technical Requirements
 
-### Bağımlılıklar
-1. **Firebase/Firestore** - ✅ Mevcut, test edilmeli
-2. **Image Assets** - ❌ Figma image'lar projeye eklenmeli
-3. **Navigation** - ✅ Expo-router çalışıyor
-4. **Theme System** - ✅ Çalışıyor, doğrulanmalı
+### Dependencies
+1. **Firebase/Firestore** - ✅ Available, needs testing
+2. **Image Assets** - ❌ Figma images need to be added to project
+3. **Navigation** - ✅ Expo-router working
+4. **Theme System** - ✅ Working, needs verification
 
-### Altyapı Kontrol Listesi
-- [ ] Firestore servisleri test edilmeli
-- [ ] Theme system doğrulanmalı
-- [ ] Image assets entegre edilmeli
-- [ ] Error handling eklenmeli
-- [ ] Loading states implement edilmeli
+### Infrastructure Checklist
+- [ ] Firestore services need to be tested
+- [ ] Theme system needs verification
+- [ ] Image assets need integration
+- [ ] Error handling needs to be added
+- [ ] Loading states need implementation
 
-## 📊 Test Stratejisi
+## 📊 Test Strategy
 
-### Gerekli Testler
-1. **Unit Tests** - ✅ Context ve calculation logic için hazır
-2. **Integration Tests** - Context senkronizasyonu
-3. **UI Tests** - Component rendering ve interactions
+### Required Tests
+1. **Unit Tests** - ✅ Ready for context and calculation logic
+2. **Integration Tests** - Context synchronization
+3. **UI Tests** - Component rendering and interactions
 4. **E2E Tests** - Complete onboarding journey
-5. **Accessibility Tests** - Screen reader ve navigation
+5. **Accessibility Tests** - Screen reader and navigation
 
-### Performance Testleri
-- [ ] App Launch: < 3 saniye
+### Performance Tests
+- [ ] App Launch: < 3 seconds
 - [ ] Screen Transitions: < 300ms
 - [ ] Form validation: < 100ms
-- [ ] Firestore sync: < 1 saniye
+- [ ] Firestore sync: < 1 second
 
-## 📱 Deployment ve Rolaut
+## 📱 Deployment and Rollout
 
 ### Feature Flags
-- [ ] Yeni ekranlar için gradual rollout
-- [ ] A/B testing için altyapı
+- [ ] Gradual rollout for new screens
+- [ ] Infrastructure for A/B testing
 - [ ] Rapid rollback capability
 
 ### Version Management
@@ -298,53 +298,53 @@ interface OnboardingContextType {
 
 ---
 
-## 💡 Özet ve Durum
+## 💡 Summary and Status
 
-**Mevcut Durum:** %20 Complete (5/28 screens)
-**Altyapı:** ✅ Complete (Context, UI Components, Storage)
-**Kritik Yol:** 13 ekranın tamamlanması gerekiyor
-**Tahmini Süre:** 2-3 hafta ( Critical path complete)
+**Current Status:** %20 Complete (5/28 screens)
+**Infrastructure:** ✅ Complete (Context, UI Components, Storage)
+**Critical Path:** 13 screens need completion
+**Estimated Time:** 2-3 weeks (critical path complete)
 
-**Güçlü Yönler:**
-- ✅ Complete state management altyapısı
-- ✅ Modern UI component sistemi
+**Strengths:**
+- ✅ Complete state management infrastructure
+- ✅ Modern UI component system
 - ✅ Advanced calculation logic
-- ✅ Firestore senkronizasyonu
+- ✅ Firestore synchronization
 
-**Eksiklikler:**
-- ❌ %80 ekran implement edilmedi
-- ❌ Image assets entegrasyonu
+**Weaknesses:**
+- ❌ %80 screens not implemented
+- ❌ Image assets integration
 - ❌ Error handling
 - ❌ Performance optimization
 
 ---
 
-## 📱 Kullanım Örnekleri
+## 📱 Usage Examples
 
-### Onboarding'i Başlatma
+### Starting Onboarding
 ```typescript
 import { router } from 'expo-router';
 
-// App entry point'den
+// From app entry point
 if (!user.onboardingCompleted) {
   router.push('/onboarding/welcome');
 }
 ```
 
-### Onboarding Verilerini Kullanma
+### Using Onboarding Data
 ```typescript
 import { useOnboarding } from '../contexts/onboarding-context';
 
 const MyComponent = () => {
   const { profile, goals, calculatedValues } = useOnboarding();
 
-  // Hesaplanan kalori hedeflerini kullanma
+  // Use calculated calorie goals
   const dailyGoal = calculatedValues.dailyCalorieGoal;
 
-  // Kullanıcı progress'ini gösterme
-  const progressText = `Merhaba ${profile.firstName}!`;
+  // Display user progress
+  const progressText = `Hello ${profile.firstName}!`;
 
-  // Hedef kilo hesaplaması
+  // Target weight calculation
   const targetWeight = goals.targetWeight;
   const currentWeight = profile.currentWeight;
   const weightDifference = targetWeight - currentWeight;
@@ -370,14 +370,14 @@ export default function App() {
 }
 ```
 
-### Firestore Senkronizasyonu
+### Firestore Synchronization
 ```typescript
 import { useOnboardingSync } from '../hooks/use-onboarding-sync';
 
 const OnboardingWrapper = () => {
   const { syncWithFirestore } = useOnboardingSync();
 
-  // Onboarding tamamlandığında senkronizasyon
+  // Sync when onboarding is completed
   const handleComplete = async () => {
     await syncWithFirestore();
     // Navigate to main app
@@ -387,28 +387,28 @@ const OnboardingWrapper = () => {
 };
 ```
 
-### Form Validation Örneği
+### Form Validation Example
 ```typescript
-// Profile bilgileri için validation pattern
+// Validation pattern for profile information
 const validateProfile = (profile: ProfileData) => {
   const errors: ValidationError[] = [];
 
   if (!profile.firstName || profile.firstName.length < 2) {
-    errors.push({ field: 'firstName', message: 'İsim en az 2 karakter olmalıdır' });
+    errors.push({ field: 'firstName', message: 'Name must be at least 2 characters' });
   }
 
   if (profile.age < 14 || profile.age > 100) {
-    errors.push({ field: 'age', message: 'Yaş 14-100 arasında olmalıdır' });
+    errors.push({ field: 'age', message: 'Age must be between 14-100' });
   }
 
   if (profile.height < 100 || profile.height > 250) {
-    errors.push({ field: 'height', message: 'Boy 100-250 cm arasında olmalıdır' });
+    errors.push({ field: 'height', message: 'Height must be between 100-250 cm' });
   }
 
   return errors;
 };
 ---
-## 📋 Ekran Başına Detaylı Spesifikasyonlar
+## 📋 Screen-by-Screen Detailed Specifications
 
 ### 🏗️ Technical Architecture
 
@@ -437,7 +437,7 @@ components/ui/
 
 **Context Integration Pattern:**
 ```typescript
-// Her onboarding ekranında kullanılacak pattern
+// Pattern to be used in every onboarding screen
 import { useOnboarding } from '../contexts/onboarding-context';
 import { useTheme } from '../contexts/theme-context';
 import { Button, Input } from '../components/ui';
@@ -453,25 +453,25 @@ const OnboardingScreen = () => {
 **Navigation Pattern:**
 ```typescript
 // Expo-router file-based routing
-router.push('/onboarding/name');     // İsim girişi
-router.push('/onboarding/goals-primary'); // Ana hedefler
-router.push('/onboarding/summary');  // Özet
+router.push('/onboarding/name');     // Name input
+router.push('/onboarding/goals-primary'); // Primary goals
+router.push('/onboarding/summary');  // Summary
 ```
 
 ### 🎯 Implementation Guidelines
 
-**Her Ekran İçin Zorunlu Özellikler:**
-1. **Progress Indicator** - Hangi adımda olduğunu göster
-2. **Back Button** - Önceki adıma dönüş (1. ekran hariç)
-3. **Skip Option** - Atla seçeneği (isteğe bağlı)
-4. **Validation** - Form validation ve error handling
-5. **Auto-save** - Her değişiklikte otomatik kayıt
-6. **Theme Integration** - Tema desteği
-7. **Loading States** - Loading ve error state'leri
+**Mandatory Features for Every Screen:**
+1. **Progress Indicator** - Shows current step
+2. **Back Button** - Return to previous step (except first screen)
+3. **Skip Option** - Skip option (optional)
+4. **Validation** - Form validation and error handling
+5. **Auto-save** - Automatic save on every change
+6. **Theme Integration** - Theme support
+7. **Loading States** - Loading and error states
 
-**Validation Kuralları:**
+**Validation Rules:**
 ```typescript
-// Ortak validation pattern
+// Common validation pattern
 const validationRules = {
   firstName: { required: true, minLength: 2, maxLength: 50 },
   age: { required: true, min: 14, max: 100 },
@@ -485,7 +485,7 @@ const validationRules = {
 
 **UI Component Pattern:**
 ```typescript
-// Her ekranda kullanılacak temel structure
+// Basic structure to be used in every screen
 import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { useTheme } from '../contexts/theme-context';
@@ -505,7 +505,7 @@ const OnboardingScreenTemplate = ({ children, onContinue, canContinue }) => {
           disabled={!canContinue}
           variant="primary"
         >
-          Devam Et
+          Continue
         </Button>
       </View>
     </View>
@@ -550,7 +550,7 @@ interface FirestoreUser {
 ### 📱 Platform-Specific Considerations
 
 **iOS:**
-- NSDatePicker kullanımı
+- NSDatePicker usage
 - Native permission handling
 - App Store review guidelines
 
@@ -566,4 +566,4 @@ interface FirestoreUser {
 
 ---
 
-**Özet:** Bu doküman, CaloriTrack onboarding sisteminin mevcut durumunu, tamamlanan ve eksik olan özellikleri, ve geliştirme için önerilen yolu göstermektedir. Altyapı hazır olmasına rağmen, kullanıcı deneyimi için kritik olan ekranların tamamlanması gerekmektedir.
+**Summary:** This document shows the current status of the CaloriTrack onboarding system, completed and missing features, and recommended development path. Although the infrastructure is ready, screens critical for user experience need to be completed.

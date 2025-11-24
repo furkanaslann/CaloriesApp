@@ -13,7 +13,7 @@ import {
     View,
     ViewStyle,
 } from 'react-native';
-import { useTheme } from '@/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '@/constants/theme';
 
 export interface InputProps extends Omit<TextInputProps, 'style'> {
   label?: string;
@@ -35,28 +35,26 @@ export const Input: React.FC<InputProps> = ({
   rightIcon,
   ...textInputProps
 }) => {
-  const theme = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
   const getInputStyle = (): TextStyle => {
     const baseStyle: TextStyle = {
       borderWidth: 1,
       borderColor: error
-        ? theme.colors.error
+        ? COLORS.error
         : isFocused
-        ? theme.colors.primary
-        : theme.semanticColors.border.primary,
-      backgroundColor: theme.semanticColors.background.primary,
-      borderRadius: theme.borderRadius.sm,
-      paddingHorizontal: theme.spacing.md,
-      paddingVertical: theme.spacing.md,
-      fontSize: theme.typography.fontSize.base,
-      color: theme.semanticColors.text.primary,
-      fontFamily: theme.typography.fontFamily.primary,
+        ? COLORS.primary
+        : COLORS.border,
+      backgroundColor: COLORS.background,
+      borderRadius: BORDER_RADIUS.md,
+      paddingHorizontal: SPACING[4],
+      paddingVertical: SPACING[3],
+      fontSize: TYPOGRAPHY.fontSizes.base,
+      color: COLORS.textPrimary,
     };
 
     if (leftIcon || rightIcon) {
-      baseStyle.paddingHorizontal = theme.spacing.lg;
+      baseStyle.paddingHorizontal = SPACING[6];
     }
 
     return {
@@ -66,24 +64,25 @@ export const Input: React.FC<InputProps> = ({
   };
 
   const getContainerStyle = (): ViewStyle => ({
-    marginBottom: theme.spacing.md,
+    marginBottom: SPACING[4],
     ...containerStyle,
   });
 
   const getLabelStyle = (): TextStyle => ({
-    ...theme.textStyles.labelLarge,
+    fontSize: TYPOGRAPHY.fontSizes.sm,
+    fontWeight: TYPOGRAPHY.fontWeights.medium,
     color: error
-      ? theme.colors.error
-      : theme.semanticColors.text.primary,
-    marginBottom: theme.spacing.sm,
+      ? COLORS.error
+      : COLORS.textPrimary,
+    marginBottom: SPACING[2],
   });
 
   const getHelperTextStyle = (): TextStyle => ({
-    ...theme.textStyles.caption,
+    fontSize: TYPOGRAPHY.fontSizes.xs,
     color: error
-      ? theme.colors.error
-      : theme.semanticColors.text.secondary,
-    marginTop: theme.spacing.sm,
+      ? COLORS.error
+      : COLORS.textSecondary,
+    marginTop: SPACING[2],
   });
 
   const styles = StyleSheet.create({
@@ -96,23 +95,23 @@ export const Input: React.FC<InputProps> = ({
     helperText: getHelperTextStyle(),
     leftIcon: {
       position: 'absolute',
-      left: theme.spacing.md,
+      left: SPACING[4],
       top: '50%',
       transform: [{ translateY: -12 }],
       zIndex: 1,
     },
     rightIcon: {
       position: 'absolute',
-      right: theme.spacing.md,
+      right: SPACING[4],
       top: '50%',
       transform: [{ translateY: -12 }],
       zIndex: 1,
     },
     inputWithLeftIcon: {
-      paddingLeft: theme.spacing['3xl'],
+      paddingLeft: SPACING[8],
     },
     inputWithRightIcon: {
-      paddingRight: theme.spacing['3xl'],
+      paddingRight: SPACING[8],
     },
   });
 
@@ -131,7 +130,7 @@ export const Input: React.FC<InputProps> = ({
           ]}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholderTextColor={theme.semanticColors.text.tertiary}
+          placeholderTextColor={COLORS.textTertiary}
           {...textInputProps}
         />
 

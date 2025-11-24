@@ -6,7 +6,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { FIREBASE_CONFIG } from '@/constants';
+// Storage keys configuration
+const STORAGE_KEYS = {
+  onboarding: '@caloritrack_onboarding'
+};
 
 // User Profile Types
 export interface UserProfile {
@@ -296,7 +299,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         version: '1.0.0',
       };
 
-      await AsyncStorage.setItem(FIREBASE_CONFIG.storageKeys.onboarding, JSON.stringify(onboardingData));
+      await AsyncStorage.setItem(STORAGE_KEYS.onboarding, JSON.stringify(onboardingData));
     } catch (error) {
       console.error('Failed to save onboarding progress:', error);
     }
@@ -305,7 +308,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   // Load progress from storage
   const loadProgress = async () => {
     try {
-      const stored = await AsyncStorage.getItem(FIREBASE_CONFIG.storageKeys.onboarding);
+      const stored = await AsyncStorage.getItem(STORAGE_KEYS.onboarding);
       if (stored) {
         const data: OnboardingStorage = JSON.parse(stored);
 
@@ -409,6 +412,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const completeOnboarding = () => {
     setIsCompleted(true);
+    // Ensure all data is saved to storage before completing
     saveProgress();
   };
 

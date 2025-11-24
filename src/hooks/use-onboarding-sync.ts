@@ -4,8 +4,10 @@
  */
 
 import { useEffect, useCallback } from 'react';
+import firestore from '@react-native-firebase/firestore';
 import { useOnboarding } from '@/context/onboarding-context';
 import { useUser } from '@/context/user-context';
+import { FIREBASE_CONFIG } from '@/constants/firebase';
 
 export const useOnboardingSync = () => {
   const {
@@ -76,6 +78,28 @@ export const useOnboardingSync = () => {
     }
   }, [commitment, user, isLoading, userData?.commitment, updateCommitment]);
 
+  // Sync calculated values to Firestore
+  useEffect(() => {
+    if (user && !isLoading && calculatedValues && (calculatedValues.bmr > 0 || calculatedValues.tdee > 0)) {
+      // Update calculated values in Firestore when they change
+      const updateCalculatedValues = async () => {
+        try {
+          await firestore()
+            .collection(FIREBASE_CONFIG.collections.users)
+            .doc(user.uid)
+            .update({
+              calculatedValues,
+              updatedAt: firestore.FieldValue.serverTimestamp(),
+            });
+        } catch (error) {
+          console.error('Error updating calculated values:', error);
+        }
+      };
+
+      updateCalculatedValues();
+    }
+  }, [calculatedValues, user, isLoading]);
+
   // Complete onboarding in both contexts
   const completeOnboarding = useCallback(async () => {
     try {
@@ -85,12 +109,28 @@ export const useOnboardingSync = () => {
       // Complete in Firestore
       if (user) {
         await completeOnboardingInFirestore();
+
+        // Ensure calculated values are saved to Firestore
+        if (calculatedValues && (calculatedValues.bmr > 0 || calculatedValues.tdee > 0)) {
+          try {
+            await firestore()
+              .collection(FIREBASE_CONFIG.collections.users)
+              .doc(user.uid)
+              .update({
+                calculatedValues,
+                updatedAt: firestore.FieldValue.serverTimestamp(),
+              });
+            console.log('Calculated values saved to Firestore:', calculatedValues);
+          } catch (error) {
+            console.error('Error saving calculated values to Firestore:', error);
+          }
+        }
       }
     } catch (error) {
       console.error('Error completing onboarding:', error);
       throw error;
     }
-  }, [completeOnboardingLocal, completeOnboardingInFirestore, user]);
+  }, [completeOnboardingLocal, completeOnboardingInFirestore, user, calculatedValues]);
 
   // Check if all required data is filled for onboarding completion
   const isReadyToComplete = useCallback(() => {

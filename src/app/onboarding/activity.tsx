@@ -6,20 +6,20 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import { useOnboarding, SCREEN_STEPS } from '../../context/onboarding-context';
-import { useTheme } from '@/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 
 const ActivityScreen = () => {
-  const themeResult = useTheme();
-  const theme = themeResult || {
+  // Modern theme system using constants
+  const theme = {
     semanticColors: {
       background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
       text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
@@ -36,6 +36,7 @@ const ActivityScreen = () => {
       labelMedium: { fontSize: 15, fontWeight: '500' },
       caption: { fontSize: 12, fontWeight: '400' },
     },
+    typography: { lineHeight: { relaxed: 24 }, fontWeight: { semibold: '600' } },
     spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8, xs: 4 },
     borderRadius: { full: 9999, xl: 16, lg: 12, md: 10, sm: 8 },
     shadows: { lg: {}, md: {}, sm: {} },
@@ -137,6 +138,10 @@ const ActivityScreen = () => {
       color: theme.semanticColors.text.secondary,
       lineHeight: theme.typography.lineHeight.relaxed,
     },
+    header: {
+      alignItems: 'center',
+      marginBottom: theme.spacing['4xl'],
+    },
     section: {
       marginBottom: theme.spacing['3xl'],
     },
@@ -183,8 +188,13 @@ const ActivityScreen = () => {
     buttonContainer: {
       flexDirection: 'row',
       gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      paddingHorizontal: theme.spacing['2xl'],
+      paddingBottom: theme.spacing['4xl'],
+      paddingTop: theme.spacing.xl,
+      backgroundColor: theme.semanticColors.background.primary,
+      borderTopLeftRadius: theme.borderRadius.xl,
+      borderTopRightRadius: theme.borderRadius.xl,
+      ...theme.shadows.lg,
     },
   });
 
@@ -259,6 +269,7 @@ const ActivityScreen = () => {
         <Button
           title="Devam Et"
           onPress={handleNext}
+          style={theme?.coloredShadows?.primary || {}}
         />
       </View>
     </SafeAreaView>

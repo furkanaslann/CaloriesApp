@@ -3,23 +3,23 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import { useOnboarding } from '../../context/onboarding-context';
-import { useTheme } from '@/constants';
 
 const SummaryScreen = () => {
-  const themeResult = useTheme();
-  const theme = themeResult || {
+  // Modern theme system using constants
+  const theme = {
     semanticColors: {
       background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
       text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
@@ -36,10 +36,13 @@ const SummaryScreen = () => {
       body: { fontSize: 16, fontWeight: '400' },
       bodySmall: { fontSize: 14, fontWeight: '400' },
       bodyMedium: { fontSize: 16, fontWeight: '500' },
+      labelLarge: { fontSize: 18, fontWeight: '500' },
+      caption: { fontSize: 12, fontWeight: '400' },
     },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10 },
-    shadows: { lg: {}, md: {} },
+    typography: { lineHeight: { relaxed: 24 }, fontWeight: { semibold: '600' } },
+    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8, xs: 4 },
+    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10, sm: 8 },
+    shadows: { lg: {}, md: {}, sm: {} },
     coloredShadows: { gradient: {}, primary: {} },
   };
   const {
@@ -254,8 +257,13 @@ const SummaryScreen = () => {
       textAlign: 'center',
     },
     buttonContainer: {
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      paddingHorizontal: theme.spacing['2xl'],
+      paddingBottom: theme.spacing['4xl'],
+      paddingTop: theme.spacing.xl,
+      backgroundColor: theme.semanticColors.background.primary,
+      borderTopLeftRadius: theme.borderRadius.xl,
+      borderTopRightRadius: theme.borderRadius.xl,
+      ...theme.shadows.lg,
     },
     finishButton: {
       backgroundColor: theme.colors.success,

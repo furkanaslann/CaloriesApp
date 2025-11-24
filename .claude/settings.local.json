@@ -15,7 +15,12 @@
       "Bash(echo:*)",
       "Bash(dir \"C:\\Users\\furka\\AppData\\Local\\Android\\Sdk\" 2)",
       "Bash(nul)",
-      "Bash(dir \"C:\\Program Files\\Android\\Android Studio\" 2)"
+      "Bash(dir \"C:\\Program Files\\Android\\Android Studio\" 2)",
+      "Bash(npx expo run:*)",
+      "Bash(for:*)",
+      "Bash(do sed -i 's/SafeAreaView,/SafeAreaView,\\n} from ''''react-native'''';\\nimport { SafeAreaView } from ''''react-native-safe-area-context'''';/' \"$file\")",
+      "Bash(done:*)",
+      "Bash(./gradlew.bat:*)"
     ],
     "deny": [],
     "ask": []

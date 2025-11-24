@@ -6,7 +6,6 @@
 import { router } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,15 +14,95 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import { useOnboarding } from '../../context/onboarding-context';
-import { useUser } from '../../context/user-context';
-import { useTheme } from '@/constants';
+import { useOnboardingSync } from '../../hooks/use-onboarding-sync';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 
 const CommitmentScreen = () => {
-  const theme = useTheme();
-  const { updateProfile, nextStep } = useOnboarding();
-  const { updateUserProfile, updateCommitment, completeOnboarding } = useUser();
+  // Theme object using constants
+  const theme = {
+    semanticColors: {
+      background: { primary: COLORS.background, surface: COLORS.surfaceAlt },
+      text: {
+        primary: COLORS.textPrimary,
+        secondary: COLORS.textSecondary,
+        tertiary: COLORS.textTertiary,
+        onPrimary: '#FFFFFF'
+      },
+      border: { primary: COLORS.border, secondary: COLORS.border },
+      success: { background: COLORS.successLight, text: COLORS.successDark },
+      error: { background: COLORS.errorLight, text: COLORS.errorDark },
+    },
+    colors: {
+      primary: COLORS.primary,
+      gradientStart: COLORS.gradientStart,
+      gradientEnd: COLORS.gradientEnd,
+      success: COLORS.success,
+      error: COLORS.error,
+    },
+    textStyles: {
+      heading1: { fontSize: TYPOGRAPHY.fontSizes['4xl'], fontWeight: '700' },
+      heading2: { fontSize: TYPOGRAPHY.fontSizes['2xl'], fontWeight: '600' },
+      heading3: { fontSize: TYPOGRAPHY.fontSizes.xl, fontWeight: '600' },
+      body: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' },
+      bodySmall: { fontSize: TYPOGRAPHY.fontSizes.sm, fontWeight: '400' },
+      button: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '500' },
+      input: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' },
+    },
+    typography: {
+      lineHeight: {
+        tight: TYPOGRAPHY.lineHeights.tight,
+        normal: TYPOGRAPHY.lineHeights.normal,
+        relaxed: TYPOGRAPHY.lineHeights.relaxed,
+      },
+      fontWeight: {
+        regular: TYPOGRAPHY.fontWeights.regular,
+        medium: TYPOGRAPHY.fontWeights.medium,
+        semibold: TYPOGRAPHY.fontWeights.semibold,
+        bold: TYPOGRAPHY.fontWeights.bold,
+      },
+    },
+    spacing: {
+      ...SPACING,
+      xs: SPACING[1],
+      sm: SPACING[2],
+      md: SPACING[3],
+      lg: SPACING[4],
+      xl: SPACING[5],
+      '2xl': SPACING[6],
+      '3xl': SPACING[8],
+      '4xl': SPACING[12],
+    },
+    borderRadius: BORDER_RADIUS,
+    shadows: SHADOWS,
+    coloredShadows: {
+      primary: SHADOWS.md,
+      success: SHADOWS.sm,
+      error: SHADOWS.sm,
+    },
+    components: {
+      input: {
+        borderWidth: 1,
+        borderRadius: BORDER_RADIUS.md,
+        paddingHorizontal: SPACING[4],
+        paddingVertical: SPACING[3],
+      },
+      button: {
+        borderRadius: BORDER_RADIUS.md,
+        paddingHorizontal: SPACING[6],
+        paddingVertical: SPACING[3],
+      },
+      card: {
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING[6],
+      },
+    },
+  };
+
+  const { updateProfile, nextStep, calculatedValues } = useOnboarding();
+  const { completeOnboarding, isReadyToComplete } = useOnboardingSync();
 
   const [commitmentData, setCommitmentData] = useState({
     firstName: '',
@@ -73,36 +152,28 @@ const CommitmentScreen = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
+    // Check if user is ready to complete onboarding
+    if (!isReadyToComplete()) {
+      Alert.alert('Hata', 'Lütfen önce tüm gerekli profil ve hedef bilgilerini doldurun.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Update profile with commitment data in both contexts
+      // Update profile with commitment data
       const profileUpdate = {
         name: commitmentData.firstName,
         lastName: commitmentData.lastName,
       };
 
       updateProfile(profileUpdate);
-      await updateUserProfile(profileUpdate);
 
-      // Update commitment data
-      const commitmentUpdate = {
-        firstName: commitmentData.firstName,
-        lastName: commitmentData.lastName,
-        email: commitmentData.email,
-        phone: commitmentData.phone,
-        commitmentStatement: commitmentData.commitmentStatement,
-        timestamp: new Date().toISOString(),
-      };
+      // Log calculated values for debugging
+      console.log('Calculated values being saved:', calculatedValues);
 
-      await updateCommitment(commitmentUpdate);
-
-      // Complete onboarding and save to Firestore
-      nextStep();
-      await completeOnboarding();
-
-      // Navigate to main app
-      router.replace('/(tabs)');
+      // Navigate to account creation screen
+      router.push('/onboarding/account-creation');
     } catch (error) {
       console.error('Error submitting commitment:', error);
       Alert.alert('Hata', 'Taahhüt gönderilirken bir hata oluştu. Lütfen tekrar deneyin.');
