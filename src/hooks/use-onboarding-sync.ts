@@ -3,7 +3,7 @@
  * Sync onboarding context data with user context (Firestore)
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import firestore from '@react-native-firebase/firestore';
 import { useOnboarding } from '@/context/onboarding-context';
 import { useUser } from '@/context/user-context';
@@ -35,82 +35,121 @@ export const useOnboardingSync = () => {
     isLoading,
   } = useUser();
 
-  // Sync profile data to Firestore
-  useEffect(() => {
-    if (user && !isLoading && Object.keys(profile).length > 0) {
-      updateUserProfile(profile);
-    }
-  }, [profile, user, isLoading, updateUserProfile]);
+  // Refs to track previous values and prevent infinite loops
+  const prevProfileRef = useRef(profile);
+  const prevGoalsRef = useRef(goals);
+  const prevActivityRef = useRef(activity);
+  const prevDietRef = useRef(diet);
+  const prevPreferencesRef = useRef(preferences);
+  const prevCommitmentRef = useRef(commitment);
+  const prevCalculatedValuesRef = useRef(calculatedValues);
 
-  // Sync goals data to Firestore
-  useEffect(() => {
-    if (user && !isLoading && Object.keys(goals).length > 0) {
-      updateGoals(goals);
-    }
-  }, [goals, user, isLoading, updateGoals]);
+  // Debounce timeout ref
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync activity data to Firestore
-  useEffect(() => {
-    if (user && !isLoading && Object.keys(activity).length > 0) {
-      updateActivity(activity);
+  // Function to handle debounced sync
+  const debouncedSync = useCallback((fn: () => Promise<void>, delay: number = 1000) => {
+    if (syncTimeoutRef.current) {
+      clearTimeout(syncTimeoutRef.current);
     }
-  }, [activity, user, isLoading, updateActivity]);
+    syncTimeoutRef.current = setTimeout(fn, delay);
+  }, []);
 
-  // Sync diet data to Firestore
+  // Sync profile data to Firestore (only if it changed)
   useEffect(() => {
-    if (user && !isLoading && Object.keys(diet).length > 0) {
-      updateDiet(diet);
+    if (user && !isLoading && Object.keys(profile).length > 0 && JSON.stringify(profile) !== JSON.stringify(prevProfileRef.current)) {
+      debouncedSync(() => updateUserProfile(profile));
+      prevProfileRef.current = profile;
     }
-  }, [diet, user, isLoading, updateDiet]);
+  }, [profile, user, isLoading, updateUserProfile, debouncedSync]);
 
-  // Sync preferences data to Firestore
+  // Sync goals data to Firestore (only if it changed)
   useEffect(() => {
-    if (user && !isLoading && Object.keys(preferences).length > 0) {
-      updatePreferences(preferences);
+    if (user && !isLoading && Object.keys(goals).length > 0 && JSON.stringify(goals) !== JSON.stringify(prevGoalsRef.current)) {
+      debouncedSync(() => updateGoals(goals));
+      prevGoalsRef.current = goals;
     }
-  }, [preferences, user, isLoading, updatePreferences]);
+  }, [goals, user, isLoading, updateGoals, debouncedSync]);
 
-  // Sync commitment data to Firestore - but only from onboarding context
-  // Skip if we already have commitment data in user context (to avoid race conditions)
+  // Sync activity data to Firestore (only if it changed)
   useEffect(() => {
-    if (user && !isLoading && Object.keys(commitment).length > 0 && !userData?.commitment) {
-      updateCommitment(commitment);
+    if (user && !isLoading && Object.keys(activity).length > 0 && JSON.stringify(activity) !== JSON.stringify(prevActivityRef.current)) {
+      debouncedSync(() => updateActivity(activity));
+      prevActivityRef.current = activity;
     }
-  }, [commitment, user, isLoading, userData?.commitment, updateCommitment]);
+  }, [activity, user, isLoading, updateActivity, debouncedSync]);
 
-  // Sync calculated values to Firestore
+  // Sync diet data to Firestore (only if it changed)
+  useEffect(() => {
+    if (user && !isLoading && Object.keys(diet).length > 0 && JSON.stringify(diet) !== JSON.stringify(prevDietRef.current)) {
+      debouncedSync(() => updateDiet(diet));
+      prevDietRef.current = diet;
+    }
+  }, [diet, user, isLoading, updateDiet, debouncedSync]);
+
+  // Sync preferences data to Firestore (only if it changed)
+  useEffect(() => {
+    if (user && !isLoading && Object.keys(preferences).length > 0 && JSON.stringify(preferences) !== JSON.stringify(prevPreferencesRef.current)) {
+      debouncedSync(() => updatePreferences(preferences));
+      prevPreferencesRef.current = preferences;
+    }
+  }, [preferences, user, isLoading, updatePreferences, debouncedSync]);
+
+  // Sync commitment data to Firestore (only if it changed and no existing commitment)
+  useEffect(() => {
+    if (user && !isLoading && Object.keys(commitment).length > 0 && !userData?.commitment && JSON.stringify(commitment) !== JSON.stringify(prevCommitmentRef.current)) {
+      debouncedSync(() => updateCommitment(commitment));
+      prevCommitmentRef.current = commitment;
+    }
+  }, [commitment, user, isLoading, userData?.commitment, updateCommitment, debouncedSync]);
+
+  // Sync calculated values to Firestore (only if meaningful values changed and only once)
   useEffect(() => {
     if (user && !isLoading && calculatedValues && (calculatedValues.bmr > 0 || calculatedValues.tdee > 0)) {
-      // Update calculated values in Firestore when they change
-      const updateCalculatedValues = async () => {
-        try {
-          await firestore()
-            .collection(FIREBASE_CONFIG.collections.users)
-            .doc(user.uid)
-            .update({
-              calculatedValues,
-              updatedAt: firestore.FieldValue.serverTimestamp(),
-            });
-        } catch (error) {
-          console.error('Error updating calculated values:', error);
-        }
-      };
+      // Only sync if the values actually changed in a meaningful way
+      const prev = prevCalculatedValuesRef.current;
+      const hasSignificantChange = !prev ||
+        Math.abs((prev.bmr || 0) - (calculatedValues.bmr || 0)) > 10 ||
+        Math.abs((prev.tdee || 0) - (calculatedValues.tdee || 0)) > 10 ||
+        Math.abs((prev.dailyCalorieGoal || 0) - (calculatedValues.dailyCalorieGoal || 0)) > 50;
 
-      updateCalculatedValues();
+      if (hasSignificantChange) {
+        const updateCalculatedValues = async () => {
+          try {
+            await firestore()
+              .collection(FIREBASE_CONFIG.collections.users)
+              .doc(user.uid)
+              .update({
+                calculatedValues,
+                updatedAt: firestore.FieldValue.serverTimestamp(),
+              });
+            console.log('Calculated values updated in Firestore:', calculatedValues);
+          } catch (error) {
+            console.error('Error updating calculated values:', error);
+          }
+        };
+
+        // Use a longer debounce for calculated values (2 seconds)
+        debouncedSync(updateCalculatedValues, 2000);
+        prevCalculatedValuesRef.current = calculatedValues;
+      }
     }
-  }, [calculatedValues, user, isLoading]);
+  }, [calculatedValues, user, isLoading, debouncedSync]);
 
   // Complete onboarding in both contexts
   const completeOnboarding = useCallback(async () => {
     try {
+      console.log('Starting onboarding completion...');
       // Complete in local context
       completeOnboardingLocal();
+      console.log('Local onboarding completed');
 
       // Complete in Firestore
       if (user) {
         await completeOnboardingInFirestore();
+        console.log('Firestore onboarding completed');
 
-        // Ensure calculated values are saved to Firestore
+        // Ensure calculated values are saved to Firestore one final time
         if (calculatedValues && (calculatedValues.bmr > 0 || calculatedValues.tdee > 0)) {
           try {
             await firestore()
@@ -120,9 +159,9 @@ export const useOnboardingSync = () => {
                 calculatedValues,
                 updatedAt: firestore.FieldValue.serverTimestamp(),
               });
-            console.log('Calculated values saved to Firestore:', calculatedValues);
+            console.log('Final calculated values saved to Firestore:', calculatedValues);
           } catch (error) {
-            console.error('Error saving calculated values to Firestore:', error);
+            console.error('Error saving final calculated values to Firestore:', error);
           }
         }
       }

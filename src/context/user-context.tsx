@@ -376,9 +376,18 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Calculate BMR, TDEE, and macros based on user data
   const calculateAndUpdateValues = async () => {
-    if (!userData || !user) return;
+    if (!userData || !user) {
+      console.log('calculateAndUpdateValues: Missing userData or user');
+      return;
+    }
 
     const { profile, activity, goals } = userData;
+
+    // Check if we have required profile data
+    if (!profile || profile === undefined) {
+      console.log('calculateAndUpdateValues: Profile is undefined or missing');
+      return;
+    }
 
     // Calculate BMR using Harris-Benedict equation
     let bmr = 0;
@@ -391,11 +400,20 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } else {
         bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * profile.age);
       }
+      console.log('BMR calculated:', bmr);
+    } else {
+      console.log('calculateAndUpdateValues: Missing required profile data', {
+        age: profile.age,
+        currentWeight: profile.currentWeight,
+        height: profile.height,
+        gender: profile.gender
+      });
+      return;
     }
 
     // Calculate TDEE based on activity level
     let tdee = bmr;
-    if (activity.level) {
+    if (activity && activity.level) {
       const multipliers = {
         sedentary: 1.2,
         lightly_active: 1.375,
@@ -404,14 +422,22 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         extremely_active: 1.9,
       };
       tdee = bmr * multipliers[activity.level];
+      console.log('TDEE calculated:', tdee, 'with activity level:', activity.level);
+    } else {
+      console.log('calculateAndUpdateValues: No activity level found, using default TDEE');
     }
 
     // Adjust calories based on goals
     let dailyCalorieGoal = tdee;
-    if (goals.primaryGoal === 'weight_loss') {
-      dailyCalorieGoal = Math.max(1200, tdee - 500); // 500 calorie deficit
-    } else if (goals.primaryGoal === 'muscle_gain') {
-      dailyCalorieGoal = tdee + 300; // 300 calorie surplus
+    if (goals && goals.primaryGoal) {
+      if (goals.primaryGoal === 'weight_loss') {
+        dailyCalorieGoal = Math.max(1200, tdee - 500); // 500 calorie deficit
+      } else if (goals.primaryGoal === 'muscle_gain') {
+        dailyCalorieGoal = tdee + 300; // 300 calorie surplus
+      }
+      console.log('Daily calorie goal calculated:', dailyCalorieGoal, 'for goal:', goals.primaryGoal);
+    } else {
+      console.log('calculateAndUpdateValues: No primary goal found, using default TDEE as calorie goal');
     }
 
     // Calculate macros (40% carbs, 30% protein, 30% fats)
@@ -419,7 +445,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const carbs = (dailyCalorieGoal * 0.4) / 4;
     const fats = (dailyCalorieGoal * 0.3) / 9; // 9 calories per gram
 
-    const calculatedValues: CalculatedValues = {
+    const newCalculatedValues: CalculatedValues = {
       bmr: Math.round(bmr),
       tdee: Math.round(tdee),
       dailyCalorieGoal: Math.round(dailyCalorieGoal),
@@ -430,34 +456,65 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       },
     };
 
-    // Update calculated values in Firestore
-    try {
-      await firestore()
-        .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid)
-        .update({
-          calculatedValues,
-          updatedAt: firestore.FieldValue.serverTimestamp(),
-        });
-    } catch (error) {
-      console.error('Error updating calculated values:', error);
+    console.log('New calculated values:', newCalculatedValues);
+
+    // Check if values changed significantly before updating Firestore
+    const currentValues = userData.calculatedValues;
+    const hasSignificantChange = !currentValues ||
+      Math.abs((currentValues.bmr || 0) - newCalculatedValues.bmr) > 10 ||
+      Math.abs((currentValues.tdee || 0) - newCalculatedValues.tdee) > 10 ||
+      Math.abs((currentValues.dailyCalorieGoal || 0) - newCalculatedValues.dailyCalorieGoal) > 50 ||
+      Math.abs((currentValues.macros?.protein || 0) - newCalculatedValues.macros.protein) > 5 ||
+      Math.abs((currentValues.macros?.carbs || 0) - newCalculatedValues.macros.carbs) > 5 ||
+      Math.abs((currentValues.macros?.fats || 0) - newCalculatedValues.macros.fats) > 3;
+
+    if (hasSignificantChange) {
+      console.log('Calculated values changed significantly, updating Firestore:', newCalculatedValues);
+      try {
+        await firestore()
+          .collection(FIREBASE_CONFIG.collections.users)
+          .doc(user.uid)
+          .update({
+            calculatedValues: newCalculatedValues,
+            updatedAt: firestore.FieldValue.serverTimestamp(),
+          });
+        console.log('Calculated values updated in user context successfully');
+      } catch (error) {
+        console.error('Error updating calculated values:', error);
+      }
+    } else {
+      console.log('Calculated values unchanged, skipping Firestore update');
     }
   };
 
-  // Update calculated values when profile, activity, or goals change
+  // Update calculated values when profile, activity, or goals change (with optimization)
   useEffect(() => {
-    if (userData) {
-      calculateAndUpdateValues();
+    if (userData && user) {
+      // Only calculate if we have the minimum required data
+      const hasBasicData = userData.profile?.age &&
+                          userData.profile?.currentWeight &&
+                          userData.profile?.height &&
+                          userData.profile?.gender;
+
+      if (hasBasicData) {
+        calculateAndUpdateValues();
+      }
     }
-  }, [userData?.profile, userData?.activity, userData?.goals]);
+  }, [userData?.profile?.age, userData?.profile?.currentWeight, userData?.profile?.height, userData?.profile?.gender, userData?.activity?.level, userData?.goals?.primaryGoal, user]);
 
   // Complete onboarding
   const completeOnboarding = async () => {
     if (!user) throw new Error('No user authenticated');
 
     try {
-      // Calculate final values before completing onboarding
-      await calculateAndUpdateValues();
+      console.log('completeOnboarding: Starting onboarding completion for user:', user.uid);
+
+      // Try to calculate final values, but don't fail if data is missing
+      try {
+        await calculateAndUpdateValues();
+      } catch (calcError) {
+        console.warn('completeOnboarding: Could not calculate values, but continuing:', calcError);
+      }
 
       // Update onboarding status
       await firestore()
@@ -468,7 +525,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           updatedAt: firestore.FieldValue.serverTimestamp(),
         });
 
+      console.log('completeOnboarding: Onboarding status updated to true');
       await refreshUserData();
+      console.log('completeOnboarding: User data refreshed successfully');
     } catch (error) {
       console.error('Error completing onboarding:', error);
       throw error;

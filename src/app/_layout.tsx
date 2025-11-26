@@ -1,13 +1,13 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, useRouter, useFocusEffect } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { useEffect, useState } from 'react';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { OnboardingProvider, useOnboarding } from '@/context/onboarding-context';
-import { UserProvider, useUser } from '@/context/user-context';
+import { OnboardingProvider } from '@/context/onboarding-context';
 import { ThemeProvider as CustomThemeProvider } from '@/context/theme-context';
+import { UserProvider, useUser } from '@/context/user-context';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
   anchor: '(tabs)',
