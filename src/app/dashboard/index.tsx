@@ -21,6 +21,7 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import StreakCard from '@/components/dashboard/streak-card';
 
 const { width } = Dimensions.get('window');
 
@@ -34,6 +35,13 @@ const DashboardIndexScreen = () => {
   const { userData, user, isLoading: userLoading, isOnboardingCompleted } = useUser();
   const [isLoading, setIsLoading] = useState(true);
   const [isChecking, setIsChecking] = useState(true);
+
+  // Streak data (minimalist 7-day design)
+  const streakData = {
+    currentStreak: 5,
+    bestStreak: 12,
+    weekDays: [true, true, true, false, true, false, true], // Pzt-Paz: 7 days of current week
+  };
 
   // Check onboarding status from Firebase (primary) and AsyncStorage (fallback)
   useEffect(() => {
@@ -204,6 +212,13 @@ const DashboardIndexScreen = () => {
     },
     content: {
       paddingBottom: 120, // Space for bottom nav
+    },
+
+    // Streak Card Container
+    streakContainer: {
+      paddingHorizontal: 24,
+      marginTop: 24,
+      marginBottom: 8,
     },
 
     // Header Section - Figma style
@@ -662,7 +677,16 @@ const DashboardIndexScreen = () => {
             </View>
           </View>
 
-          
+          {/* Minimalist Streak Card - Below Header */}
+          <View style={styles.streakContainer}>
+            <StreakCard
+              currentStreak={streakData.currentStreak}
+              bestStreak={streakData.bestStreak}
+              weekDays={streakData.weekDays}
+              onPress={() => router.push('/dashboard/progress')}
+            />
+          </View>
+
           {/* Summary Card - Modern progress card */}
           <View style={styles.summarySection}>
             <View style={styles.summaryCard}>
@@ -933,7 +957,7 @@ const DashboardIndexScreen = () => {
           <Ionicons name="camera-outline" size={24} color="#94A3B8" style={styles.navIcon} />
           <Text style={styles.navLabel}>Kamera</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/meals')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/recipes')}>
           <Ionicons name="restaurant-outline" size={24} color="#94A3B8" style={styles.navIcon} />
           <Text style={styles.navLabel}>Tarifler</Text>
         </TouchableOpacity>

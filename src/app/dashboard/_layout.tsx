@@ -16,6 +16,7 @@ const DashboardLayout = () => {
       <Stack.Screen name="community" options={{ title: 'Topluluk', headerShown: false }} />
       <Stack.Screen name="profile" options={{ title: 'Profil', headerShown: false }} />
       <Stack.Screen name="goals" options={{ title: 'Hedefler', headerShown: false }} />
+      <Stack.Screen name="recipes" options={{ title: 'Tarifler', headerShown: false }} />
       <Stack.Screen name="getting-started" options={{ title: 'Başlangıç', headerShown: false }} />
     </Stack>
   );

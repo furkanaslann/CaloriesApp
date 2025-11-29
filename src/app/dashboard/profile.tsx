@@ -4,6 +4,8 @@
  */
 
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   Dimensions,
@@ -19,6 +21,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const { width } = Dimensions.get('window');
 
 const ProfileDashboardScreen = () => {
+  const router = useRouter();
   // Create theme object that matches expected structure
   const theme = {
     semanticColors: {
@@ -279,6 +282,45 @@ const ProfileDashboardScreen = () => {
     actionButtons: {
       marginBottom: theme.spacing['4xl'],
     },
+
+    // Bottom Navigation - Modern style (from index.tsx)
+    bottomNav: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 90,
+      backgroundColor: '#FFFFFF',
+      borderTopWidth: 1,
+      borderTopColor: '#E2E8F0',
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      paddingBottom: 30,
+      paddingHorizontal: 24,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      elevation: 5,
+    },
+    navItem: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      flex: 1,
+      paddingVertical: 8,
+    },
+    navIcon: {
+      marginBottom: 4,
+    },
+    navLabel: {
+      fontSize: 12,
+      color: '#94A3B8',
+      fontWeight: '500',
+    },
+    navLabelActive: {
+      color: '#7C3AED',
+    },
     actionButton: {
       backgroundColor: theme.colors.primary,
       borderRadius: theme.borderRadius.lg,
@@ -372,6 +414,26 @@ const ProfileDashboardScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Bottom Navigation - Modern style */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard')}>
+          <Ionicons name="home-outline" size={24} color="#94A3B8" style={styles.navIcon} />
+          <Text style={styles.navLabel}>Ana Sayfa</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/camera')}>
+          <Ionicons name="camera-outline" size={24} color="#94A3B8" style={styles.navIcon} />
+          <Text style={styles.navLabel}>Kamera</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/meals')}>
+          <Ionicons name="restaurant-outline" size={24} color="#94A3B8" style={styles.navIcon} />
+          <Text style={styles.navLabel}>Tarifler</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Ionicons name="person" size={24} color="#7C3AED" style={styles.navIcon} />
+          <Text style={[styles.navLabel, styles.navLabelActive]}>Profil</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
