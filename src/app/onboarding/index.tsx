@@ -14,7 +14,7 @@ export default function OnboardingIndex() {
 
       if (isCompleted) {
         // If onboarding is completed, redirect to main app
-        router.replace('/(tabs)');
+        router.replace('/dashboard');
       } else {
         // If not completed, start onboarding
         router.replace('/onboarding/welcome');

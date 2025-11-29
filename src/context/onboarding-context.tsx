@@ -5,6 +5,8 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { saveOnboardingData, updateOnboardingData } from '@/utils/firebase';
+import { auth } from '@/utils/firebase';
 
 // Storage keys configuration
 const STORAGE_KEYS = {
@@ -166,10 +168,11 @@ export interface OnboardingContextType {
   nextStep: () => void;
   previousStep: () => void;
   goToStep: (step: number) => void;
-  completeOnboarding: () => void;
+  completeOnboarding: () => Promise<void>;
   resetOnboarding: () => void;
   saveProgress: () => Promise<void>;
   loadProgress: () => Promise<void>;
+  syncToFirestore: () => Promise<void>;
 }
 
 // Onboarding Storage Structure
@@ -410,10 +413,142 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     saveProgress();
   };
 
-  const completeOnboarding = () => {
-    setIsCompleted(true);
-    // Ensure all data is saved to storage before completing
-    saveProgress();
+  const completeOnboarding = async () => {
+    try {
+      setIsCompleted(true);
+      // Save to local storage first
+      await saveProgress();
+
+      // Then sync to Firestore
+      await syncToFirestore();
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      // Still set as completed locally even if Firestore sync fails
+      setIsCompleted(true);
+    }
+  };
+
+  // Sync onboarding data to Firestore
+  const syncToFirestore = async () => {
+    try {
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        console.log('No authenticated user, skipping Firestore sync');
+        return;
+      }
+
+      // Validate required fields before saving
+      if (!profile.name || !profile.lastName || !profile.age || !profile.currentWeight || !profile.height) {
+        console.warn('Missing required profile fields, skipping Firestore sync');
+        return;
+      }
+
+      // Helper function to remove undefined values recursively
+      const removeUndefinedValues = (obj: any): any => {
+        if (obj === null || obj === undefined) return null;
+        if (typeof obj !== 'object') return obj;
+
+        if (Array.isArray(obj)) {
+          return obj.map(removeUndefinedValues);
+        }
+
+        const cleaned: any = {};
+        for (const key in obj) {
+          if (obj.hasOwnProperty(key)) {
+            const value = removeUndefinedValues(obj[key]);
+            if (value !== undefined) {
+              cleaned[key] = value;
+            }
+          }
+        }
+        return cleaned;
+      };
+
+      const onboardingData = {
+        profile: {
+          name: profile.name!,
+          lastName: profile.lastName!,
+          age: profile.age!,
+          dateOfBirth: profile.dateOfBirth || '',
+          gender: profile.gender || 'other',
+          height: profile.height!,
+          currentWeight: profile.currentWeight!,
+          profilePhoto: profile.profilePhoto || null,
+        },
+        goals: {
+          primaryGoal: goals.primaryGoal || 'maintenance',
+          targetWeight: goals.targetWeight || null,
+          timeline: goals.timeline || 12,
+          weeklyGoal: goals.weeklyGoal || 0.5,
+          motivation: goals.motivation || 5,
+        },
+        activity: {
+          level: activity.level || 'sedentary',
+          occupation: activity.occupation || 'office',
+          exerciseTypes: activity.exerciseTypes || [],
+          exerciseFrequency: activity.exerciseFrequency || 0,
+          sleepHours: activity.sleepHours || 8,
+        },
+        diet: {
+          type: diet.type || 'balanced',
+          allergies: diet.allergies || [],
+          intolerances: diet.intolerances || [],
+          dislikedFoods: diet.dislikedFoods || [],
+          culturalRestrictions: diet.culturalRestrictions || [],
+        },
+        preferences: {
+          notifications: {
+            mealReminders: preferences.notifications?.mealReminders ?? true,
+            waterReminders: preferences.notifications?.waterReminders ?? true,
+            exerciseReminders: preferences.notifications?.exerciseReminders ?? true,
+            dailySummary: preferences.notifications?.dailySummary ?? true,
+            achievements: preferences.notifications?.achievements ?? true,
+          },
+          privacy: {
+            dataSharing: preferences.privacy?.dataSharing ?? false,
+            analytics: preferences.privacy?.analytics ?? true,
+            marketing: preferences.privacy?.marketing ?? false,
+          },
+        },
+        calculatedValues: {
+          bmr: calculatedValues.bmr || 0,
+          tdee: calculatedValues.tdee || 0,
+          dailyCalorieGoal: calculatedValues.dailyCalorieGoal || 2000,
+          macros: {
+            protein: calculatedValues.macros?.protein || 0,
+            carbs: calculatedValues.macros?.carbs || 0,
+            fats: calculatedValues.macros?.fats || 0,
+          },
+        },
+        commitment: commitment.firstName ? {
+          firstName: commitment.firstName!,
+          lastName: commitment.lastName!,
+          email: commitment.email!,
+          phone: commitment.phone || null,
+          commitmentStatement: commitment.commitmentStatement || '',
+          timestamp: commitment.timestamp || new Date().toISOString(),
+        } : null,
+        account: account.username ? {
+          username: account.username!,
+          email: account.email!,
+          createdAt: account.createdAt || new Date().toISOString(),
+          preferences: {
+            agreeToTerms: account.preferences?.agreeToTerms ?? false,
+            agreeToPrivacy: account.preferences?.agreeToPrivacy ?? false,
+            subscribeToNewsletter: account.preferences?.subscribeToNewsletter ?? false,
+          },
+        } : null,
+      };
+
+      // Clean the data to remove any remaining undefined values
+      const cleanedOnboardingData = removeUndefinedValues(onboardingData);
+
+      await saveOnboardingData(currentUser.uid, cleanedOnboardingData);
+      console.log('Onboarding data successfully synced to Firestore');
+    } catch (error) {
+      console.error('Error syncing onboarding data to Firestore:', error);
+      throw error;
+    }
   };
 
   const resetOnboarding = () => {
@@ -460,6 +595,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     resetOnboarding,
     saveProgress,
     loadProgress,
+    syncToFirestore,
   };
 
   return (

@@ -3,45 +3,18 @@
  *
  * This file contains helper functions for Firebase services using react-native-firebase.
  * Currently configured for Authentication and Firestore.
- * 
+ *
  * Note: react-native-firebase automatically initializes Firebase using the
  * GoogleService-Info.plist (iOS) and google-services.json (Android) files.
  * No manual initialization is required.
  */
 
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 // Uncomment when you need Firebase Storage
 // import storage from '@react-native-firebase/storage';
 
 import { FIREBASE_CONFIG } from '@/constants/firebase';
-
-// ============================================================================
-// FIREBASE INSTANCE HELPERS
-// ============================================================================
-
-/**
- * Get Firebase App instance
- */
-const getFirebaseApp = (): FirebaseApp => {
-  const apps = getApps();
-  if (apps.length > 0) {
-    return getApp();
-  }
-  throw new Error('Firebase app not initialized');
-};
-
-/**
- * Get Auth instance
- */
-const getAuthInstance = () => {
-  return getAuth(getFirebaseApp());
-};
-
-/**
- * Get Firestore instance
- */
-const getFirestoreInstance = (): Firestore => {
-  return getFirestore(getFirebaseApp());
-};
 
 // ============================================================================
 // AUTHENTICATION FUNCTIONS
@@ -428,6 +401,186 @@ export const deleteMeal = async (userId: string, mealId: string) => {
 //     throw new Error(error.message);
 //   }
 // };
+
+// ============================================================================
+// FIRESTORE FUNCTIONS - ONBOARDING DATA
+// ============================================================================
+
+/**
+ * Save complete onboarding data to Firestore
+ * This function saves all onboarding information after user completes the flow
+ */
+// Helper function to filter out undefined values
+const filterUndefinedValues = (obj: any): any => {
+  if (obj === null || obj === undefined) return null;
+  if (typeof obj !== 'object') return obj;
+
+  const filtered: any = Array.isArray(obj) ? [] : {};
+
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      const value = obj[key];
+      if (value !== undefined) {
+        if (typeof value === 'object' && value !== null) {
+          filtered[key] = filterUndefinedValues(value);
+        } else {
+          filtered[key] = value;
+        }
+      }
+    }
+  }
+
+  return filtered;
+};
+
+export const saveOnboardingData = async (userId: string, onboardingData: any) => {
+  try {
+    // Filter out any undefined values before sending to Firestore
+    const filteredData = filterUndefinedValues(onboardingData);
+
+    // Build the Firestore document data
+    const firestoreData: any = {
+      // Metadata
+      onboardingCompleted: true,
+      onboardingCompletedAt: firestore.FieldValue.serverTimestamp(),
+      lastUpdated: firestore.FieldValue.serverTimestamp(),
+      version: '1.0.0',
+    };
+
+    // Only add fields that exist in the filtered data
+    if (filteredData.profile) {
+      const profile = filteredData.profile;
+      firestoreData.name = profile.name;
+      firestoreData.lastName = profile.lastName;
+      firestoreData.fullName = `${profile.name} ${profile.lastName}`;
+      firestoreData.age = profile.age;
+      firestoreData.dateOfBirth = profile.dateOfBirth;
+      firestoreData.gender = profile.gender;
+      firestoreData.height = profile.height;
+      firestoreData.currentWeight = profile.currentWeight;
+      if (profile.profilePhoto !== null) {
+        firestoreData.profilePhoto = profile.profilePhoto;
+      }
+      firestoreData.profile = profile;
+    }
+
+    if (filteredData.goals) {
+      firestoreData.goals = filteredData.goals;
+    }
+
+    if (filteredData.activity) {
+      firestoreData.activity = filteredData.activity;
+    }
+
+    if (filteredData.diet) {
+      firestoreData.diet = filteredData.diet;
+    }
+
+    if (filteredData.preferences) {
+      firestoreData.preferences = filteredData.preferences;
+    }
+
+    if (filteredData.calculatedValues) {
+      firestoreData.calculatedValues = filteredData.calculatedValues;
+    }
+
+    if (filteredData.commitment !== null) {
+      firestoreData.commitment = filteredData.commitment;
+    }
+
+    if (filteredData.account !== null) {
+      firestoreData.account = filteredData.account;
+    }
+
+    // Save to Firestore
+    await firestore()
+      .collection(FIREBASE_CONFIG.collections.users)
+      .doc(userId)
+      .set(firestoreData, { merge: true });
+
+    console.log('Onboarding data saved successfully for user:', userId);
+  } catch (error: any) {
+    console.error('Error saving onboarding data:', error);
+    throw new Error(`Failed to save onboarding data: ${error.message}`);
+  }
+};
+
+/**
+ * Get onboarding data from Firestore
+ */
+export const getOnboardingData = async (userId: string) => {
+  try {
+    const doc = await firestore()
+      .collection(FIREBASE_CONFIG.collections.users)
+      .doc(userId)
+      .get();
+
+    if (!doc.exists) {
+      return null;
+    }
+
+    const data = doc.data();
+    return {
+      id: doc.id,
+      profile: {
+        name: data.name,
+        lastName: data.lastName,
+        age: data.age,
+        dateOfBirth: data.dateOfBirth,
+        gender: data.gender,
+        height: data.height,
+        currentWeight: data.currentWeight,
+        profilePhoto: data.profilePhoto,
+      },
+      goals: data.goals,
+      activity: data.activity,
+      diet: data.diet,
+      preferences: data.preferences,
+      calculatedValues: data.calculatedValues,
+      commitment: data.commitment,
+      account: data.account,
+      onboardingCompleted: data.onboardingCompleted || false,
+      onboardingCompletedAt: data.onboardingCompletedAt,
+      lastUpdated: data.lastUpdated,
+      version: data.version,
+    };
+  } catch (error: any) {
+    console.error('Error getting onboarding data:', error);
+    throw new Error(`Failed to get onboarding data: ${error.message}`);
+  }
+};
+
+/**
+ * Update specific parts of onboarding data
+ */
+export const updateOnboardingData = async (
+  userId: string,
+  updates: Partial<{
+    profile: any;
+    goals: any;
+    activity: any;
+    diet: any;
+    preferences: any;
+    calculatedValues: any;
+    commitment: any;
+    account: any;
+  }>
+) => {
+  try {
+    await firestore()
+      .collection(FIREBASE_CONFIG.collections.users)
+      .doc(userId)
+      .update({
+        ...updates,
+        lastUpdated: firestore.FieldValue.serverTimestamp(),
+      });
+
+    console.log('Onboarding data updated successfully for user:', userId);
+  } catch (error: any) {
+    console.error('Error updating onboarding data:', error);
+    throw new Error(`Failed to update onboarding data: ${error.message}`);
+  }
+};
 
 // Export auth and firestore instances for direct use
 export { auth, firestore };

@@ -34,29 +34,6 @@ if (!isExpoGo) {
 }
 
 const NotificationsScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-    },
-    colors: { primary: '#7C3AED', success: '#10B981', warning: '#F59E0B', info: '#3B82F6' },
-    textStyles: {
-      onboardingTitle: { fontSize: 30, fontWeight: '600' },
-      onboardingDescription: { fontSize: 16, fontWeight: '400' },
-      heading3: { fontSize: 24, fontWeight: '600' },
-      heading4: { fontSize: 20, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
-      labelMedium: { fontSize: 15, fontWeight: '500' },
-      caption: { fontSize: 12, fontWeight: '400' },
-    },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10 },
-    shadows: { lg: {}, md: {} },
-    coloredShadows: { primary: {} },
-  };
   const { preferences, updatePreferences, nextStep, previousStep } = useOnboarding();
 
   const [formData, setFormData] = useState({
@@ -181,96 +158,99 @@ const NotificationsScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: COLORS.background,
     },
     scrollView: {
       flex: 1,
     },
     content: {
-      padding: theme.spacing.lg,
+      padding: SPACING[6],
     },
     header: {
       marginTop: '10%',
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: SPACING[10],
       alignItems: 'center',
     },
     title: {
-      ...theme.textStyles.heading2,
-      color: theme.semanticColors.text.primary,
+      fontSize: TYPOGRAPHY.fontSizes['3xl'],
+      fontWeight: TYPOGRAPHY.fontWeights.bold,
+      color: COLORS.textPrimary,
       textAlign: 'center',
-      marginBottom: theme.spacing.md,
-      lineHeight: 40,
-      fontSize: 32,
-      fontWeight: '700',
+      marginBottom: SPACING[4],
+      lineHeight: TYPOGRAPHY.lineHeights.tight * TYPOGRAPHY.fontSizes['3xl'],
     },
     subtitle: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
+      fontSize: TYPOGRAPHY.fontSizes.base,
+      fontWeight: TYPOGRAPHY.fontWeights.regular,
+      color: COLORS.textSecondary,
       textAlign: 'center',
-      lineHeight: theme.typography.lineHeight.relaxed,
-      paddingHorizontal: theme.spacing.lg,
+      lineHeight: TYPOGRAPHY.lineHeights.relaxed * TYPOGRAPHY.fontSizes.base,
+      paddingHorizontal: SPACING[6],
     },
     permissionCard: {
-      backgroundColor: theme.semanticColors.surface,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
-      marginBottom: theme.spacing['2xl'],
+      backgroundColor: COLORS.surfaceAlt,
+      borderRadius: BORDER_RADIUS.lg,
+      padding: SPACING[6],
+      marginBottom: SPACING[6],
       alignItems: 'center',
-      ...theme.shadows.md,
+      ...SHADOWS.md,
     },
     permissionTitle: {
-      ...theme.textStyles.heading4,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
+      fontSize: TYPOGRAPHY.fontSizes.xl,
+      fontWeight: TYPOGRAPHY.fontWeights.semibold,
+      color: COLORS.textPrimary,
+      marginBottom: SPACING[4],
       textAlign: 'center',
     },
     permissionDescription: {
-      ...(theme?.textStyles?.body || { fontSize: 16, fontWeight: '400' }),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
+      fontSize: TYPOGRAPHY.fontSizes.sm,
+      fontWeight: TYPOGRAPHY.fontWeights.regular,
+      color: COLORS.textSecondary,
       textAlign: 'center',
-      marginBottom: theme?.spacing?.lg || 24,
-      lineHeight: 24,
-      fontSize: 14,
-      fontWeight: '400',
+      marginBottom: SPACING[6],
+      lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.sm,
     },
     permissionButton: {
-      backgroundColor: theme.colors.primary,
-      paddingHorizontal: theme.spacing['2xl'],
-      paddingVertical: theme.spacing.md,
-      borderRadius: theme.borderRadius.md,
+      backgroundColor: COLORS.primary,
+      paddingHorizontal: SPACING[6],
+      paddingVertical: SPACING[4],
+      borderRadius: BORDER_RADIUS.md,
     },
     permissionButtonText: {
-      ...theme.textStyles.labelLarge,
-      color: theme.semanticColors.text.onPrimary,
+      fontSize: TYPOGRAPHY.fontSizes.lg,
+      fontWeight: TYPOGRAPHY.fontWeights.medium,
+      color: COLORS.background,
     },
     permissionStatus: {
-      ...theme.textStyles.caption,
-      color: theme.semanticColors.text.secondary,
-      marginTop: theme.spacing.sm,
+      fontSize: TYPOGRAPHY.fontSizes.xs,
+      fontWeight: TYPOGRAPHY.fontWeights.regular,
+      color: COLORS.textSecondary,
+      marginTop: SPACING[2],
     },
     section: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: SPACING[10],
     },
     sectionTitle: {
-      ...theme.textStyles.heading4,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.lg,
+      fontSize: TYPOGRAPHY.fontSizes.xl,
+      fontWeight: TYPOGRAPHY.fontWeights.semibold,
+      color: COLORS.textPrimary,
+      marginBottom: SPACING[6],
     },
     notificationList: {
-      gap: theme.spacing.md,
+      gap: SPACING[4],
     },
     notificationCard: {
-      backgroundColor: theme?.semanticColors?.surface || '#F8FAFC',
-      borderRadius: theme?.borderRadius?.lg || 12,
-      padding: theme?.spacing?.lg || 24,
+      backgroundColor: COLORS.surfaceAlt,
+      borderRadius: BORDER_RADIUS.lg,
+      padding: SPACING[6],
       flexDirection: 'row',
       alignItems: 'flex-start',
       minHeight: 80,
-      ...(theme?.shadows?.sm || {}),
+      ...SHADOWS.sm,
     },
     notificationIcon: {
       fontSize: 28,
-      marginRight: theme?.spacing?.lg || 24,
+      marginRight: SPACING[6],
       marginTop: 2,
     },
     notificationContent: {
@@ -278,36 +258,33 @@ const NotificationsScreen = () => {
       justifyContent: 'center',
     },
     notificationTitle: {
-      ...(theme?.textStyles?.labelLarge || { fontSize: 18, fontWeight: '500' }),
-      color: theme?.semanticColors?.text?.primary || '#1E293B',
-      marginBottom: theme?.spacing?.xs || 4,
-      fontWeight: '600',
-      fontSize: 15,
-      lineHeight: 20,
+      fontSize: TYPOGRAPHY.fontSizes.lg,
+      fontWeight: TYPOGRAPHY.fontWeights.semibold,
+      color: COLORS.textPrimary,
+      marginBottom: SPACING[1],
+      lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.lg,
     },
     notificationDescription: {
-      ...(theme?.textStyles?.caption || { fontSize: 12, fontWeight: '400' }),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
-      marginBottom: theme?.spacing?.xs || 4,
-      fontSize: 12,
-      fontWeight: '400',
-      lineHeight: 16,
+      fontSize: TYPOGRAPHY.fontSizes.xs,
+      fontWeight: TYPOGRAPHY.fontWeights.regular,
+      color: COLORS.textSecondary,
+      marginBottom: SPACING[1],
+      lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.xs,
       flexWrap: 'wrap',
     },
     notificationTime: {
-      ...(theme?.textStyles?.caption || { fontSize: 12, fontWeight: '400' }),
-      color: theme?.colors?.primary || '#7C3AED',
-      fontSize: 11,
-      fontWeight: '500',
+      fontSize: TYPOGRAPHY.fontSizes.xs,
+      fontWeight: TYPOGRAPHY.fontWeights.medium,
+      color: COLORS.primary,
     },
     switchContainer: {
-      marginLeft: theme.spacing.md,
+      marginLeft: SPACING[4],
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      gap: SPACING[4],
+      paddingHorizontal: SPACING[6],
+      paddingBottom: SPACING[8],
     },
   });
 
@@ -361,8 +338,8 @@ const NotificationsScreen = () => {
                     <Switch
                       value={formData.notifications[setting.key]}
                       onValueChange={() => handleNotificationToggle(setting.key)}
-                      trackColor={{ false: theme.semanticColors.border.primary, true: theme.colors.primary }}
-                      thumbColor={theme.semanticColors.background.primary}
+                      trackColor={{ false: COLORS.border, true: COLORS.primary }}
+                      thumbColor={COLORS.background}
                     />
                   </View>
                 </View>

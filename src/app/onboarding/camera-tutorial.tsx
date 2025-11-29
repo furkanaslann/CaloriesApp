@@ -3,7 +3,6 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -84,7 +83,7 @@ const CameraTutorialScreen = () => {
       setCurrentSlide(currentSlide + 1);
     } else {
       nextStep();
-      router.push('/onboarding/summary');
+      router.push('/onboarding/notifications');
     }
   };
 
@@ -120,7 +119,7 @@ const CameraTutorialScreen = () => {
       alignItems: 'center',
       alignSelf: 'center',
       marginBottom: theme.spacing['4xl'],
-      ...theme.shadows.lg,
+      ...(theme.shadows?.lg || {}),
     },
     icon: {
       fontSize: 60,
@@ -140,7 +139,11 @@ const CameraTutorialScreen = () => {
     },
     title: {
       fontSize: theme.textStyles.onboardingTitle?.fontSize || 30,
-      fontWeight: theme.textStyles.onboardingTitle?.fontWeight || '600',
+      fontWeight:
+        (typeof theme.textStyles.onboardingTitle?.fontWeight === 'number' ||
+          typeof theme.textStyles.onboardingTitle?.fontWeight === 'undefined')
+          ? theme.textStyles.onboardingTitle?.fontWeight ?? '600'
+          : (parseInt(theme.textStyles.onboardingTitle?.fontWeight, 10) as any) ?? '600',
       color: theme.semanticColors.text.primary,
       textAlign: 'center',
       marginTop: '10%',
@@ -149,7 +152,11 @@ const CameraTutorialScreen = () => {
     },
     subtitle: {
       fontSize: theme.textStyles.onboardingSubtitle?.fontSize || 20,
-      fontWeight: theme.textStyles.onboardingSubtitle?.fontWeight || '500',
+      fontWeight:
+        (typeof theme.textStyles.onboardingSubtitle?.fontWeight === 'number' ||
+          typeof theme.textStyles.onboardingSubtitle?.fontWeight === 'undefined')
+          ? theme.textStyles.onboardingSubtitle?.fontWeight ?? '500'
+          : (parseInt(theme.textStyles.onboardingSubtitle?.fontWeight, 10) as any) ?? '500',
       color: theme.semanticColors.text.secondary,
       textAlign: 'center',
       marginBottom: theme.spacing.lg,
@@ -168,15 +175,14 @@ const CameraTutorialScreen = () => {
       backgroundColor: theme.semanticColors.surface,
       borderRadius: theme.borderRadius.lg,
       padding: theme.spacing.lg,
-      ...theme.shadows.sm,
+      ...(theme.shadows?.sm || {}),
     },
     tipsTitle: {
-      ...theme.textStyles.heading5,
+      fontSize: 16,
+      fontWeight: '600',
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.md,
       textAlign: 'center',
-      fontSize: 16,
-      fontWeight: '600',
     },
     tipItem: {
       flexDirection: 'row',
@@ -204,7 +210,7 @@ const CameraTutorialScreen = () => {
       backgroundColor: theme.semanticColors.background.primary,
       borderTopLeftRadius: theme.borderRadius.xl,
       borderTopRightRadius: theme.borderRadius.xl,
-      ...theme.shadows.lg,
+      ...(theme.shadows?.lg || {}),
     },
     progressIndicator: {
       flexDirection: 'row',

@@ -102,10 +102,8 @@ const AccountCreationScreen = () => {
     },
   };
 
-  const { profile, goals, completeOnboarding: completeOnboardingLocal, updateAccount } = useOnboarding();
-  const { completeOnboarding: completeOnboardingInFirestore } = useUser();
-  // Temporarily disable sync to avoid infinite loop
-  // const { completeOnboarding: completeOnboardingWithSync } = useOnboardingSync();
+  const { profile, goals, completeOnboarding, updateAccount } = useOnboarding();
+  // Firestore entegrasyonu artık onboarding context içinde otomatik yapılıyor
 
   const [accountData, setAccountData] = useState({
     username: '',
@@ -188,34 +186,26 @@ const AccountCreationScreen = () => {
       // Simulate API call for account creation
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Complete onboarding process locally first
+      // Complete onboarding process (this now handles both local storage and Firestore sync)
       try {
-        console.log('Starting completeOnboardingLocal...');
+        console.log('Starting completeOnboarding...');
         console.log('Current profile data:', profile);
         console.log('Current goals data:', goals);
 
-        // Complete in onboarding context
-        completeOnboardingLocal();
-        console.log('completeOnboardingLocal completed successfully');
-
-        // Try to complete in Firestore but don't block navigation
-        try {
-          console.log('Starting completeOnboardingInFirestore...');
-          await completeOnboardingInFirestore();
-          console.log('completeOnboardingInFirestore completed successfully');
-        } catch (firestoreError) {
-          console.error('Firestore completion failed, but continuing:', firestoreError);
-        }
+        // Complete onboarding - this will save to local storage and sync to Firestore
+        await completeOnboarding();
+        console.log('completeOnboarding completed successfully (including Firestore sync)');
 
       } catch (error) {
         console.error('Error in completeOnboarding:', error);
+        // Even if Firestore sync fails, continue with navigation
       }
 
       console.log('About to navigate to main app...');
       // Force navigation after a short delay
       setTimeout(() => {
         console.log('Forcing navigation to main app...');
-        router.replace('/(tabs)');
+        router.replace('/dashboard');
       }, 1000);
     } catch (error) {
       console.error('Error creating account:', error);

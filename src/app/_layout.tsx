@@ -10,7 +10,7 @@ import { UserProvider, useUser } from '@/context/user-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  anchor: 'dashboard',
 };
 
 function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
@@ -18,7 +18,7 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
   const { isLoading, isOnboardingCompleted, createAnonymousUser, user } = useUser();
   const router = useRouter();
 
-  // Initialize user and handle routing - but don't interfere with ongoing onboarding
+  // Initialize user and always start with dashboard route
   useEffect(() => {
     const initializeApp = async () => {
       try {
@@ -38,17 +38,12 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
         console.log('User initialized:', user.uid);
         console.log('Onboarding completed:', isOnboardingCompleted);
 
-        // Route based on onboarding status
-        if (isOnboardingCompleted) {
-          console.log('Routing to main app (tabs)');
-          router.replace('/(tabs)');
-        } else {
-          console.log('Routing to onboarding welcome screen');
-          router.replace('/onboarding/welcome');
-        }
+        // Always start with dashboard route - dashboard will handle onboarding check internally
+        console.log('Routing to dashboard (will handle onboarding check internally)');
+        router.replace('/dashboard');
       } catch (error) {
         console.error('Error initializing app:', error);
-        // Only fallback to welcome screen on first load
+        // Fallback to welcome screen on error
         router.replace('/onboarding/welcome');
       }
     };
@@ -62,6 +57,7 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
+        <Stack.Screen name="dashboard" options={{ headerShown: false }} />
         <Stack.Screen
           name="onboarding"
           options={{ headerShown: false }}

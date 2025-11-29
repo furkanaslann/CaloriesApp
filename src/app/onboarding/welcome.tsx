@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
@@ -11,6 +11,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextStyle,
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -175,7 +176,7 @@ const WelcomeScreen = () => {
     },
     title: {
       fontSize: theme.textStyles.onboardingTitle?.fontSize || 30,
-      fontWeight: theme.textStyles.onboardingTitle?.fontWeight || '600',
+      fontWeight: (theme.textStyles.onboardingTitle?.fontWeight || '600') as TextStyle['fontWeight'],
       color: theme.semanticColors.text.primary,
       textAlign: 'center',
       marginTop: '10%',
@@ -184,7 +185,7 @@ const WelcomeScreen = () => {
     },
     subtitle: {
       fontSize: theme.textStyles.onboardingSubtitle?.fontSize || 20,
-      fontWeight: theme.textStyles.onboardingSubtitle?.fontWeight || '500',
+      fontWeight: (theme.textStyles.onboardingSubtitle?.fontWeight || '500') as TextStyle['fontWeight'],
       color: theme.semanticColors.text.secondary,
       textAlign: 'center',
       marginBottom: theme.spacing.lg,
@@ -261,7 +262,7 @@ const WelcomeScreen = () => {
                 <Text style={[styles.subtitle, {
                   marginBottom: theme.spacing['2xl'],
                   fontSize: 16,
-                  fontWeight: '400',
+                  fontWeight: '400' as TextStyle['fontWeight'],
                   fontStyle: 'italic',
                   color: theme.semanticColors.text.tertiary
                 }]}>

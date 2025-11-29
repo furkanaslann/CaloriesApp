@@ -3,6 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -20,29 +21,6 @@ import Button from '../../components/ui/button';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const PrivacyScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-    },
-    colors: { primary: '#7C3AED', success: '#10B981', error: '#EF4444', info: '#3B82F6' },
-    textStyles: {
-      onboardingTitle: { fontSize: 30, fontWeight: '600' },
-      onboardingDescription: { fontSize: 16, fontWeight: '400' },
-      heading3: { fontSize: 24, fontWeight: '600' },
-      heading4: { fontSize: 20, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
-      buttonMedium: { fontSize: 16, fontWeight: '500' },
-      caption: { fontSize: 12, fontWeight: '400' },
-    },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10 },
-    shadows: { lg: {}, md: {} },
-    coloredShadows: { primary: {} },
-  };
   const { preferences, updatePreferences, nextStep, previousStep } = useOnboarding();
 
   const [formData, setFormData] = useState({
@@ -124,191 +102,196 @@ const PrivacyScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: COLORS.background,
     },
     scrollView: {
       flex: 1,
     },
     content: {
-      padding: theme.spacing.lg,
+      padding: SPACING[6],
     },
     header: {
       marginTop: '10%',
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: SPACING[10],
       alignItems: 'center',
     },
     title: {
-      ...theme.textStyles.heading2,
-      color: theme.semanticColors.text.primary,
+      fontSize: TYPOGRAPHY.fontSizes['3xl'],
+      fontWeight: TYPOGRAPHY.fontWeights.bold,
+      color: COLORS.textPrimary,
       textAlign: 'center',
-      marginBottom: theme.spacing.md,
-      lineHeight: 40,
-      fontSize: 32,
-      fontWeight: '700',
+      marginBottom: SPACING[4],
+      lineHeight: TYPOGRAPHY.lineHeights.tight * TYPOGRAPHY.fontSizes['3xl'],
     },
     subtitle: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
+      fontSize: TYPOGRAPHY.fontSizes.base,
+      fontWeight: TYPOGRAPHY.fontWeights.regular,
+      color: COLORS.textSecondary,
       textAlign: 'center',
-      lineHeight: theme.typography.lineHeight.relaxed,
-      paddingHorizontal: theme.spacing.lg,
+      lineHeight: TYPOGRAPHY.lineHeights.relaxed * TYPOGRAPHY.fontSizes.base,
+      paddingHorizontal: SPACING[6],
     },
     privacyCard: {
-      backgroundColor: theme.semanticColors.surface,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing['2xl'],
-      marginBottom: theme.spacing['2xl'],
+      backgroundColor: COLORS.surfaceAlt,
+      borderRadius: BORDER_RADIUS.lg,
+      padding: SPACING[6],
+      marginBottom: SPACING[6],
       alignItems: 'center',
-      ...theme.shadows.md,
+      ...SHADOWS.md,
     },
     privacyIcon: {
       fontSize: 48,
-      marginBottom: theme.spacing.lg,
+      marginBottom: SPACING[6],
     },
     privacyTitle: {
-      ...theme.textStyles.heading3,
-      color: theme.semanticColors.text.primary,
+      fontSize: TYPOGRAPHY.fontSizes['2xl'],
+      fontWeight: TYPOGRAPHY.fontWeights.semibold,
+      color: COLORS.textPrimary,
       textAlign: 'center',
-      marginBottom: theme.spacing.md,
+      marginBottom: SPACING[4],
     },
     privacyDescription: {
-      ...(theme?.textStyles?.body || { fontSize: 16, fontWeight: '400' }),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
+      fontSize: TYPOGRAPHY.fontSizes.sm,
+      fontWeight: TYPOGRAPHY.fontWeights.regular,
+      color: COLORS.textSecondary,
       textAlign: 'center',
-      lineHeight: 24,
-      fontSize: 14,
-      fontWeight: '400',
+      lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.sm,
     },
     section: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: SPACING[10],
     },
     sectionTitle: {
-      ...theme.textStyles.heading4,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.lg,
+      fontSize: TYPOGRAPHY.fontSizes.xl,
+      fontWeight: TYPOGRAPHY.fontWeights.semibold,
+      color: COLORS.textPrimary,
+      marginBottom: SPACING[6],
     },
     privacyList: {
-      gap: theme.spacing.md,
+      gap: SPACING[4],
     },
     privacyOptionCard: {
-      backgroundColor: theme.semanticColors.surface,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
+      backgroundColor: COLORS.surfaceAlt,
+      borderRadius: BORDER_RADIUS.lg,
+      padding: SPACING[6],
       flexDirection: 'row',
       alignItems: 'center',
-      ...theme.shadows.sm,
+      ...SHADOWS.sm,
     },
     privacyOptionIcon: {
       fontSize: 32,
-      marginRight: theme.spacing.lg,
+      marginRight: SPACING[6],
     },
     privacyOptionContent: {
       flex: 1,
     },
     privacyOptionTitle: {
-      ...theme.textStyles.labelLarge,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.xs,
-      fontWeight: theme.typography.fontWeight.semibold,
+      fontSize: TYPOGRAPHY.fontSizes.lg,
+      fontWeight: TYPOGRAPHY.fontWeights.semibold,
+      color: COLORS.textPrimary,
+      marginBottom: SPACING[1],
+      lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.lg,
     },
     privacyOptionDescription: {
-      ...(theme?.textStyles?.caption || { fontSize: 12, fontWeight: '400' }),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
-      lineHeight: 18,
-      fontSize: 13,
-      fontWeight: '400',
+      fontSize: TYPOGRAPHY.fontSizes.sm,
+      fontWeight: TYPOGRAPHY.fontWeights.regular,
+      color: COLORS.textSecondary,
+      lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.sm,
     },
     recommendedBadge: {
-      backgroundColor: theme.colors.success,
-      paddingHorizontal: theme.spacing.sm,
-      paddingVertical: theme.spacing.xs,
-      borderRadius: theme.borderRadius.full,
-      marginTop: theme.spacing.xs,
+      backgroundColor: COLORS.success,
+      paddingHorizontal: SPACING[2],
+      paddingVertical: SPACING[1],
+      borderRadius: BORDER_RADIUS.full,
+      marginTop: SPACING[1],
       alignSelf: 'flex-start',
     },
     recommendedBadgeText: {
-      ...theme.textStyles.caption,
-      color: theme.semanticColors.text.onPrimary,
-      fontSize: 10,
-      fontWeight: theme.typography.fontWeight.semibold,
+      fontSize: TYPOGRAPHY.fontSizes.xs,
+      fontWeight: TYPOGRAPHY.fontWeights.semibold,
+      color: COLORS.background,
     },
     switchContainer: {
-      marginLeft: theme.spacing.md,
+      marginLeft: SPACING[4],
     },
     termsCard: {
-      backgroundColor: theme.semanticColors.surface,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
-      marginBottom: theme.spacing['3xl'],
-      ...theme.shadows.sm,
+      backgroundColor: COLORS.surfaceAlt,
+      borderRadius: BORDER_RADIUS.lg,
+      padding: SPACING[6],
+      marginBottom: SPACING[10],
+      ...SHADOWS.sm,
     },
     termsHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: theme.spacing.md,
+      marginBottom: SPACING[4],
     },
     termsIcon: {
       fontSize: 24,
-      marginRight: theme.spacing.md,
+      marginRight: SPACING[4],
     },
     termsTitle: {
-      ...theme.textStyles.labelLarge,
-      color: theme.semanticColors.text.primary,
-      fontWeight: theme.typography.fontWeight.semibold,
+      fontSize: TYPOGRAPHY.fontSizes.lg,
+      fontWeight: TYPOGRAPHY.fontWeights.semibold,
+      color: COLORS.textPrimary,
+      lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.lg,
     },
     termsDescription: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
-      lineHeight: theme.typography.lineHeight.relaxed,
-      marginBottom: theme.spacing.lg,
+      fontSize: TYPOGRAPHY.fontSizes.base,
+      fontWeight: TYPOGRAPHY.fontWeights.regular,
+      color: COLORS.textSecondary,
+      lineHeight: TYPOGRAPHY.lineHeights.relaxed * TYPOGRAPHY.fontSizes.base,
+      marginBottom: SPACING[6],
     },
     termsLinks: {
-      gap: theme.spacing.sm,
+      gap: SPACING[2],
     },
     termsLink: {
       flexDirection: 'row',
       alignItems: 'center',
     },
     linkText: {
-      ...theme.textStyles.body,
-      color: theme.colors.primary,
+      fontSize: TYPOGRAPHY.fontSizes.base,
+      fontWeight: TYPOGRAPHY.fontWeights.regular,
+      color: COLORS.primary,
       textDecorationLine: 'underline',
+      lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.base,
     },
     termsCheckbox: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginTop: theme.spacing.lg,
-      paddingTop: theme.spacing.lg,
+      marginTop: SPACING[6],
+      paddingTop: SPACING[6],
       borderTopWidth: 1,
-      borderTopColor: theme.semanticColors.border.primary,
+      borderTopColor: COLORS.border,
     },
     checkbox: {
       width: 24,
       height: 24,
       borderWidth: 2,
-      borderColor: formData.termsAccepted ? theme.colors.primary : theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.sm,
-      marginRight: theme.spacing.md,
+      borderColor: formData.termsAccepted ? COLORS.primary : COLORS.border,
+      borderRadius: BORDER_RADIUS.sm,
+      marginRight: SPACING[4],
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: formData.termsAccepted ? theme.colors.primary : 'transparent',
+      backgroundColor: formData.termsAccepted ? COLORS.primary : 'transparent',
     },
     checkmark: {
-      color: theme.semanticColors.text.onPrimary,
+      color: COLORS.background,
       fontWeight: 'bold',
       fontSize: 16,
     },
     checkboxText: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.primary,
+      fontSize: TYPOGRAPHY.fontSizes.base,
+      fontWeight: TYPOGRAPHY.fontWeights.regular,
+      color: COLORS.textPrimary,
       flex: 1,
-      lineHeight: theme.typography.lineHeight.relaxed,
+      lineHeight: TYPOGRAPHY.lineHeights.relaxed * TYPOGRAPHY.fontSizes.base,
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      gap: SPACING[4],
+      paddingHorizontal: SPACING[6],
+      paddingBottom: SPACING[8],
     },
   });
 
@@ -351,8 +334,8 @@ const PrivacyScreen = () => {
                     <Switch
                       value={formData.privacy[setting.key]}
                       onValueChange={() => handlePrivacyToggle(setting.key)}
-                      trackColor={{ false: theme.semanticColors.border.primary, true: theme.colors.primary }}
-                      thumbColor={theme.semanticColors.background.primary}
+                      trackColor={{ false: COLORS.border, true: COLORS.primary }}
+                      thumbColor={COLORS.background}
                     />
                   </View>
                 </View>
