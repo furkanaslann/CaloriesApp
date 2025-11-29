@@ -4,89 +4,7 @@
  */
 
 import { TextStyle, ViewStyle } from 'react-native';
-
-// Theme Types
-export type Theme = {
-  colors: {
-    primary: string;
-    primaryDark: string;
-    primaryLight: string;
-    background: string;
-    surface: string;
-    surfaceAlt: string;
-    border: string;
-    borderLight: string;
-    textPrimary: string;
-    textSecondary: string;
-    textTertiary: string;
-    textMuted: string;
-    success: string;
-    successLight: string;
-    successDark: string;
-    error: string;
-    errorLight: string;
-    errorDark: string;
-    onboardingAccent: string;
-    onboardingText: string;
-    onboardingSubtle: string;
-  };
-  semanticColors: {
-    background: {
-      primary: string;
-      secondary: string;
-    };
-    border: {
-      primary: string;
-      secondary: string;
-    };
-    text: {
-      primary: string;
-      secondary: string;
-      tertiary: string;
-      onPrimary: string;
-    };
-  };
-  spacing: {
-    xs: number;
-    sm: number;
-    md: number;
-    lg: number;
-    xl: number;
-    '2xl': number;
-    '3xl': number;
-    '4xl': number;
-    '5xl': number;
-    '6xl': number;
-    '8xl': number;
-    '10xl': number;
-    '12xl': number;
-    '16xl': number;
-    '20xl': number;
-  };
-  borderRadius: {
-    sm: number;
-    md: number;
-    lg: number;
-    xl: number;
-    full: number;
-  };
-  typography: {
-    xs: TextStyle;
-    sm: TextStyle;
-    base: TextStyle;
-    lg: TextStyle;
-    xl: TextStyle;
-    '2xl': TextStyle;
-    '3xl': TextStyle;
-    '4xl': TextStyle;
-  };
-  shadows: {
-    sm: ViewStyle;
-    md: ViewStyle;
-    lg: ViewStyle;
-    xl: ViewStyle;
-  };
-};
+import { Theme, ThemeContextType } from '@/types/ui';
 
 // Light Theme
 export const LightTheme: Theme = {
@@ -354,13 +272,6 @@ export const DarkTheme: Theme = {
   },
 };
 
-// Theme Context Type
-export type ThemeContextType = {
-  theme: Theme;
-  isDark: boolean;
-  toggleTheme: () => void;
-  setTheme: (theme: 'light' | 'dark') => void;
-};
 
 // Export theme hook (deprecated - use useThemeContext instead)
 export const useTheme = () => {

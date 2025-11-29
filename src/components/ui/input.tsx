@@ -14,16 +14,7 @@ import {
     ViewStyle,
 } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '@/constants/theme';
-
-export interface InputProps extends Omit<TextInputProps, 'style'> {
-  label?: string;
-  error?: string;
-  helperText?: string;
-  containerStyle?: ViewStyle;
-  inputStyle?: TextStyle;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-}
+import { InputProps } from '@/types/ui';
 
 export const Input: React.FC<InputProps> = ({
   label,

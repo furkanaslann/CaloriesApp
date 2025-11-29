@@ -13,18 +13,7 @@ import {
     ViewStyle,
 } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
-
-export interface ButtonProps {
-  title: string;
-  onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'small' | 'medium' | 'large';
-  disabled?: boolean;
-  loading?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
-  fullWidth?: boolean;
-}
+import { ButtonProps } from '@/types/ui';
 
 export const Button: React.FC<ButtonProps> = ({
   title,

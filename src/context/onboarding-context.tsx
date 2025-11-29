@@ -7,113 +7,25 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { saveOnboardingData, updateOnboardingData } from '@/utils/firebase';
 import { auth } from '@/utils/firebase';
+import {
+  UserProfile,
+  Goals,
+  Activity,
+  Diet,
+  Preferences,
+  Commitment,
+  Account,
+  CalculatedValues,
+  OnboardingContextType,
+  OnboardingStorage,
+  ScreenName,
+  ONBOARDING_SCREENS
+} from '@/types';
 
 // Storage keys configuration
 const STORAGE_KEYS = {
   onboarding: '@caloritrack_onboarding'
 };
-
-// User Profile Types
-export interface UserProfile {
-  name: string;
-  lastName: string;
-  age: number;
-  dateOfBirth: string;
-  gender: 'male' | 'female' | 'other';
-  height: number; // cm
-  currentWeight: number; // kg
-  profilePhoto?: string;
-}
-
-// Goals Types
-export interface Goals {
-  primaryGoal: 'weight_loss' | 'maintenance' | 'muscle_gain' | 'healthy_eating';
-  targetWeight?: number;
-  timeline: number; // weeks
-  weeklyGoal: number; // kg per week
-  motivation: number; // 1-10 scale
-}
-
-// Activity Types
-export interface Activity {
-  level: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active';
-  occupation: 'office' | 'physical' | 'mixed';
-  exerciseTypes: string[];
-  exerciseFrequency: number; // per week
-  sleepHours: number;
-}
-
-// Diet Types
-export interface Diet {
-  type: string;
-  allergies: string[];
-  intolerances: string[];
-  dislikedFoods: string[];
-  culturalRestrictions: string[];
-}
-
-// Preferences Types
-export interface Preferences {
-  notifications: {
-    mealReminders: boolean;
-    waterReminders: boolean;
-    exerciseReminders: boolean;
-    dailySummary: boolean;
-    achievements: boolean;
-  };
-  privacy: {
-    dataSharing: boolean;
-    analytics: boolean;
-    marketing: boolean;
-  };
-}
-
-// Commitment Types
-export interface Commitment {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  commitmentStatement: string;
-  timestamp: string;
-}
-
-// Account Types
-export interface Account {
-  username: string;
-  email: string;
-  passwordHash: string; // In real app, this should be hashed
-  createdAt: string;
-  preferences: {
-    agreeToTerms: boolean;
-    agreeToPrivacy: boolean;
-    subscribeToNewsletter: boolean;
-  };
-}
-
-// Calculated Values Types
-export interface CalculatedValues {
-  bmr: number; // Basal Metabolic Rate
-  tdee: number; // Total Daily Energy Expenditure
-  dailyCalorieGoal: number;
-  macros: {
-    protein: number;
-    carbs: number;
-    fats: number;
-  };
-}
-
-// Onboarding Screen Configuration
-const ONBOARDING_SCREENS = [
-  'welcome',
-  'name', 'last-name', 'date-of-birth', 'gender',
-  'height', 'weight', 'profile-photo',
-  'goals-primary', 'goals-weight', 'goals-weekly', 'goals-timeline', 'goals-motivation',
-  'activity', 'occupation', 'exercise-types', 'exercise-frequency', 'sleep-hours',
-  'diet', 'camera-tutorial', 'notifications', 'privacy', 'summary', 'commitment', 'account-creation', 'index'
-] as const;
-
-type ScreenName = typeof ONBOARDING_SCREENS[number];
 
 // Calculate step number for each screen
 const SCREEN_STEPS: Record<ScreenName, number> = ONBOARDING_SCREENS.reduce((acc, screen, index) => {
@@ -133,63 +45,6 @@ const validateScreenName = (screenName: string): screenName is ScreenName => {
 const getProgressPercentage = (currentStep: number): number => {
   return Math.round((currentStep / (TOTAL_STEPS - 1)) * 100);
 };
-
-// Onboarding Context Type
-export interface OnboardingContextType {
-  // User Data
-  profile: Partial<UserProfile>;
-  goals: Partial<Goals>;
-  activity: Partial<Activity>;
-  diet: Partial<Diet>;
-  preferences: Partial<Preferences>;
-  commitment: Partial<Commitment>;
-  account: Partial<Account>;
-
-  // Calculated values (computed)
-  calculatedValues: CalculatedValues;
-
-  // Navigation State
-  currentStep: number;
-  totalSteps: number;
-  completedSteps: number[];
-  isCompleted: boolean;
-
-  // Actions
-  updateProfile: (data: Partial<UserProfile>) => void;
-  updateGoals: (data: Partial<Goals>) => void;
-  updateActivity: (data: Partial<Activity>) => void;
-  updateDiet: (data: Partial<Diet>) => void;
-  updatePreferences: (data: Partial<Preferences>) => void;
-  updateCommitment: (data: Partial<Commitment>) => void;
-  updateAccount: (data: Partial<Account>) => void;
-  getCurrentStep: (screenName: ScreenName) => number;
-  getProgressPercentage: (currentStep: number) => number;
-  validateScreenName: (screenName: string) => boolean;
-  nextStep: () => void;
-  previousStep: () => void;
-  goToStep: (step: number) => void;
-  completeOnboarding: () => Promise<void>;
-  resetOnboarding: () => void;
-  saveProgress: () => Promise<void>;
-  loadProgress: () => Promise<void>;
-  syncToFirestore: () => Promise<void>;
-}
-
-// Onboarding Storage Structure
-interface OnboardingStorage {
-  profile: Partial<UserProfile>;
-  goals: Partial<Goals>;
-  activity: Partial<Activity>;
-  diet: Partial<Diet>;
-  preferences: Partial<Preferences>;
-  commitment: Partial<Commitment>;
-  account: Partial<Account>;
-  currentStep: number;
-  completedSteps: number[];
-  isCompleted: boolean;
-  lastUpdated: string;
-  version: string;
-}
 
 // Create context
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);

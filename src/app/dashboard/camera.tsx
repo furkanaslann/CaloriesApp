@@ -3,25 +3,29 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
-import React, { useState } from 'react';
+import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Alert,
   Dimensions,
-  FlatList,
   ScrollView,
   StyleSheet,
   Text,
   TextStyle,
-  View,
   TouchableOpacity,
-  Alert,
-  Image
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useDashboard } from '@/hooks/use-dashboard';
 
 const { width } = Dimensions.get('window');
 
 const CameraDashboardScreen = () => {
+  const router = useRouter();
+  const { addMeal, getRecentMeals } = useDashboard();
+  const [foodHistory, setFoodHistory] = useState([]);
   // Create theme object that matches expected structure
   const theme = {
     semanticColors: {
@@ -65,53 +69,31 @@ const CameraDashboardScreen = () => {
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Sample food analysis history
-  const foodHistory = [
-    {
-      id: '1',
-      foodName: 'Çoban Salata',
-      calories: 185,
-      protein: 8,
-      carbs: 12,
-      fat: 14,
-      time: '12:30',
-      date: 'Bugün',
-      confidence: 95
-    },
-    {
-      id: '2',
-      foodName: 'Izgara Tavuk',
-      calories: 320,
-      protein: 45,
-      carbs: 8,
-      fat: 12,
-      time: '19:45',
-      date: 'Dün',
-      confidence: 88
-    },
-    {
-      id: '3',
-      foodName: 'Yulaf Ezmesi',
-      calories: 280,
-      protein: 12,
-      carbs: 35,
-      fat: 8,
-      time: '08:15',
-      date: 'Dün',
-      confidence: 92
-    },
-    {
-      id: '4',
-      foodName: 'Mevsim Salata',
-      calories: 145,
-      protein: 6,
-      carbs: 18,
-      fat: 7,
-      time: '13:00',
-      date: '2 gün önce',
-      confidence: 90
-    },
-  ];
+  // Load recent meals on mount or when dependencies change
+  useEffect(() => {
+    loadRecentMeals();
+  }, [getRecentMeals, loadRecentMeals]);
+
+  const loadRecentMeals = useCallback(async () => {
+    try {
+      const meals = await getRecentMeals(10);
+      // Transform meals to expected format
+      const transformedMeals = meals.map(meal => ({
+        id: meal.id,
+        foodName: meal.name,
+        calories: meal.calories,
+        protein: meal.nutrition?.protein || 0,
+        carbs: meal.nutrition?.carbohydrates || 0,
+        fat: meal.nutrition?.fats || 0,
+        time: meal.time,
+        date: meal.date,
+        confidence: meal.confidence || 0
+      }));
+      setFoodHistory(transformedMeals);
+    } catch (error) {
+      console.error('Error loading recent meals:', error);
+    }
+  }, [getRecentMeals]);
 
   // Quick food suggestions
   const quickFoods = [
@@ -132,7 +114,7 @@ const CameraDashboardScreen = () => {
       backgroundColor: theme.semanticColors.background.primary,
     },
     scrollContent: {
-      paddingBottom: theme.spacing['2xl'],
+      paddingBottom: theme.spacing['2xl'] + 60, // Extra space for bottom nav
     },
     header: {
       paddingHorizontal: theme.spacing['2xl'],
@@ -277,18 +259,87 @@ const CameraDashboardScreen = () => {
       fontWeight: '700' as TextStyle['fontWeight'],
       color: theme.colors.primary,
     },
+
+    // Bottom Navigation - Modern style
+    bottomNav: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 90,
+      backgroundColor: '#FFFFFF',
+      borderTopWidth: 1,
+      borderTopColor: '#E2E8F0',
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      paddingBottom: 30,
+      paddingHorizontal: 24,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      elevation: 5,
+    },
+    navItem: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      flex: 1,
+      paddingVertical: 8,
+    },
+    navIcon: {
+      marginBottom: 4,
+    },
+    navLabel: {
+      fontSize: 12,
+      color: '#94A3B8',
+      fontWeight: '500',
+    },
+    navLabelActive: {
+      color: '#7C3AED',
+    },
   });
 
-  const handleCameraPress = () => {
+  const handleCameraPress = async () => {
     setIsAnalyzing(true);
-    setTimeout(() => {
+
+    try {
+      // Simulate AI analysis with sample data
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const analyzedMeal = {
+        name: 'Mevsim Salata',
+        calories: 145,
+        time: new Date().toTimeString().slice(0, 5),
+        type: 'Öğle Yemeği' as const,
+        nutrition: {
+          protein: 6,
+          carbohydrates: 18,
+          fats: 7
+        },
+        confidence: 92
+      };
+
+      // Add meal to Firestore via dashboard service
+      const addedMeal = await addMeal(analyzedMeal);
+
+      // Reload recent meals
+      await loadRecentMeals();
+
       setIsAnalyzing(false);
       Alert.alert(
         'Analiz Tamamlandı!',
-        'Yemek başarıyla analiz edildi.\n\n🥗 Mevsim Salata\nKalori: 145 kcal\nGüven: %92',
+        `Yemek başarıyla analiz edildi.\n\n🥗 ${addedMeal.name}\nKalori: ${addedMeal.calories} kcal\nGüven: ${addedMeal.confidence}%`,
         [{ text: 'Tamam', style: 'default' }]
       );
-    }, 2000);
+    } catch (error) {
+      setIsAnalyzing(false);
+      Alert.alert(
+        'Hata',
+        'Yemek analizi sırasında bir hata oluştu. Lütfen tekrar deneyin.',
+        [{ text: 'Tamam', style: 'default' }]
+      );
+    }
   };
 
   const renderFoodItem = ({ item }) => (
@@ -369,6 +420,26 @@ const CameraDashboardScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Bottom Navigation - Modern style */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard')}>
+          <Ionicons name="home-outline" size={24} color="#94A3B8" style={styles.navIcon} />
+          <Text style={styles.navLabel}>Ana Sayfa</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Ionicons name="camera" size={24} color="#7C3AED" style={styles.navIcon} />
+          <Text style={[styles.navLabel, styles.navLabelActive]}>Kamera</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/recipes')}>
+          <Ionicons name="restaurant-outline" size={24} color="#94A3B8" style={styles.navIcon} />
+          <Text style={styles.navLabel}>Tarifler</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/profile')}>
+          <Ionicons name="person-outline" size={24} color="#94A3B8" style={styles.navIcon} />
+          <Text style={styles.navLabel}>Profil</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };

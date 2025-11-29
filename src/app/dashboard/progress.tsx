@@ -4,7 +4,7 @@
  */
 
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
   ScrollView,
@@ -12,13 +12,28 @@ import {
   Text,
   TextStyle,
   View,
-  TouchableOpacity
+  TouchableOpacity,
+  RefreshControl,
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDashboard } from '@/hooks/use-dashboard';
 
 const { width } = Dimensions.get('window');
 
 const ProgressDashboardScreen = () => {
+  // Use dashboard hook for data management
+  const {
+    dashboardData,
+    isLoading,
+    isRefreshing,
+    error,
+    streakData,
+    todayStats,
+    achievements,
+    refreshDashboard,
+  } = useDashboard();
+
   // Create theme object that matches expected structure
   const theme = {
     semanticColors: {
@@ -60,27 +75,54 @@ const ProgressDashboardScreen = () => {
     coloredShadows: { gradient: SHADOWS.lg },
   };
 
-  // Progress data
-  const weeklyStats = [
-    { day: 'Pzt', calories: 1850, goal: 2000 },
-    { day: 'Sal', calories: 2100, goal: 2000 },
-    { day: 'Çar', calories: 1950, goal: 2000 },
-    { day: 'Per', calories: 2200, goal: 2000 },
-    { day: 'Cum', calories: 1800, goal: 2000 },
-    { day: 'Cmt', calories: 2300, goal: 2000 },
-    { day: 'Paz', calories: 1900, goal: 2000 },
-  ];
+  // Generate weekly stats from dashboard data
+  const generateWeeklyStats = () => {
+    const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+    const today = new Date();
+    const currentDayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1; // Monday = 0
+
+    return days.map((day, index) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - currentDayIndex + index);
+      const dateStr = date.toISOString().split('T')[0];
+
+      // Get data from dashboard if available
+      const dayData = dashboardData?.dailyStats?.[dateStr];
+      return {
+        day,
+        calories: dayData?.calories || 0,
+        goal: dayData?.goal || 2000,
+      };
+    });
+  };
+
+  const weeklyStats = generateWeeklyStats();
+
+  // Get streak-related achievements
+  const streakAchievements = achievements?.filter(a => a.category === 'streak') || [];
 
   const monthlyGoals = [
-    { title: 'Kilo Kaybı', current: 2.5, goal: 5, unit: 'kg', color: theme.colors.success },
-    { title: 'Egzersiz', current: 18, goal: 20, unit: 'gün', color: theme.colors.primary },
-    { title: 'Su Tüketimi', current: 120, goal: 140, unit: 'L', color: theme.colors.warning },
-  ];
-
-  const achievements = [
-    { icon: '🔥', title: '7 Günlük Seri', description: 'Haftada her gün giriş yaptın' },
-    { icon: '💪', title: 'Hedef Aşıldı', description: 'Haftalık kalori hedefini geçtin' },
-    { icon: '🏃', title: 'Aktif Kullanıcı', description: '10 günden beri aktifsin' },
+    {
+      title: 'Mevcut Seri',
+      current: streakData?.currentStreak || 0,
+      goal: Math.max((streakData?.bestStreak || 0) + 1, 7),
+      unit: 'gün',
+      color: theme.colors.primary
+    },
+    {
+      title: 'En İyi Seri',
+      current: streakData?.bestStreak || 0,
+      goal: 30,
+      unit: 'gün',
+      color: theme.colors.success
+    },
+    {
+      title: 'Bu Hafta Aktif Gün',
+      current: weeklyStats.filter(d => d.calories > 0).length,
+      goal: 7,
+      unit: 'gün',
+      color: theme.colors.warning
+    },
   ];
 
   // Dynamic styles using updated theme
@@ -249,6 +291,20 @@ const ProgressDashboardScreen = () => {
       fontSize: 12,
       color: theme.semanticColors.text.secondary,
     },
+
+    // Loading styles
+    loadingContainer: {
+      flex: 1,
+      backgroundColor: theme.semanticColors.background.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      marginTop: 16,
+      fontSize: 16,
+      color: theme.semanticColors.text.secondary,
+      fontWeight: '500',
+    },
   });
 
   const renderWeeklyChart = () => {
@@ -281,12 +337,32 @@ const ProgressDashboardScreen = () => {
     );
   };
 
+  // Show loading screen
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={styles.loadingText}>İlerleme verileri yükleniyor...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={refreshDashboard}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
+        }
       >
         <View style={styles.header}>
           <Text style={styles.title}>Detaylı Analiz</Text>
@@ -338,15 +414,23 @@ const ProgressDashboardScreen = () => {
           {/* Achievements */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Başarılar</Text>
-            {achievements.map((achievement, index) => (
-              <TouchableOpacity key={index} style={styles.achievementCard}>
-                <Text style={styles.achievementIcon}>{achievement.icon}</Text>
-                <View style={styles.achievementInfo}>
-                  <Text style={styles.achievementTitle}>{achievement.title}</Text>
-                  <Text style={styles.achievementDescription}>{achievement.description}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+            {streakAchievements.length > 0 ? (
+              streakAchievements.map((achievement, index) => (
+                <TouchableOpacity key={index} style={styles.achievementCard}>
+                  <Text style={styles.achievementIcon}>
+                    {achievement.category === 'streak' ? '🔥' : '🏆'}
+                  </Text>
+                  <View style={styles.achievementInfo}>
+                    <Text style={styles.achievementTitle}>{achievement.title}</Text>
+                    <Text style={styles.achievementDescription}>{achievement.description}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View style={styles.statsCard}>
+                <Text style={styles.chartSubtitle}>Henüz bir kazanım bulunmuyor. İlk başarıyı kazanmak için yemek kaydetmeye başla!</Text>
+              </View>
+            )}
           </View>
         </View>
       </ScrollView>

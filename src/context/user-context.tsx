@@ -7,58 +7,18 @@ import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { FIREBASE_CONFIG } from '@/constants/firebase';
-
-// Import existing onboarding types
+import { dashboardService } from '@/services/dashboard-service';
 import {
-  Activity,
-  CalculatedValues,
-  Commitment,
-  Diet,
+  UserDocument,
+  UserContextType,
+  UserProfile,
   Goals,
+  Activity,
+  Diet,
   Preferences,
-  UserProfile
-} from './onboarding-context';
-
-// User data structure for Firestore
-export interface UserDocument {
-  uid: string;
-  email?: string;
-  displayName?: string;
-  isAnonymous: boolean;
-  onboardingCompleted: boolean;
-  profile: Partial<UserProfile>;
-  goals: Partial<Goals>;
-  activity: Partial<Activity>;
-  diet: Partial<Diet>;
-  preferences: Partial<Preferences>;
-  commitment: Partial<Commitment>;
-  calculatedValues: CalculatedValues;
-  createdAt: any; // Firestore Timestamp
-  updatedAt: any; // Firestore Timestamp
-}
-
-// User Context Type
-export interface UserContextType {
-  // Auth state
-  user: FirebaseAuthTypes.User | null;
-  userData: UserDocument | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  isOnboardingCompleted: boolean;
-
-  // Actions
-  createAnonymousUser: () => Promise<FirebaseAuthTypes.User>;
-  updateUserProfile: (data: Partial<UserProfile>) => Promise<void>;
-  updateGoals: (data: Partial<Goals>) => Promise<void>;
-  updateActivity: (data: Partial<Activity>) => Promise<void>;
-  updateDiet: (data: Partial<Diet>) => Promise<void>;
-  updatePreferences: (data: Partial<Preferences>) => Promise<void>;
-  updateCommitment: (data: Partial<Commitment>) => Promise<void>;
-  completeOnboarding: () => Promise<void>;
-  signInAnonymously: () => Promise<FirebaseAuthTypes.User>;
-  signOut: () => Promise<void>;
-  refreshUserData: () => Promise<void>;
-}
+  Commitment,
+  CalculatedValues
+} from '@/types';
 
 // Create context
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -522,11 +482,24 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .doc(user.uid)
         .update({
           onboardingCompleted: true,
+          onboardingCompletedAt: new Date().toISOString(),
           updatedAt: firestore.FieldValue.serverTimestamp(),
         });
 
       console.log('completeOnboarding: Onboarding status updated to true');
       await refreshUserData();
+
+      // Initialize dashboard data after onboarding completion
+      try {
+        const userDoc = await loadUserData(user.uid);
+        if (userDoc) {
+          await dashboardService.initializeDashboardData(user.uid, userDoc);
+          console.log('completeOnboarding: Dashboard data initialized successfully');
+        }
+      } catch (dashboardError) {
+        console.warn('completeOnboarding: Could not initialize dashboard data:', dashboardError);
+      }
+
       console.log('completeOnboarding: User data refreshed successfully');
     } catch (error) {
       console.error('Error completing onboarding:', error);

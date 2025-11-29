@@ -18,10 +18,13 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  RefreshControl,
+  Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import StreakCard from '@/components/dashboard/streak-card';
+import { useDashboard } from '@/hooks/use-dashboard';
 
 const { width } = Dimensions.get('window');
 
@@ -33,15 +36,22 @@ const FIGMA_IMAGES = {
 const DashboardIndexScreen = () => {
   const router = useRouter();
   const { userData, user, isLoading: userLoading, isOnboardingCompleted } = useUser();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isChecking, setIsChecking] = useState(true);
 
-  // Streak data (minimalist 7-day design)
-  const streakData = {
-    currentStreak: 5,
-    bestStreak: 12,
-    weekDays: [true, true, true, false, true, false, true], // Pzt-Paz: 7 days of current week
-  };
+  // Use dashboard hook for data management
+  const {
+    userDocument,
+    isLoading,
+    isRefreshing,
+    error,
+    streakData,
+    todayLog,
+    recentMeals,
+    refreshDashboard,
+    clearError,
+    formatDateForDisplay,
+  } = useDashboard();
+
+  const [isChecking, setIsChecking] = useState(true);
 
   // Check onboarding status from Firebase (primary) and AsyncStorage (fallback)
   useEffect(() => {
@@ -160,45 +170,27 @@ const DashboardIndexScreen = () => {
     coloredShadows: { gradient: SHADOWS.lg },
   };
 
-  // Sample data for dashboard
-  const dailyStats = {
-    calories: 1250,
-    goal: 2000,
-    remaining: 750,
-    water: 6,
-    waterGoal: 8,
-    steps: 8500,
-    stepsGoal: 10000,
-    macros: {
-      carbs: { current: 150, goal: 250, color: '#F59E0B' },
-      protein: { current: 80, goal: 120, color: '#10B981' },
-      fat: { current: 45, goal: 65, color: '#EF4444' }
-    }
+  // Get data from dashboard hook or use defaults
+  const dailyStats = todayLog || {
+    calories: {
+      consumed: 0,
+      goal: userData?.calculatedValues?.dailyCalorieGoal || 2000,
+      remaining: userData?.calculatedValues?.dailyCalorieGoal || 2000,
+    },
+    nutrition: {
+      protein: { current: 0, goal: userData?.calculatedValues?.macros?.protein || 120 },
+      carbs: { current: 0, goal: userData?.calculatedValues?.macros?.carbs || 250 },
+      fats: { current: 0, goal: userData?.calculatedValues?.macros?.fats || 65 },
+    },
+    water: {
+      glasses: 0,
+      goal: 8,
+    },
+    steps: {
+      count: 0,
+      goal: 10000,
+    },
   };
-
-  const recentMeals = [
-    {
-      id: 1,
-      name: 'Yulaf Ezmesi',
-      calories: 320,
-      time: '08:30',
-      type: 'Kahvaltı'
-    },
-    {
-      id: 2,
-      name: 'Tavuklu Salata',
-      calories: 450,
-      time: '12:45',
-      type: 'Öğle Yemeği'
-    },
-    {
-      id: 3,
-      name: 'Elma',
-      calories: 95,
-      time: '15:20',
-      type: 'Atıştırmalık'
-    }
-  ];
 
   // Dynamic styles using updated theme - Figma Design inspired
   const styles = StyleSheet.create({
@@ -643,14 +635,24 @@ const DashboardIndexScreen = () => {
     },
   });
 
-  // Show loading screen while checking onboarding status
+  // Show error if any
+  if (error && !isLoading && !isChecking) {
+    Alert.alert('Hata', error, [
+      { text: 'Yeniden Dene', onPress: refreshDashboard },
+      { text: 'İptal', onPress: clearError },
+    ]);
+  }
+
+  // Show loading screen while checking onboarding status or loading dashboard data
   if (isChecking || isLoading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
         <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
         <View style={styles.loadingContent}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Yükleniyor...</Text>
+          <Text style={styles.loadingText}>
+            {isChecking ? 'Giriş Kontrol Ediliyor...' : 'Dashboard Yükleniyor...'}
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -659,7 +661,18 @@ const DashboardIndexScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={refreshDashboard}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
+        }
+      >
         <View style={styles.content}>
           {/* Header Section - Figma style */}
           <View style={styles.header}>
@@ -680,9 +693,9 @@ const DashboardIndexScreen = () => {
           {/* Minimalist Streak Card - Below Header */}
           <View style={styles.streakContainer}>
             <StreakCard
-              currentStreak={streakData.currentStreak}
-              bestStreak={streakData.bestStreak}
-              weekDays={streakData.weekDays}
+              currentStreak={streakData?.currentStreak || 0}
+              bestStreak={streakData?.bestStreak || 0}
+              weekDays={streakData?.weekDays || [false, false, false, false, false, false, false]}
               onPress={() => router.push('/dashboard/progress')}
             />
           </View>
@@ -721,10 +734,10 @@ const DashboardIndexScreen = () => {
 
                 <View style={styles.summaryProgress}>
                   <Text style={styles.progressText}>
-                    {Math.round((dailyStats.calories / dailyStats.goal) * 100)}%
+                    {Math.round((dailyStats.calories.consumed / dailyStats.calories.goal) * 100)}%
                   </Text>
                   <Text style={styles.progressLabel}>
-                    {dailyStats.calories} / {dailyStats.goal} kalori
+                    {dailyStats.calories.consumed} / {dailyStats.calories.goal} kalori
                   </Text>
 
                   <View style={styles.progressBarContainer}>
@@ -732,7 +745,7 @@ const DashboardIndexScreen = () => {
                       style={[
                         styles.progressBarFill,
                         {
-                          width: `${Math.min((dailyStats.calories / dailyStats.goal) * 100, 100)}%`
+                          width: `${Math.min((dailyStats.calories.consumed / dailyStats.calories.goal) * 100, 100)}%`
                         }
                       ]}
                     />
@@ -745,15 +758,15 @@ const DashboardIndexScreen = () => {
                   <View style={styles.macroItem}>
                     <View style={styles.macroHeader}>
                       <Text style={styles.macroName}>Karbonhidrat</Text>
-                      <Text style={styles.macroValues}>{dailyStats.macros.carbs.current}g / {dailyStats.macros.carbs.goal}g</Text>
+                      <Text style={styles.macroValues}>{dailyStats.nutrition.carbs.current}g / {dailyStats.nutrition.carbs.goal}g</Text>
                     </View>
                     <View style={styles.macroProgressBar}>
                       <View
                         style={[
                           styles.macroProgressFill,
                           {
-                            width: `${Math.min((dailyStats.macros.carbs.current / dailyStats.macros.carbs.goal) * 100, 100)}%`,
-                            backgroundColor: dailyStats.macros.carbs.color
+                            width: `${Math.min((dailyStats.nutrition.carbs.current / dailyStats.nutrition.carbs.goal) * 100, 100)}%`,
+                            backgroundColor: '#F59E0B'
                           }
                         ]}
                       />
@@ -764,15 +777,15 @@ const DashboardIndexScreen = () => {
                   <View style={styles.macroItem}>
                     <View style={styles.macroHeader}>
                       <Text style={styles.macroName}>Protein</Text>
-                      <Text style={styles.macroValues}>{dailyStats.macros.protein.current}g / {dailyStats.macros.protein.goal}g</Text>
+                      <Text style={styles.macroValues}>{dailyStats.nutrition.protein.current}g / {dailyStats.nutrition.protein.goal}g</Text>
                     </View>
                     <View style={styles.macroProgressBar}>
                       <View
                         style={[
                           styles.macroProgressFill,
                           {
-                            width: `${Math.min((dailyStats.macros.protein.current / dailyStats.macros.protein.goal) * 100, 100)}%`,
-                            backgroundColor: dailyStats.macros.protein.color
+                            width: `${Math.min((dailyStats.nutrition.protein.current / dailyStats.nutrition.protein.goal) * 100, 100)}%`,
+                            backgroundColor: '#10B981'
                           }
                         ]}
                       />
@@ -783,15 +796,15 @@ const DashboardIndexScreen = () => {
                   <View style={styles.macroItem}>
                     <View style={styles.macroHeader}>
                       <Text style={styles.macroName}>Yağ</Text>
-                      <Text style={styles.macroValues}>{dailyStats.macros.fat.current}g / {dailyStats.macros.fat.goal}g</Text>
+                      <Text style={styles.macroValues}>{dailyStats.nutrition.fats.current}g / {dailyStats.nutrition.fats.goal}g</Text>
                     </View>
                     <View style={styles.macroProgressBar}>
                       <View
                         style={[
                           styles.macroProgressFill,
                           {
-                            width: `${Math.min((dailyStats.macros.fat.current / dailyStats.macros.fat.goal) * 100, 100)}%`,
-                            backgroundColor: dailyStats.macros.fat.color
+                            width: `${Math.min((dailyStats.nutrition.fats.current / dailyStats.nutrition.fats.goal) * 100, 100)}%`,
+                            backgroundColor: '#EF4444'
                           }
                         ]}
                       />
@@ -816,7 +829,7 @@ const DashboardIndexScreen = () => {
                   <View style={[styles.quickStatIcon, { backgroundColor: '#EBF8FF' }]}>
                     <Ionicons name="water" size={24} color="#3B82F6" />
                   </View>
-                  <Text style={styles.quickStatValue}>{dailyStats.water}</Text>
+                  <Text style={styles.quickStatValue}>{dailyStats.water.glasses}</Text>
                   <Text style={styles.quickStatLabel}>Bardak Su</Text>
                 </View>
 
@@ -825,7 +838,7 @@ const DashboardIndexScreen = () => {
                   <View style={[styles.quickStatIcon, { backgroundColor: '#ECFDF5' }]}>
                     <Ionicons name="walk" size={24} color="#10B981" />
                   </View>
-                  <Text style={styles.quickStatValue}>{(dailyStats.steps / 1000).toFixed(1)}k</Text>
+                  <Text style={styles.quickStatValue}>{(dailyStats.steps.count / 1000).toFixed(1)}k</Text>
                   <Text style={styles.quickStatLabel}>Adım</Text>
                 </View>
 
@@ -834,7 +847,7 @@ const DashboardIndexScreen = () => {
                   <View style={[styles.quickStatIcon, { backgroundColor: '#FEF3C7' }]}>
                     <Ionicons name="time" size={24} color="#F59E0B" />
                   </View>
-                  <Text style={styles.quickStatValue}>{dailyStats.remaining}</Text>
+                  <Text style={styles.quickStatValue}>{dailyStats.calories.remaining}</Text>
                   <Text style={styles.quickStatLabel}>Kalan Kalori</Text>
                 </View>
               </ScrollView>
@@ -864,15 +877,15 @@ const DashboardIndexScreen = () => {
 
               <View style={styles.detailedStatProgress}>
                 <View style={styles.detailedStatNumbers}>
-                  <Text style={styles.detailedStatCurrent}>{dailyStats.calories}</Text>
-                  <Text style={styles.detailedStatGoal}>/ {dailyStats.goal} kcal</Text>
+                  <Text style={styles.detailedStatCurrent}>{dailyStats.calories.consumed}</Text>
+                  <Text style={styles.detailedStatGoal}>/ {dailyStats.calories.goal} kcal</Text>
                 </View>
                 <View style={styles.progressBar}>
                   <View
                     style={[
                       styles.progressFill,
                       {
-                        width: `${(dailyStats.calories / dailyStats.goal) * 100}%`,
+                        width: `${(dailyStats.calories.consumed / dailyStats.calories.goal) * 100}%`,
                         backgroundColor: '#7C3AED'
                       }
                     ]}
@@ -900,15 +913,15 @@ const DashboardIndexScreen = () => {
 
               <View style={styles.detailedStatProgress}>
                 <View style={styles.detailedStatNumbers}>
-                  <Text style={styles.detailedStatCurrent}>{dailyStats.water}</Text>
-                  <Text style={styles.detailedStatGoal}>/ {dailyStats.waterGoal} bardak</Text>
+                  <Text style={styles.detailedStatCurrent}>{dailyStats.water.glasses}</Text>
+                  <Text style={styles.detailedStatGoal}>/ {dailyStats.water.goal} bardak</Text>
                 </View>
                 <View style={styles.progressBar}>
                   <View
                     style={[
                       styles.progressFill,
                       {
-                        width: `${(dailyStats.water / dailyStats.waterGoal) * 100}%`,
+                        width: `${(dailyStats.water.glasses / dailyStats.water.goal) * 100}%`,
                         backgroundColor: '#3B82F6'
                       }
                     ]}
@@ -931,7 +944,7 @@ const DashboardIndexScreen = () => {
               <TouchableOpacity key={meal.id} style={styles.mealCard}>
                 <View style={styles.mealIconContainer}>
                   <Ionicons
-                    name={meal.type === 'Kahvaltı' ? 'sunny-outline' : meal.type === 'Öğle Yemeği' ? 'partly-sunny-outline' : 'moon-outline'}
+                    name={meal.type === 'Kahvaltı' ? 'sunny-outline' : meal.type === 'Öğle Yemeği' ? 'partly-sunny-outline' : meal.type === 'Akşam Yemeği' ? 'moon-outline' : 'nutrition-outline'}
                     size={24}
                     color="#F59E0B"
                   />

@@ -15,13 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-interface StreakCardProps {
-  currentStreak: number;
-  bestStreak: number;
-  weekDays: boolean[]; // 7 days of the week
-  onPress?: () => void;
-}
+import { StreakCardProps } from '@/types/ui';
 
 const StreakCard: React.FC<StreakCardProps> = ({
   currentStreak,
