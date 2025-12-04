@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const FUNCTIONS_URL = process.env.EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL || 'https://us-central1-caloriesapp-demo.cloudfunctions.net';
+const FUNCTIONS_URL = process.env.EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL || 'https://us-central1-calories-app-185b6.cloudfunctions.net';
 
 export interface FoodAnalysisResult {
   food_name: string;
@@ -51,8 +51,36 @@ class GeminiService {
     userPrompt?: string,
     authToken?: string
   ): Promise<{ success: boolean; data: FoodAnalysisResult }> {
+    // Debug logları ekle
+    console.log('Gemini Service: analyzeFood çağrıldı');
+    console.log('Image length:', imageBase64.length);
+    console.log('Image starts with:', imageBase64.substring(0, 50) + '...');
+
+    // Base64 formatını kontrol et ve düzelt
+    let processedImageBase64 = imageBase64;
+
+    // Data URL formatındaysa sadece base64 kısmını al
+    if (imageBase64.includes(',')) {
+      processedImageBase64 = imageBase64.split(',')[1];
+      console.log('Image processed: Data URL\'den base64 ayrıldı');
+    }
+
+    // Whitespace karakterlerini temizle
+    processedImageBase64 = processedImageBase64.replace(/\s+/g, '').trim();
+    console.log('Image cleaned, new length:', processedImageBase64.length);
+
+    // Base64 formatını doğrula
+    const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+    if (!base64Regex.test(processedImageBase64)) {
+      console.error('Invalid base64 format detected');
+      console.log('First 100 chars:', processedImageBase64.substring(0, 100));
+      throw new Error('Geçersiz resim formatı');
+    }
+
+    console.log('Processed image length:', processedImageBase64.length);
+
     return this.makeRequest('/analyzeFood', {
-      imageBase64,
+      imageBase64: processedImageBase64,
       userPrompt: userPrompt || 'Bu yemeği analiz et ve besin değerlerini tahmin et'
     }, authToken);
   }

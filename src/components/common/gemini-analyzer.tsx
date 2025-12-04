@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 import { useGemini } from '@/hooks/use-gemini';
 import { FoodAnalysisResult } from '@/services/gemini-service';
@@ -64,15 +65,49 @@ const GeminiAnalyzer: React.FC<GeminiAnalyzerProps> = ({
   // Galeriden resim seç
   const pickImage = async () => {
     try {
+      // Dosya iznini iste
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('İzin Gerekli', 'Galeriye erişim izni vermeniz gerekmektedir.');
+        return;
+      }
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
+        allowsEditing: false, // Sanal cihazda sorun çıkarmaması için kapat
         quality: 0.7,
         base64: true,
+        presentationStyle: 'fullScreen',
+        selectionLimit: 1,
       });
 
-      if (!result.canceled && result.assets[0].base64) {
-        setPreviewImage(`data:image/jpeg;base64,${result.assets[0].base64}`);
+      console.log('ImagePicker result:', result);
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+
+        // Base64 data kontrolü
+        if (asset.base64) {
+          setPreviewImage(`data:image/jpeg;base64,${asset.base64}`);
+          console.log('Base64 image loaded, size:', asset.base64.length);
+        } else if (asset.uri) {
+          // Eğer base64 gelmezse, URI'yi base64'e çevir
+          console.log('Image URI:', asset.uri);
+
+          try {
+            // URI'yi base64'e çevir
+            const base64 = await FileSystem.readAsStringAsync(asset.uri, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+
+            const mimeType = asset.mimeType || 'image/jpeg';
+            setPreviewImage(`data:${mimeType};base64,${base64}`);
+            console.log('Base64 converted from URI, size:', base64.length);
+          } catch (fsError) {
+            console.error('FileSystem error:', fsError);
+            Alert.alert('Hata', 'Dosya okunamadı. Başka bir resim seçin.');
+          }
+        }
       }
     } catch (error) {
       Alert.alert('Hata', 'Resim seçilemedi');

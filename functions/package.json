@@ -1,28 +1,47 @@
 {
   "name": "functions",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "lint": "eslint .",
-    "serve": "firebase emulators:start --only functions",
-    "shell": "firebase functions:shell",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "deploy": "npm run build && firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "predeploy": "npm run build",
+    "test": "jest"
   },
-  "keywords": [],
+  "keywords": [
+    "firebase",
+    "functions",
+    "gemini",
+    "ai",
+    "food-analysis",
+    "calorietrack"
+  ],
   "author": "",
   "license": "ISC",
   "description": "Firebase Functions for CaloriTrack app with Gemini 2.0 Flash API integration",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.13.2",
     "firebase-admin": "^13.6.0",
-    "firebase-functions": "^7.0.0"
+    "firebase-functions": "^7.0.1"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.57.0",
     "eslint-plugin-promise": "^7.1.0",
-    "firebase-functions-test": "^3.3.0"
+    "firebase-functions-test": "^3.3.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": "20"

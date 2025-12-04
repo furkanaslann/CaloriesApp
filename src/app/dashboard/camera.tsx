@@ -14,7 +14,8 @@ import {
   TextStyle,
   TouchableOpacity,
   View,
-  Modal
+  Modal,
+  Linking
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,6 +24,8 @@ import { useDashboard } from '@/hooks/use-dashboard';
 import GeminiAnalyzer from '@/components/common/gemini-analyzer';
 import { FoodAnalysisResult } from '@/services/gemini-service';
 import { useUser } from '@/context/user-context';
+import * as ImagePicker from 'expo-image-picker';
+import { Camera } from 'expo-camera';
 
 const { width } = Dimensions.get('window');
 
@@ -32,6 +35,11 @@ const CameraDashboardScreen = () => {
   const { user } = useUser();
   const [foodHistory, setFoodHistory] = useState([]);
   const [showGeminiAnalyzer, setShowGeminiAnalyzer] = useState(false);
+
+  // İzin durumları
+  const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
+  const [galleryPermission, setGalleryPermission] = useState<boolean | null>(null);
+  const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
   // Create theme object that matches expected structure
   const theme = {
     semanticColors: {
@@ -75,9 +83,65 @@ const CameraDashboardScreen = () => {
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
+  // İzinleri kontrol et
+  const checkPermissions = async () => {
+    setIsLoadingPermissions(true);
+    try {
+      // Kamera izni
+      const cameraResult = await Camera.requestCameraPermissionsAsync();
+      setCameraPermission(cameraResult.status === 'granted');
+
+      // Galeri izni
+      const galleryResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      setGalleryPermission(galleryResult.status === 'granted');
+
+      // İzinlerden biri verilmediyse kullanıcıyı bilgilendir
+      if (cameraResult.status !== 'granted' || galleryResult.status !== 'granted') {
+        showPermissionAlert(cameraResult.status === 'granted', galleryResult.status === 'granted');
+      }
+    } catch (error) {
+      console.error('Permission check error:', error);
+      Alert.alert('Hata', 'İzinler kontrol edilirken bir hata oluştu.');
+    } finally {
+      setIsLoadingPermissions(false);
+    }
+  };
+
+  // İzin uyarısı göster
+  const showPermissionAlert = (hasCamera: boolean, hasGallery: boolean) => {
+    let message = 'AI yiyecek analizi için aşağıdaki izinler gereklidir:\n\n';
+
+    if (!hasCamera) {
+      message += '• Kamera: Yemek fotoğrafları çekmek için\n';
+    }
+    if (!hasGallery) {
+      message += '• Galeri: Mevcut fotoğrafları seçmek için\n';
+    }
+
+    message += '\nAyarlar → Uygulama İzinleri bölümünden izinleri verebilirsiniz.';
+
+    Alert.alert(
+      'İzin Gerekli',
+      message,
+      [
+        { text: 'İptal', style: 'cancel' },
+        {
+          text: 'Ayarları Aç',
+          onPress: () => Linking.openSettings()
+        }
+      ]
+    );
+  };
+
+  // İzinleri yeniden kontrol et
+  const handleRefreshPermissions = async () => {
+    await checkPermissions();
+  };
+
   // Load recent meals on mount or when dependencies change
   useEffect(() => {
     loadRecentMeals();
+    checkPermissions(); // İzinleri kontrol et
   }, [getRecentMeals, loadRecentMeals]);
 
   const loadRecentMeals = useCallback(async () => {
@@ -348,9 +412,53 @@ const CameraDashboardScreen = () => {
     navLabelActive: {
       color: '#7C3AED',
     },
+
+    // Permission styles
+    permissionAlert: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#FEF3C7',
+      borderRadius: theme.borderRadius.lg,
+      padding: theme.spacing.md,
+      marginBottom: theme.spacing.lg,
+      borderWidth: 1,
+      borderColor: '#F59E0B',
+    },
+    permissionContent: {
+      flex: 1,
+      marginLeft: theme.spacing.md,
+    },
+    permissionTitle: {
+      fontSize: 16,
+      fontWeight: '600' as TextStyle['fontWeight'],
+      color: theme.semanticColors.text.primary,
+      marginBottom: 2,
+    },
+    permissionText: {
+      fontSize: 14,
+      color: theme.semanticColors.text.secondary,
+    },
+    refreshButton: {
+      padding: theme.spacing.sm,
+      borderRadius: theme.borderRadius.md,
+      backgroundColor: '#F3F4F6',
+    },
   });
 
   const handleCameraPress = () => {
+    // İzinler kontrol edilmediyse kontrol et
+    if (cameraPermission === null || galleryPermission === null) {
+      checkPermissions();
+      return;
+    }
+
+    // İzinler verilmediyse kontrol et
+    if (!cameraPermission || !galleryPermission) {
+      showPermissionAlert(cameraPermission, galleryPermission);
+      return;
+    }
+
+    // Tüm izinler verildiyse analyzer'ı aç
     setShowGeminiAnalyzer(true);
   };
 
@@ -444,15 +552,53 @@ const CameraDashboardScreen = () => {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.content}>
+          {/* İzin Durumu */}
+          {(cameraPermission === false || galleryPermission === false) && (
+            <View style={styles.permissionAlert}>
+              <Ionicons name="warning" size={24} color="#F59E0B" />
+              <View style={styles.permissionContent}>
+                <Text style={styles.permissionTitle}>İzin Gerekli</Text>
+                <Text style={styles.permissionText}>
+                  {!cameraPermission && !galleryPermission
+                    ? 'Kamera ve Galeri izinleri gerekli'
+                    : !cameraPermission
+                    ? 'Kamera izni gerekli'
+                    : 'Galeri izni gerekli'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.refreshButton}
+                onPress={handleRefreshPermissions}
+                disabled={isLoadingPermissions}
+              >
+                {isLoadingPermissions ? (
+                  <Ionicons name="sync" size={20} color="#CBD5E1" />
+                ) : (
+                  <Ionicons name="refresh" size={20} color="#7C3AED" />
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* AI Camera Button */}
           <TouchableOpacity
-            style={[styles.cameraButton, isAnalyzing && styles.cameraButtonDisabled]}
+            style={[
+              styles.cameraButton,
+              (isAnalyzing || (cameraPermission === false || galleryPermission === false)) &&
+              styles.cameraButtonDisabled
+            ]}
             onPress={handleCameraPress}
-            disabled={isAnalyzing}
+            disabled={isAnalyzing || (cameraPermission === false || galleryPermission === false)}
           >
             <Ionicons name="camera" size={24} color="#FFFFFF" style={{ marginRight: 8 }} />
             <Text style={styles.cameraButtonText}>
-              {isAnalyzing ? 'İşleniyor...' : '📸 AI ile Analiz Et'}
+              {isLoadingPermissions
+                ? 'İzinler Kontrol Ediliyor...'
+                : isAnalyzing
+                ? 'İşleniyor...'
+                : cameraPermission === false || galleryPermission === false
+                ? 'İzin Gerekli 📋'
+                : '📸 AI ile Analiz Et'}
             </Text>
           </TouchableOpacity>
 
