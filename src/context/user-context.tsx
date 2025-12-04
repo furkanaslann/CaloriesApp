@@ -7,7 +7,6 @@ import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { FIREBASE_CONFIG } from '@/constants/firebase';
-import { dashboardService } from '@/services/dashboard-service';
 import {
   UserDocument,
   UserContextType,
@@ -489,17 +488,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.log('completeOnboarding: Onboarding status updated to true');
       await refreshUserData();
 
-      // Initialize dashboard data after onboarding completion
-      try {
-        const userDoc = await loadUserData(user.uid);
-        if (userDoc) {
-          await dashboardService.initializeDashboardData(user.uid, userDoc);
-          console.log('completeOnboarding: Dashboard data initialized successfully');
-        }
-      } catch (dashboardError) {
-        console.warn('completeOnboarding: Could not initialize dashboard data:', dashboardError);
-      }
-
+  
       console.log('completeOnboarding: User data refreshed successfully');
     } catch (error) {
       console.error('Error completing onboarding:', error);

@@ -22,7 +22,11 @@
       "Bash(done:*)",
       "Bash(./gradlew.bat:*)",
       "mcp__figma-dev-mode-mcp-server__get_screenshot",
-      "mcp__figma-dev-mode-mcp-server__get_design_context"
+      "mcp__figma-dev-mode-mcp-server__get_design_context",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(firebase login:*)",
+      "Bash(firebase init functions:*)"
     ],
     "deny": [],
     "ask": []

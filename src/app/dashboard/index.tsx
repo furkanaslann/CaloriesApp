@@ -36,16 +36,17 @@ const FIGMA_IMAGES = {
 const DashboardIndexScreen = () => {
   const router = useRouter();
   const { userData, user, isLoading: userLoading, isOnboardingCompleted } = useUser();
+  const [isLoading, setIsLoading] = useState(true);
 
   // Use dashboard hook for data management
   const {
     userDocument,
-    isLoading,
+    isLoading: dashboardLoading,
     isRefreshing,
     error,
     streakData,
     todayLog,
-    recentMeals,
+    recentMeals = [],
     refreshDashboard,
     clearError,
     formatDateForDisplay,
@@ -576,6 +577,95 @@ const DashboardIndexScreen = () => {
       fontWeight: '700',
       color: '#7C3AED',
     },
+    mealNutrition: {
+      flexDirection: 'row',
+      gap: 8,
+      marginTop: 4,
+    },
+    nutritionText: {
+      fontSize: 12,
+      color: '#64748B',
+      backgroundColor: '#F1F5F9',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+
+    // Empty State
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: 40,
+      paddingHorizontal: 24,
+    },
+    emptyStateTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: '#1E293B',
+      marginTop: 16,
+      marginBottom: 8,
+    },
+    emptyStateSubtitle: {
+      fontSize: 14,
+      color: '#64748B',
+      textAlign: 'center',
+      marginBottom: 24,
+      lineHeight: 20,
+    },
+    addFirstMealButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#7C3AED',
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      borderRadius: 12,
+      gap: 8,
+    },
+    addFirstMealText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: '#FFFFFF',
+    },
+
+    // Quick Add Section
+    quickAddSection: {
+      paddingHorizontal: 24,
+      marginBottom: 32,
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: '#1E293B',
+      marginBottom: 16,
+    },
+    quickAddContainer: {
+      flexDirection: 'row',
+      gap: 12,
+      paddingRight: 24,
+    },
+    quickAddItem: {
+      alignItems: 'center',
+      backgroundColor: '#FFFFFF',
+      borderRadius: 12,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: '#E2E8F0',
+      minWidth: 80,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 1,
+    },
+    quickAddEmoji: {
+      fontSize: 24,
+      marginBottom: 8,
+    },
+    quickAddName: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: '#1E293B',
+      textAlign: 'center',
+    },
 
     // Bottom Navigation - Modern style
     bottomNav: {
@@ -931,31 +1021,70 @@ const DashboardIndexScreen = () => {
             </View>
           </View>
 
-          {/* Recent Meals Section */}
+          {/* Food Logging Section */}
           <View style={styles.recentMealsSection}>
             <View style={styles.recentMealsHeader}>
-              <Text style={styles.recentMealsTitle}>Son Öğünler</Text>
-              <TouchableOpacity>
+              <Text style={styles.recentMealsTitle}>Bugünün Yiyecekleri</Text>
+              <TouchableOpacity onPress={() => router.push('/dashboard/meals')}>
                 <Text style={styles.seeAllButton}>Tümünü Gör</Text>
               </TouchableOpacity>
             </View>
 
-            {recentMeals.map((meal) => (
-              <TouchableOpacity key={meal.id} style={styles.mealCard}>
-                <View style={styles.mealIconContainer}>
-                  <Ionicons
-                    name={meal.type === 'Kahvaltı' ? 'sunny-outline' : meal.type === 'Öğle Yemeği' ? 'partly-sunny-outline' : meal.type === 'Akşam Yemeği' ? 'moon-outline' : 'nutrition-outline'}
-                    size={24}
-                    color="#F59E0B"
-                  />
-                </View>
-                <View style={styles.mealContent}>
-                  <Text style={styles.mealName}>{meal.name}</Text>
-                  <Text style={styles.mealMeta}>{meal.time} • {meal.type}</Text>
-                </View>
-                <Text style={styles.mealCalories}>{meal.calories}</Text>
-              </TouchableOpacity>
-            ))}
+            {recentMeals.length > 0 ? (
+              recentMeals.map((meal) => (
+                <TouchableOpacity key={meal.id} style={styles.mealCard}>
+                  <View style={styles.mealIconContainer}>
+                    <Ionicons
+                      name={meal.type === 'Kahvaltı' ? 'sunny-outline' : meal.type === 'Öğle Yemeği' ? 'partly-sunny-outline' : meal.type === 'Akşam Yemeği' ? 'moon-outline' : 'nutrition-outline'}
+                      size={24}
+                      color="#F59E0B"
+                    />
+                  </View>
+                  <View style={styles.mealContent}>
+                    <Text style={styles.mealName}>{meal.name}</Text>
+                    <Text style={styles.mealMeta}>{meal.time} • {meal.type}</Text>
+                    {meal.nutrition && (
+                      <View style={styles.mealNutrition}>
+                        <Text style={styles.nutritionText}>P: {meal.nutrition.protein}g</Text>
+                        <Text style={styles.nutritionText}>K: {meal.nutrition.carbohydrates}g</Text>
+                        <Text style={styles.nutritionText}>Y: {meal.nutrition.fats}g</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.mealCalories}>{meal.calories} kcal</Text>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View style={styles.emptyState}>
+                <Ionicons name="restaurant-outline" size={48} color="#CBD5E1" />
+                <Text style={styles.emptyStateTitle}>Henüz yiyecek eklenmedi</Text>
+                <Text style={styles.emptyStateSubtitle}>
+                  Fotoğraf çekerek veya manuel ekleyerek başlayın
+                </Text>
+                <TouchableOpacity
+                  style={styles.addFirstMealButton}
+                  onPress={() => router.push('/dashboard/camera')}
+                >
+                  <Ionicons name="camera" size={20} color="#FFFFFF" />
+                  <Text style={styles.addFirstMealText}>İlk Yiyeceği Ekle</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          {/* Quick Add Food Section */}
+          <View style={styles.quickAddSection}>
+            <Text style={styles.sectionTitle}>Hızlı Ekle</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.quickAddContainer}>
+                {['🍎 Elma', '🥗 Salata', '🍗 Tavuk', '🥛 Yoğurt', '🍌 Muz'].map((food, index) => (
+                  <TouchableOpacity key={index} style={styles.quickAddItem}>
+                    <Text style={styles.quickAddEmoji}>{food.split(' ')[0]}</Text>
+                    <Text style={styles.quickAddName}>{food.split(' ')[1]}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
           </View>
         </View>
       </ScrollView>

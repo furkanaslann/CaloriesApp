@@ -13,19 +13,25 @@ import {
   Text,
   TextStyle,
   TouchableOpacity,
-  View
+  View,
+  Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useDashboard } from '@/hooks/use-dashboard';
+import GeminiAnalyzer from '@/components/common/gemini-analyzer';
+import { FoodAnalysisResult } from '@/services/gemini-service';
+import { useUser } from '@/context/user-context';
 
 const { width } = Dimensions.get('window');
 
 const CameraDashboardScreen = () => {
   const router = useRouter();
   const { addMeal, getRecentMeals } = useDashboard();
+  const { user } = useUser();
   const [foodHistory, setFoodHistory] = useState([]);
+  const [showGeminiAnalyzer, setShowGeminiAnalyzer] = useState(false);
   // Create theme object that matches expected structure
   const theme = {
     semanticColors: {
@@ -150,16 +156,60 @@ const CameraDashboardScreen = () => {
       paddingVertical: theme.spacing['2xl'],
       alignItems: 'center',
       marginBottom: theme.spacing['2xl'],
+      flexDirection: 'row',
+      justifyContent: 'center',
       ...theme.shadows.lg,
+    },
+    cameraButtonDisabled: {
+      backgroundColor: '#CBD5E1',
     },
     cameraButtonText: {
       fontSize: 18,
       fontWeight: '600' as TextStyle['fontWeight'],
       color: theme.semanticColors.onPrimary,
     },
-    cameraIcon: {
-      fontSize: 24,
-      marginRight: theme.spacing.sm,
+
+    // AI Features Section
+    aiFeaturesSection: {
+      marginBottom: theme.spacing['2xl'],
+    },
+    featureCard: {
+      backgroundColor: theme.semanticColors.background.primary,
+      borderRadius: theme.borderRadius.lg,
+      borderWidth: 1,
+      borderColor: theme.semanticColors.border.primary,
+      padding: theme.spacing.lg,
+      marginBottom: theme.spacing.md,
+      flexDirection: 'row',
+      alignItems: 'center',
+      ...theme.shadows.sm,
+    },
+    featureTitle: {
+      fontSize: 16,
+      fontWeight: '600' as TextStyle['fontWeight'],
+      color: theme.semanticColors.text.primary,
+      marginLeft: theme.spacing.md,
+      flex: 1,
+    },
+    featureDescription: {
+      fontSize: 14,
+      color: theme.semanticColors.text.secondary,
+      marginLeft: theme.spacing.md,
+      flex: 2,
+    },
+
+    // Modal Styles
+    closeModalButton: {
+      position: 'absolute',
+      top: 60,
+      right: 24,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000,
     },
     quickAddSection: {
       marginBottom: theme.spacing['2xl'],
@@ -300,24 +350,28 @@ const CameraDashboardScreen = () => {
     },
   });
 
-  const handleCameraPress = async () => {
-    setIsAnalyzing(true);
+  const handleCameraPress = () => {
+    setShowGeminiAnalyzer(true);
+  };
 
+  const handleAnalysisComplete = async (result: FoodAnalysisResult) => {
     try {
-      // Simulate AI analysis with sample data
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      setIsAnalyzing(true);
 
+      // Create meal object from AI analysis
       const analyzedMeal = {
-        name: 'Mevsim Salata',
-        calories: 145,
+        name: result.food_name,
+        calories: result.calories,
         time: new Date().toTimeString().slice(0, 5),
         type: 'Öğle Yemeği' as const,
         nutrition: {
-          protein: 6,
-          carbohydrates: 18,
-          fats: 7
+          protein: result.protein,
+          carbohydrates: result.carbs,
+          fats: result.fat
         },
-        confidence: 92
+        confidence: Math.round(result.confidence_score * 100),
+        ingredients: result.ingredients,
+        health_tips: result.health_tips
       };
 
       // Add meal to Firestore via dashboard service
@@ -328,14 +382,17 @@ const CameraDashboardScreen = () => {
 
       setIsAnalyzing(false);
       Alert.alert(
-        'Analiz Tamamlandı!',
-        `Yemek başarıyla analiz edildi.\n\n🥗 ${addedMeal.name}\nKalori: ${addedMeal.calories} kcal\nGüven: ${addedMeal.confidence}%`,
-        [{ text: 'Tamam', style: 'default' }]
+        '✅ AI Analiz Tamamlandı!',
+        `🍽️ ${addedMeal.name}\n🔥 ${addedMeal.calories} kcal\n💪 Protein: ${addedMeal.nutrition.protein}g\n🌾 Karbonhidrat: ${addedMeal.nutrition.carbohydrates}g\n🥑 Yağ: ${addedMeal.nutrition.fats}g\n\nGüven Skoru: ${addedMeal.confidence}%`,
+        [
+          { text: 'Dashboard', onPress: () => router.push('/dashboard') },
+          { text: 'Tamam', style: 'default' }
+        ]
       );
     } catch (error) {
       setIsAnalyzing(false);
       Alert.alert(
-        'Hata',
+        '❌ Hata',
         'Yemek analizi sırasında bir hata oluştu. Lütfen tekrar deneyin.',
         [{ text: 'Tamam', style: 'default' }]
       );
@@ -377,8 +434,8 @@ const CameraDashboardScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Akıllı Fotoğraf</Text>
-        <Text style={styles.subtitle}>Yemeklerinizi anında analiz edin</Text>
+        <Text style={styles.title}>🤖 AI Yiyecek Analizi</Text>
+        <Text style={styles.subtitle}>Yemeklerinizi fotoğraflayarak anında analiz edin</Text>
       </View>
 
       <ScrollView
@@ -387,17 +444,36 @@ const CameraDashboardScreen = () => {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.content}>
-          {/* Camera Button */}
+          {/* AI Camera Button */}
           <TouchableOpacity
-            style={styles.cameraButton}
+            style={[styles.cameraButton, isAnalyzing && styles.cameraButtonDisabled]}
             onPress={handleCameraPress}
             disabled={isAnalyzing}
           >
-            <Text style={[styles.cameraButtonText, { flexDirection: 'row', alignItems: 'center' }]}>
-              <Text style={styles.cameraIcon}>📸</Text>
-              {isAnalyzing ? 'Analiz Ediliyor...' : 'Yemek Çek'}
+            <Ionicons name="camera" size={24} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <Text style={styles.cameraButtonText}>
+              {isAnalyzing ? 'İşleniyor...' : '📸 AI ile Analiz Et'}
             </Text>
           </TouchableOpacity>
+
+          {/* AI Features */}
+          <View style={styles.aiFeaturesSection}>
+            <View style={styles.featureCard}>
+              <Ionicons name="bulb" size={24} color="#7C3AED" />
+              <Text style={styles.featureTitle}>Akıllı Tanıma</Text>
+              <Text style={styles.featureDescription}>Gemini 2.0 Flash ile yiyecekleri otomatik tanı</Text>
+            </View>
+            <View style={styles.featureCard}>
+              <Ionicons name="bar-chart" size={24} color="#10B981" />
+              <Text style={styles.featureTitle}>Detaylı Besin</Text>
+              <Text style={styles.featureDescription}>Kalori, protein, karbonhidrat, yağ değerleri</Text>
+            </View>
+            <View style={styles.featureCard}>
+              <Ionicons name="shield-checkmark" size={24} color="#F59E0B" />
+              <Text style={styles.featureTitle}>Yüksek Doğruluk</Text>
+              <Text style={styles.featureDescription}>95+ başarı oranı ile analiz</Text>
+            </View>
+          </View>
 
           {/* Quick Add Section */}
           <View style={styles.quickAddSection}>
@@ -440,6 +516,24 @@ const CameraDashboardScreen = () => {
           <Text style={styles.navLabel}>Profil</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Gemini AI Analyzer Modal */}
+      <Modal
+        visible={showGeminiAnalyzer}
+        animationType="slide"
+        presentationStyle="fullScreen"
+      >
+        <GeminiAnalyzer
+          onAnalysisComplete={handleAnalysisComplete}
+          authToken={user?.uid}
+        />
+        <TouchableOpacity
+          style={styles.closeModalButton}
+          onPress={() => setShowGeminiAnalyzer(false)}
+        >
+          <Ionicons name="close" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 };

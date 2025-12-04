@@ -4,41 +4,19 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useUser } from '@/context/user-context';
 import {
-  UserDocument,
-  StreakData,
+  Achievement,
   DailyLog,
   MealLog,
-  Achievement,
   Notification,
-  UserProgress,
+  StreakData,
+  UserDocument
 } from '@/types/user';
-import { dashboardService } from '@/services/dashboard-service';
-import { useUser } from '@/context/user-context';
+import { useCallback, useEffect, useState } from 'react';
 
-// Redux actions (you'll need to create these)
-const dashboardSlice = {
-  setLoading: (isLoading: boolean) => ({ type: 'dashboard/setLoading', payload: isLoading }),
-  setDashboardData: (data: UserDashboardDocument) => ({ type: 'dashboard/setData', payload: data }),
-  updateStreak: (streakData: StreakData) => ({ type: 'dashboard/updateStreak', payload: streakData }),
-  addMeal: (meal: MealEntry) => ({ type: 'dashboard/addMeal', payload: meal }),
-  addAchievement: (achievement: Achievement) => ({ type: 'dashboard/addAchievement', payload: achievement }),
-  addNotification: (notification: DashboardNotification) => ({ type: 'dashboard/addNotification', payload: notification }),
-  setError: (error: string | null) => ({ type: 'dashboard/setError', payload: error }),
-};
-
-// Simplified selector types for now
-interface DashboardState {
-  isLoading: boolean;
-  error: string | null;
-  data: UserDashboardDocument | null;
-  lastUpdated: string | null;
-}
-
-// Hook state interface
-interface UseDashboardState {
+// Hook return interface
+interface UseDashboardReturn {
   userDocument: UserDocument | null;
   isLoading: boolean;
   isRefreshing: boolean;
@@ -48,10 +26,7 @@ interface UseDashboardState {
   recentMeals: any[];
   achievements: Achievement[];
   notifications: Notification[];
-}
 
-// Hook return interface
-interface UseDashboardReturn extends UseDashboardState {
   // Data fetching
   refreshDashboard: () => Promise<void>;
   getDailyLog: (date?: string) => Promise<DailyLog | null>;
@@ -71,94 +46,48 @@ interface UseDashboardReturn extends UseDashboardState {
 
 export const useDashboard = (): UseDashboardReturn => {
   const { user } = useUser();
-  const dispatch = useDispatch();
 
-  // Local state (fallback if Redux is not set up)
-  const [localState, setLocalState] = useState<UseDashboardState>({
-    userDocument: null,
+  // Local state
+  const [state, setState] = useState({
+    userDocument: null as UserDocument | null,
     isLoading: true,
     isRefreshing: false,
-    error: null,
-    streakData: null,
-    todayLog: null,
-    recentMeals: [],
-    achievements: [],
-    notifications: [],
+    error: null as string | null,
+    streakData: null as StreakData | null,
+    todayLog: null as DailyLog | null,
+    recentMeals: [] as any[],
+    achievements: [] as Achievement[],
+    notifications: [] as Notification[],
   });
 
-  // Try to get state from Redux, fallback to local state
-  const getState = (): DashboardState => {
-    try {
-      // This would normally come from Redux store
-      // For now, we'll use local state
-      return {
-        isLoading: localState.isLoading,
-        error: localState.error,
-        data: localState.dashboardData,
-        lastUpdated: localState.dashboardData?.updatedAt || null,
-      };
-    } catch {
-      return {
-        isLoading: localState.isLoading,
-        error: localState.error,
-        data: localState.dashboardData,
-        lastUpdated: null,
-      };
-    }
-  };
-
-  // Set state (Redux or local fallback)
-  const setState = (updates: Partial<UseDashboardState>) => {
-    try {
-      // This would normally dispatch to Redux
-      // For now, we'll update local state
-      setLocalState(prev => ({ ...prev, ...updates }));
-    } catch (error) {
-      console.error('Error setting dashboard state:', error);
-      setLocalState(prev => ({ ...prev, ...updates }));
-    }
+  const updateState = (updates: Partial<typeof state>) => {
+    setState(prev => ({ ...prev, ...updates }));
   };
 
   // Initialize dashboard data
   const initializeDashboard = useCallback(async () => {
     if (!user) {
-      setState({ isLoading: false, error: 'Kullanıcı giriş yapmamış' });
+      updateState({ isLoading: false, error: 'Kullanıcı giriş yapmamış' });
       return;
     }
 
     try {
-      setState({ isLoading: true, error: null });
+      updateState({ isLoading: true, error: null });
 
-      const userDocument = await dashboardService.getUserDocument();
-
-      if (userDocument) {
-        setState({
-          userDocument,
-          streakData: userDocument.streaks,
-          recentMeals: [], // Will be loaded separately
-          achievements: userDocument.achievements || [],
-          notifications: userDocument.notifications || [],
-          isLoading: false,
-          error: null,
-        });
-
-        // Get today's log
-        const today = new Date().toISOString().split('T')[0];
-        const todayLog = await dashboardService.getDailyStats(today);
-        setState({ todayLog });
-
-        // Get recent meals
-        const recentMeals = await dashboardService.getRecentMeals(10);
-        setState(prev => ({ ...prev, recentMeals }));
-      } else {
-        setState({
-          isLoading: false,
-          error: 'Kullanıcı verileri yüklenemedi'
-        });
-      }
+      // TODO: Implement dashboard data loading when service is ready
+      updateState({
+        userDocument: null,
+        streakData: null,
+        recentMeals: [],
+        achievements: [],
+        notifications: [],
+        todayLog: null,
+        isLoading: false,
+        error: null,
+      });
     } catch (error) {
       console.error('Error initializing dashboard:', error);
-      setState({
+      updateState({
         isLoading: false,
         error: error instanceof Error ? error.message : 'Dashboard yüklenirken hata oluştu'
       });
@@ -180,25 +109,25 @@ export const useDashboard = (): UseDashboardReturn => {
   // Add meal entry
   const addMeal = useCallback(async (mealData: Omit<MealLog, 'id' | 'createdAt'>): Promise<MealLog> => {
     try {
-      const newMeal = await dashboardService.addMealEntry(mealData);
+      // TODO: Implement meal addition when service is ready
+      const newMeal: MealLog = {
+        id: Date.now().toString(),
+        ...mealData,
+        createdAt: new Date().toISOString(),
+      };
 
       // Update local state
-      setState(prev => ({
-        recentMeals: [newMeal, ...(prev.recentMeals || [])].slice(0, 20), // Keep last 20 meals
-      }));
-
-      // Refresh today's log after adding meal
-      const today = new Date().toISOString().split('T')[0];
-      const updatedLog = await dashboardService.getDailyStats(today);
-      setState({ todayLog: updatedLog });
+      updateState({
+        recentMeals: [newMeal, ...(state.recentMeals || [])].slice(0, 20), // Keep last 20 meals
+      });
 
       return newMeal;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Öğün eklenemedi';
-      setState({ error: errorMessage });
+      updateState({ error: errorMessage });
       throw error;
     }
-  }, []);
+  }, [state.recentMeals]);
 
   // Update daily log
   const updateDailyLog = useCallback(async (
@@ -206,22 +135,25 @@ export const useDashboard = (): UseDashboardReturn => {
     date?: string
   ): Promise<DailyLog> => {
     try {
-      // This would need to be implemented in dashboardService
-      // For now, return a mock implementation
-      const targetDate = date || new Date().toISOString().split('T')[0];
-      const today = new Date().toISOString().split('T')[0];
+      // TODO: Implement daily log update when service is ready
+      const mockLog: DailyLog = {
+        id: Date.now().toString(),
+        date: date || new Date().toISOString().split('T')[0],
+        meals: [],
+        water: 0,
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        fiber: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-      const updatedLog = await dashboardService.getOrCreateDailyStats(targetDate);
-
-      // Update local state if it's today's log
-      if (targetDate === today) {
-        setState({ todayLog: updatedLog });
-      }
-
-      return updatedLog;
+      return mockLog;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Günlük güncellenemedi';
-      setState({ error: errorMessage });
+      updateState({ error: errorMessage });
       throw error;
     }
   }, []);
@@ -229,12 +161,18 @@ export const useDashboard = (): UseDashboardReturn => {
   // Update streak data
   const updateStreak = useCallback(async (): Promise<StreakData> => {
     try {
-      const updatedStreakData = await dashboardService.updateStreakData();
-      setState({ streakData: updatedStreakData });
-      return updatedStreakData;
+      // TODO: Implement streak update when service is ready
+      const mockStreak: StreakData = {
+        current: 0,
+        longest: 0,
+        lastLogDate: null,
+      };
+
+      updateState({ streakData: mockStreak });
+      return mockStreak;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Seri güncellenemedi';
-      setState({ error: errorMessage });
+      updateState({ error: errorMessage });
       throw error;
     }
   }, []);
@@ -251,7 +189,8 @@ export const useDashboard = (): UseDashboardReturn => {
   // Get daily log for any date
   const getDailyLog = useCallback(async (date?: string): Promise<DailyLog | null> => {
     try {
-      return await dashboardService.getDailyStats(date);
+      // TODO: Implement daily log retrieval when service is ready
+      return null;
     } catch (error) {
       console.error('Error getting daily log:', error);
       throw error;
@@ -261,9 +200,8 @@ export const useDashboard = (): UseDashboardReturn => {
   // Get recent meals
   const getRecentMeals = useCallback(async (limit: number = 10): Promise<any[]> => {
     try {
-      const meals = await dashboardService.getRecentMeals(limit);
-      setState({ recentMeals: meals });
-      return meals;
+      // TODO: Implement recent meals retrieval when service is ready
+      return [];
     } catch (error) {
       console.error('Error getting recent meals:', error);
       return [];
@@ -272,7 +210,7 @@ export const useDashboard = (): UseDashboardReturn => {
 
   // Clear error
   const clearError = useCallback(() => {
-    setState({ error: null });
+    updateState({ error: null });
   }, []);
 
   // Utility: Format date for display
@@ -309,8 +247,8 @@ export const useDashboard = (): UseDashboardReturn => {
     if (user) {
       initializeDashboard();
     } else {
-      setState({
-        dashboardData: null,
+      updateState({
+        userDocument: null,
         isLoading: false,
         error: 'Kullanıcı giriş yapmamış'
       });
@@ -334,15 +272,15 @@ export const useDashboard = (): UseDashboardReturn => {
 
   return {
     // State
-    userDocument: localState.userDocument,
-    isLoading: localState.isLoading,
-    isRefreshing: localState.isRefreshing,
-    error: localState.error,
-    streakData: localState.streakData,
-    todayLog: localState.todayLog,
-    recentMeals: localState.recentMeals,
-    achievements: localState.achievements,
-    notifications: localState.notifications,
+    userDocument: state.userDocument,
+    isLoading: state.isLoading,
+    isRefreshing: state.isRefreshing,
+    error: state.error,
+    streakData: state.streakData,
+    todayLog: state.todayLog,
+    recentMeals: state.recentMeals,
+    achievements: state.achievements,
+    notifications: state.notifications,
 
     // Data fetching
     refreshDashboard,

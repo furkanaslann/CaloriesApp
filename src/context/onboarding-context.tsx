@@ -6,7 +6,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { saveOnboardingData, updateOnboardingData } from '@/utils/firebase';
-import { auth } from '@/utils/firebase';
+import { auth, firestore } from '@/utils/firebase';
 import {
   UserProfile,
   Goals,
@@ -16,6 +16,7 @@ import {
   Commitment,
   Account,
   CalculatedValues,
+  UserDocument,
   OnboardingContextType,
   OnboardingStorage,
   ScreenName,
@@ -283,7 +284,7 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     }
   };
 
-  // Sync onboarding data to Firestore
+  // Sync onboarding data to Firestore as complete UserDocument
   const syncToFirestore = async () => {
     try {
       const currentUser = auth().currentUser;
@@ -319,7 +320,16 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         return cleaned;
       };
 
-      const onboardingData = {
+      // Create complete UserDocument structure
+      const userDocument: Partial<UserDocument> = {
+        uid: currentUser.uid,
+        email: currentUser.email,
+        displayName: account.username || currentUser.displayName,
+        isAnonymous: currentUser.isAnonymous,
+        onboardingCompleted: true,
+        onboardingCompletedAt: new Date().toISOString(),
+
+        // Profile information
         profile: {
           name: profile.name!,
           lastName: profile.lastName!,
@@ -328,15 +338,19 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
           gender: profile.gender || 'other',
           height: profile.height!,
           currentWeight: profile.currentWeight!,
-          profilePhoto: profile.profilePhoto || null,
+          profilePhoto: profile.profilePhoto || undefined,
         },
+
+        // Goals and targets
         goals: {
           primaryGoal: goals.primaryGoal || 'maintenance',
-          targetWeight: goals.targetWeight || null,
+          targetWeight: goals.targetWeight || undefined,
           timeline: goals.timeline || 12,
           weeklyGoal: goals.weeklyGoal || 0.5,
           motivation: goals.motivation || 5,
         },
+
+        // Activity level
         activity: {
           level: activity.level || 'sedentary',
           occupation: activity.occupation || 'office',
@@ -344,6 +358,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
           exerciseFrequency: activity.exerciseFrequency || 0,
           sleepHours: activity.sleepHours || 8,
         },
+
+        // Diet preferences
         diet: {
           type: diet.type || 'balanced',
           allergies: diet.allergies || [],
@@ -351,6 +367,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
           dislikedFoods: diet.dislikedFoods || [],
           culturalRestrictions: diet.culturalRestrictions || [],
         },
+
+        // App preferences
         preferences: {
           notifications: {
             mealReminders: preferences.notifications?.mealReminders ?? true,
@@ -365,6 +383,18 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
             marketing: preferences.privacy?.marketing ?? false,
           },
         },
+
+        // Commitment data
+        commitment: commitment.firstName ? {
+          firstName: commitment.firstName!,
+          lastName: commitment.lastName!,
+          email: commitment.email!,
+          phone: commitment.phone || undefined,
+          commitmentStatement: commitment.commitmentStatement || '',
+          timestamp: commitment.timestamp || new Date().toISOString(),
+        } : undefined,
+
+        // Calculated nutritional values
         calculatedValues: {
           bmr: calculatedValues.bmr || 0,
           tdee: calculatedValues.tdee || 0,
@@ -375,31 +405,30 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
             fats: calculatedValues.macros?.fats || 0,
           },
         },
-        commitment: commitment.firstName ? {
-          firstName: commitment.firstName!,
-          lastName: commitment.lastName!,
-          email: commitment.email!,
-          phone: commitment.phone || null,
-          commitmentStatement: commitment.commitmentStatement || '',
-          timestamp: commitment.timestamp || new Date().toISOString(),
-        } : null,
-        account: account.username ? {
-          username: account.username!,
-          email: account.email!,
-          createdAt: account.createdAt || new Date().toISOString(),
-          preferences: {
-            agreeToTerms: account.preferences?.agreeToTerms ?? false,
-            agreeToPrivacy: account.preferences?.agreeToPrivacy ?? false,
-            subscribeToNewsletter: account.preferences?.subscribeToNewsletter ?? false,
-          },
-        } : null,
+
+        // Initialize dashboard-specific fields (will be populated by dashboard service)
+        progress: {
+          currentWeight: profile.currentWeight || 0,
+          startingWeight: profile.currentWeight || 0,
+          goalWeight: goals.targetWeight || profile.currentWeight || 0,
+          weightLossTotal: 0,
+          weightLossToGoal: 0,
+          weeklyWeightChange: 0,
+          averageWeeklyLoss: 0,
+          timeOnApp: 0,
+          lastWeightUpdate: new Date().toISOString().split('T')[0],
+        },
+
+        // Timestamps
+        createdAt: firestore.FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
       };
 
       // Clean the data to remove any remaining undefined values
-      const cleanedOnboardingData = removeUndefinedValues(onboardingData);
+      const cleanedUserDocument = removeUndefinedValues(userDocument);
 
-      await saveOnboardingData(currentUser.uid, cleanedOnboardingData);
-      console.log('Onboarding data successfully synced to Firestore');
+      await saveOnboardingData(currentUser.uid, cleanedUserDocument);
+      console.log('Onboarding data successfully synced to Firestore as UserDocument');
     } catch (error) {
       console.error('Error syncing onboarding data to Firestore:', error);
       throw error;
