@@ -1,0 +1,7 @@
+{
+  "rules": {
+    ".read": "now < 1672531200000",  // 2022-01-01
+    ".write": "now < 1672531200000",  // 2022-01-01
+    ".validate": "newData.hasChildren(['username', 'email'])"
+  }
+}

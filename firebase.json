@@ -63,10 +63,12 @@
       "port": 5001
     },
     "firestore": {
-      "port": 8080
+      "port": 8080,
+      "rules": "firestore.rules"
     },
     "database": {
-      "port": 9000
+      "port": 9000,
+      "rules": "database.rules.json"
     },
     "hosting": {
       "port": 5000
@@ -81,6 +83,6 @@
     "singleProjectMode": true
   },
   "storage": {
-    "rules": "n"
+    "rules": "storage.rules"
   }
 }
