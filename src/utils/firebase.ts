@@ -11,10 +11,39 @@
 
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-// Uncomment when you need Firebase Storage
-// import storage from '@react-native-firebase/storage';
+import storage from '@react-native-firebase/storage';
 
 import { FIREBASE_CONFIG } from '@/constants/firebase';
+
+// Firebase Emulator Configuration for Development
+const IS_DEV = __DEV__;
+const EMULATOR_CONFIG = {
+  host: 'localhost',
+  ports: {
+    auth: 9099,
+    firestore: 8080,
+    storage: 9199,
+    functions: 5001,
+  },
+};
+
+// Initialize Firebase Emulators in Development
+if (IS_DEV) {
+  try {
+    // Connect to Auth Emulator
+    auth().useEmulator(EMULATOR_CONFIG.host + ':' + EMULATOR_CONFIG.ports.auth);
+
+    // Connect to Firestore Emulator
+    firestore().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.firestore);
+
+    // Connect to Storage Emulator
+    storage().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.storage);
+
+    console.log('🔥 Firebase Emulators connected successfully');
+  } catch (error) {
+    console.warn('⚠️ Firebase Emulator connection failed:', error);
+  }
+}
 
 // ============================================================================
 // AUTHENTICATION FUNCTIONS
@@ -100,7 +129,7 @@ export const updateUserProfile = async (displayName: string, photoURL?: string) 
   } catch (error: any) {
     console.error('Update profile error:', error);
     throw new Error(error.message);
-  }const auth = getAuthInstance();
+  }
 };
 
 // ============================================================================
@@ -333,74 +362,95 @@ export const deleteMeal = async (userId: string, mealId: string) => {
 /**
  * Upload an image to Firebase Storage
  */
-// export const uploadImage = async (
-//   userId: string,
-//   imageUri: string,
-//   imageName: string = `meal_${Date.now()}.jpg`
-// ) => {
-//   try {
-//     const reference = storage().ref(`users/${userId}/meals/${imageName}`);
-//     await reference.putFile(imageUri);
-//     const downloadURL = await reference.getDownloadURL();
-//     return downloadURL;
-//   } catch (error: any) {
-//     console.error('Error uploading image:', error);
-//     throw new Error(error.message);
-//   }
-// };
+export const uploadImage = async (
+  userId: string,
+  imageUri: string,
+  imageName: string = `meal_${Date.now()}.jpg`
+) => {
+  try {
+    const reference = storage().ref(`users/${userId}/meals/${imageName}`);
+    await reference.putFile(imageUri);
+    const downloadURL = await reference.getDownloadURL();
+    return downloadURL;
+  } catch (error: any) {
+    console.error('Error uploading image:', error);
+    throw new Error(error.message);
+  }
+};
 
 /**
  * Delete an image from Firebase Storage
  */
-// export const deleteImage = async (imageUrl: string) => {
-//   try {
-//     const reference = storage().refFromURL(imageUrl);
-//     await reference.delete();
-//   } catch (error: any) {
-//     console.error('Error deleting image:', error);
-//     throw new Error(error.message);
-//   }
-// };
+export const deleteImage = async (imageUrl: string) => {
+  try {
+    const reference = storage().refFromURL(imageUrl);
+    await reference.delete();
+  } catch (error: any) {
+    console.error('Error deleting image:', error);
+    throw new Error(error.message);
+  }
+};
 
 // ============================================================================
 // EXAMPLE: COMPLETE WORKFLOW
 // ============================================================================
 
 /**
+ * Upload image from URI to Firebase Storage
+ */
+export const uploadImageFromUri = async (
+  userId: string,
+  imageUri: string,
+  imageName: string = `meal_${Date.now()}.jpg`
+) => {
+  try {
+    // Doğrudan URI'den Storage'a yükle
+    const reference = storage().ref(`users/${userId}/meals/${imageName}`);
+    await reference.putFile(imageUri);
+    const downloadURL = await reference.getDownloadURL();
+
+    return downloadURL;
+  } catch (error: any) {
+    console.error('Error uploading image from URI:', error);
+    throw new Error(error.message);
+  }
+};
+
+/**
  * Example: Add a meal with image upload
  */
-// export const addMealWithImage = async (
-//   userId: string,
-//   mealData: {
-//     name: string;
-//     calories: number;
-//     protein?: number;
-//     carbs?: number;
-//     fat?: number;
-//     mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
-//   },
-//   imageUri?: string
-// ) => {
-//   try {
-//     let imageUrl;
-//     
-//     // Upload image if provided
-//     if (imageUri) {
-//       imageUrl = await uploadImage(userId, imageUri);
-//     }
-//     
-//     // Add meal to Firestore
-//     const mealId = await addMeal(userId, {
-//       ...mealData,
-//       imageUrl,
-//     });
-//     
-//     return { mealId, imageUrl };
-//   } catch (error: any) {
-//     console.error('Error adding meal with image:', error);
-//     throw new Error(error.message);
-//   }
-// };
+export const addMealWithImage = async (
+  userId: string,
+  mealData: {
+    name: string;
+    calories: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+    mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  },
+  imageUri?: string
+) => {
+  try {
+    let imageUrl;
+
+    // Upload image if provided
+    if (imageUri) {
+      imageUrl = await uploadImage(userId, imageUri);
+    }
+
+    // Add meal to Firestore
+    const mealId = await addMeal(userId, {
+      ...mealData,
+      imageUrl,
+    });
+
+    return { mealId, imageUrl };
+  } catch (error: any) {
+    console.error('Error adding meal with image:', error);
+    throw new Error(error.message);
+  }
+};
 
 // ============================================================================
 // FIRESTORE FUNCTIONS - ONBOARDING DATA
@@ -410,33 +460,99 @@ export const deleteMeal = async (userId: string, mealId: string) => {
  * Save complete onboarding data to Firestore
  * This function saves all onboarding information after user completes the flow
  */
-// Helper function to filter out undefined values
+// Helper function to filter out undefined and null values recursively
 const filterUndefinedValues = (obj: any): any => {
-  if (obj === null || obj === undefined) return null;
-  if (typeof obj !== 'object') return obj;
+  // Handle primitive values
+  if (obj === null || obj === undefined) {
+    return null;
+  }
 
-  const filtered: any = Array.isArray(obj) ? [] : {};
+  // Handle Date objects
+  if (obj instanceof Date) {
+    return obj;
+  }
+
+  // Handle Firestore Timestamp objects
+  if (typeof obj === 'object' && obj && obj._type === 'timestamp') {
+    return obj; // Keep Firestore timestamps as-is
+  }
+
+  if (typeof obj !== 'object') {
+    return obj;
+  }
+
+  // Handle arrays
+  if (Array.isArray(obj)) {
+    const filteredArray = obj
+      .map(item => filterUndefinedValues(item))
+      .filter(item => item !== null && item !== undefined);
+    return filteredArray.length > 0 ? filteredArray : null;
+  }
+
+  // Handle objects
+  const filtered: any = {};
+  let hasValidValues = false;
 
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
       const value = obj[key];
-      if (value !== undefined) {
-        if (typeof value === 'object' && value !== null) {
-          filtered[key] = filterUndefinedValues(value);
-        } else {
+
+      // Skip undefined values
+      if (value === undefined) {
+        continue;
+      }
+
+      // Recursively filter nested objects
+      if (typeof value === 'object' && value !== null && !(value instanceof Date)) {
+        if (value && value._type === 'timestamp') {
+          // Keep Firestore timestamps
           filtered[key] = value;
+          hasValidValues = true;
+        } else {
+          const filteredValue = filterUndefinedValues(value);
+          if (filteredValue !== null && filteredValue !== undefined) {
+            filtered[key] = filteredValue;
+            hasValidValues = true;
+          }
         }
+      } else {
+        // Include primitive values and Dates
+        filtered[key] = value === null ? null : value;
+        hasValidValues = true;
       }
     }
   }
 
-  return filtered;
+  // Return null if object has no valid values
+  return hasValidValues ? filtered : null;
 };
 
 export const saveOnboardingData = async (userId: string, onboardingData: any) => {
   try {
+    console.log('Original onboarding data:', JSON.stringify(onboardingData, null, 2));
+
     // Filter out any undefined values before sending to Firestore
     const filteredData = filterUndefinedValues(onboardingData);
+    console.log('Filtered onboarding data:', JSON.stringify(filteredData, null, 2));
+
+    // If filtered data is null, create minimal structure
+    if (filteredData === null) {
+      console.warn('All data was filtered out, creating minimal structure');
+      const minimalData = {
+        onboardingCompleted: true,
+        onboardingCompletedAt: firestore.FieldValue.serverTimestamp(),
+        lastUpdated: firestore.FieldValue.serverTimestamp(),
+        version: '1.0.0',
+      };
+
+      await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(userId)
+        .set(minimalData, { merge: true });
+
+      console.log('Minimal onboarding data saved successfully for user:', userId);
+      return;
+    }
 
     // Build the Firestore document data
     const firestoreData: any = {
@@ -447,56 +563,20 @@ export const saveOnboardingData = async (userId: string, onboardingData: any) =>
       version: '1.0.0',
     };
 
-    // Only add fields that exist in the filtered data
-    if (filteredData.profile) {
-      const profile = filteredData.profile;
-      firestoreData.name = profile.name;
-      firestoreData.lastName = profile.lastName;
-      firestoreData.fullName = `${profile.name} ${profile.lastName}`;
-      firestoreData.age = profile.age;
-      firestoreData.dateOfBirth = profile.dateOfBirth;
-      firestoreData.gender = profile.gender;
-      firestoreData.height = profile.height;
-      firestoreData.currentWeight = profile.currentWeight;
-      if (profile.profilePhoto !== null) {
-        firestoreData.profilePhoto = profile.profilePhoto;
-      }
-      firestoreData.profile = profile;
-    }
+    // Directly use the filtered data as the main document
+    const finalData = {
+      ...firestoreData,
+      ...filteredData,
+    };
 
-    if (filteredData.goals) {
-      firestoreData.goals = filteredData.goals;
-    }
-
-    if (filteredData.activity) {
-      firestoreData.activity = filteredData.activity;
-    }
-
-    if (filteredData.diet) {
-      firestoreData.diet = filteredData.diet;
-    }
-
-    if (filteredData.preferences) {
-      firestoreData.preferences = filteredData.preferences;
-    }
-
-    if (filteredData.calculatedValues) {
-      firestoreData.calculatedValues = filteredData.calculatedValues;
-    }
-
-    if (filteredData.commitment !== null) {
-      firestoreData.commitment = filteredData.commitment;
-    }
-
-    if (filteredData.account !== null) {
-      firestoreData.account = filteredData.account;
-    }
+    // Remove any remaining undefined values
+    const cleanedFinalData = filterUndefinedValues(finalData);
 
     // Save to Firestore
     await firestore()
       .collection(FIREBASE_CONFIG.collections.users)
       .doc(userId)
-      .set(firestoreData, { merge: true });
+      .set(cleanedFinalData || firestoreData, { merge: true });
 
     console.log('Onboarding data saved successfully for user:', userId);
   } catch (error: any) {

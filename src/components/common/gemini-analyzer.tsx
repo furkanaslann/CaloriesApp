@@ -9,6 +9,7 @@ import {
   Modal,
   ScrollView,
   Dimensions,
+  Image,
 } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
@@ -16,11 +17,12 @@ import * as FileSystem from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 import { useGemini } from '@/hooks/use-gemini';
 import { FoodAnalysisResult } from '@/services/gemini-service';
+import { uploadImageFromUri } from '@/utils/firebase';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 interface GeminiAnalyzerProps {
-  onAnalysisComplete: (result: FoodAnalysisResult) => void;
+  onAnalysisComplete: (result: FoodAnalysisResult, imageUrl?: string) => void;
   authToken?: string;
 }
 
@@ -31,6 +33,7 @@ const GeminiAnalyzer: React.FC<GeminiAnalyzerProps> = ({
   const [showCamera, setShowCamera] = useState(false);
   const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [capturedImageUri, setCapturedImageUri] = useState<string | null>(null);
   const cameraRef = useRef<CameraView>(null);
 
   const { loading, error, analyzeFood } = useGemini(authToken);
@@ -54,6 +57,7 @@ const GeminiAnalyzer: React.FC<GeminiAnalyzerProps> = ({
 
       if (photo.base64) {
         setPreviewImage(`data:image/jpeg;base64,${photo.base64}`);
+        setCapturedImageUri(photo.uri); // Orijinal URI'yi sakla
         setShowCamera(false);
       }
     } catch (error) {
@@ -86,6 +90,9 @@ const GeminiAnalyzer: React.FC<GeminiAnalyzerProps> = ({
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
 
+        // Orijinal URI'yi sakla
+        setCapturedImageUri(asset.uri);
+
         // Base64 data kontrolü
         if (asset.base64) {
           setPreviewImage(`data:image/jpeg;base64,${asset.base64}`);
@@ -117,12 +124,40 @@ const GeminiAnalyzer: React.FC<GeminiAnalyzerProps> = ({
 
   // Analizi yap
   const handleAnalyze = async () => {
-    if (!previewImage) return;
+    if (!previewImage || !authToken) return;
 
-    const result = await analyzeFood(previewImage);
-    if (result) {
-      onAnalysisComplete(result);
-      setPreviewImage(null);
+    try {
+      // Analizi yap
+      const result = await analyzeFood(previewImage);
+
+      if (result) {
+        let imageUrl: string | undefined;
+
+        // Başarılı analiz sonrası fotoğrafı Firebase Storage'a yükle
+        // Sadece orijinal URI varsa yükle yap
+        if (capturedImageUri) {
+          try {
+            // Doğrudan URI'den Firebase Storage'a yükle
+            imageUrl = await uploadImageFromUri(authToken, capturedImageUri);
+            console.log('Image uploaded to Firebase Storage:', imageUrl);
+          } catch (uploadError) {
+            console.error('Error uploading image to Firebase Storage:', uploadError);
+            // Yükleme başarısız olursa analizi devam ettir ama kullanıcı bilgilendir
+            Alert.alert(
+              'Analiz Tamamlandı',
+              'Yemek analizi başarıyla tamamlandı ancak fotoğraf yüklenirken bir hata oluştu.'
+            );
+          }
+        }
+
+        // Sonucu ve imageUrl'yi ana componente gönder
+        onAnalysisComplete(result, imageUrl);
+        setPreviewImage(null);
+        setCapturedImageUri(null);
+      }
+    } catch (error) {
+      console.error('Analysis error:', error);
+      Alert.alert('Hata', 'Analiz sırasında bir hata oluştu');
     }
   };
 
@@ -130,6 +165,7 @@ const GeminiAnalyzer: React.FC<GeminiAnalyzerProps> = ({
   const startCamera = async () => {
     const hasPermission = await checkCameraPermission();
     if (hasPermission) {
+      setCapturedImageUri(null); // Önceki fotoğrafı temizle
       setShowCamera(true);
     } else {
       Alert.alert(
@@ -208,11 +244,18 @@ const GeminiAnalyzer: React.FC<GeminiAnalyzerProps> = ({
           <Text style={styles.previewTitle}>Önizleme</Text>
 
           <View style={styles.imagePreview}>
-            {/* Burada resim gösterilebilir - şu an için placeholder */}
-            <View style={styles.imagePlaceholder}>
-              <Ionicons name="image" size={50} color="#CBD5E1" />
-              <Text style={styles.imagePlaceholderText}>Resim seçildi</Text>
-            </View>
+            {previewImage ? (
+              <Image
+                source={{ uri: previewImage }}
+                style={styles.selectedImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.imagePlaceholder}>
+                <Ionicons name="image" size={50} color="#CBD5E1" />
+                <Text style={styles.imagePlaceholderText}>Resim seçildi</Text>
+              </View>
+            )}
           </View>
 
           <View style={styles.previewActions}>
@@ -352,6 +395,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 20,
     overflow: 'hidden',
+  },
+  selectedImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
   },
   imagePlaceholder: {
     flex: 1,

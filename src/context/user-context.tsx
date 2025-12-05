@@ -43,11 +43,12 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Listen to auth state changes
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(async (firebaseUser) => {
+      console.log('Auth state changed. User:', firebaseUser?.uid);
       setUser(firebaseUser);
 
       if (firebaseUser) {
         // Load user data from Firestore
-        loadUserData(firebaseUser.uid).catch(console.error);
+        await loadUserData(firebaseUser.uid);
       } else {
         setUserData(null);
       }
@@ -61,44 +62,55 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Load user data from Firestore
   const loadUserData = async (userId: string) => {
     try {
+      console.log('loadUserData: Loading data for user:', userId);
       const userDoc = await firestore()
         .collection(FIREBASE_CONFIG.collections.users)
         .doc(userId)
         .get();
 
       if (userDoc.exists) {
-        const data = userDoc.data() as UserDocument;
-        setUserData(data);
+        const rawData = userDoc.data();
+        console.log('loadUserData: Raw data from Firestore:', rawData);
+
+        // Safely handle the data with proper defaults
+        const safeData: UserDocument = {
+          uid: userId,
+          email: rawData?.email || null,
+          displayName: rawData?.displayName || null,
+          isAnonymous: rawData?.isAnonymous !== false, // Default to true if not specified
+          onboardingCompleted: rawData?.onboardingCompleted === true,
+          onboardingCompletedAt: rawData?.onboardingCompletedAt || null,
+          profile: rawData?.profile || {},
+          goals: rawData?.goals || {},
+          activity: rawData?.activity || {},
+          diet: rawData?.diet || {},
+          preferences: rawData?.preferences || {},
+          commitment: rawData?.commitment || {},
+          calculatedValues: rawData?.calculatedValues || defaultCalculatedValues,
+          progress: rawData?.progress || {},
+          createdAt: rawData?.createdAt || null,
+          updatedAt: rawData?.updatedAt || null,
+          lastUpdated: rawData?.lastUpdated || null,
+          version: rawData?.version || null,
+        };
+
+        console.log('loadUserData: Safe data created, onboardingCompleted:', safeData.onboardingCompleted);
+        setUserData(safeData);
       } else {
+        console.log('loadUserData: No document exists, creating initial document');
         // Create initial user document if it doesn't exist
         await createInitialUserDocument(userId);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
-    }
-  };
-
-  // Create initial user document
-  const createInitialUserDocument = async (userId: string) => {
-    try {
-      // Check if document already exists first
-      const existingDoc = await firestore()
-        .collection(FIREBASE_CONFIG.collections.users)
-        .doc(userId)
-        .get();
-
-      if (existingDoc.exists) {
-        const data = existingDoc.data() as UserDocument;
-        setUserData(data);
-        return data;
-      }
-
-      // Create new document if it doesn't exist
-      const currentUser = auth().currentUser;
-      const initialData: any = {
+      // On error, create a minimal safe user data object
+      const fallbackData: UserDocument = {
         uid: userId,
-        isAnonymous: currentUser?.isAnonymous || true,
+        email: null,
+        displayName: null,
+        isAnonymous: true,
         onboardingCompleted: false,
+        onboardingCompletedAt: null,
         profile: {},
         goals: {},
         activity: {},
@@ -106,28 +118,115 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         preferences: {},
         commitment: {},
         calculatedValues: defaultCalculatedValues,
+        progress: {},
+        createdAt: null,
+        updatedAt: null,
+        lastUpdated: null,
+        version: null,
+      };
+      console.log('loadUserData: Using fallback data due to error');
+      setUserData(fallbackData);
+    }
+  };
+
+  // Create initial user document
+  const createInitialUserDocument = async (userId: string) => {
+    try {
+      console.log('createInitialUserDocument: Creating document for user:', userId);
+
+      // Check if document already exists first
+      const existingDoc = await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(userId)
+        .get();
+
+      if (existingDoc.exists) {
+        console.log('createInitialUserDocument: Document already exists, loading it');
+        const rawData = existingDoc.data();
+
+        // Create safe data from existing document
+        const safeData: UserDocument = {
+          uid: userId,
+          email: rawData?.email || null,
+          displayName: rawData?.displayName || null,
+          isAnonymous: rawData?.isAnonymous !== false,
+          onboardingCompleted: rawData?.onboardingCompleted === true,
+          onboardingCompletedAt: rawData?.onboardingCompletedAt || null,
+          profile: rawData?.profile || {},
+          goals: rawData?.goals || {},
+          activity: rawData?.activity || {},
+          diet: rawData?.diet || {},
+          preferences: rawData?.preferences || {},
+          commitment: rawData?.commitment || {},
+          calculatedValues: rawData?.calculatedValues || defaultCalculatedValues,
+          progress: rawData?.progress || {},
+          createdAt: rawData?.createdAt || null,
+          updatedAt: rawData?.updatedAt || null,
+          lastUpdated: rawData?.lastUpdated || null,
+          version: rawData?.version || null,
+        };
+
+        setUserData(safeData);
+        return safeData;
+      }
+
+      console.log('createInitialUserDocument: Creating new document');
+      // Create new document if it doesn't exist
+      const currentUser = auth().currentUser;
+      const initialData: UserDocument = {
+        uid: userId,
+        email: currentUser?.email || null,
+        displayName: currentUser?.displayName || null,
+        isAnonymous: currentUser?.isAnonymous !== false,
+        onboardingCompleted: false,
+        onboardingCompletedAt: null,
+        profile: {},
+        goals: {},
+        activity: {},
+        diet: {},
+        preferences: {},
+        commitment: {},
+        calculatedValues: defaultCalculatedValues,
+        progress: {},
         createdAt: firestore.FieldValue.serverTimestamp(),
         updatedAt: firestore.FieldValue.serverTimestamp(),
+        lastUpdated: firestore.FieldValue.serverTimestamp(),
+        version: '1.0.0',
       };
-
-      // Only add email and displayName if they exist
-      if (currentUser?.email) {
-        initialData.email = currentUser.email;
-      }
-      if (currentUser?.displayName) {
-        initialData.displayName = currentUser.displayName;
-      }
 
       await firestore()
         .collection(FIREBASE_CONFIG.collections.users)
         .doc(userId)
         .set(initialData);
 
-      setUserData(initialData as UserDocument);
+      console.log('createInitialUserDocument: Document created successfully');
+      setUserData(initialData);
       return initialData;
     } catch (error) {
       console.error('Error creating initial user document:', error);
-      throw error;
+      // Even on error, set a minimal safe data object to prevent crashes
+      const fallbackData: UserDocument = {
+        uid: userId,
+        email: null,
+        displayName: null,
+        isAnonymous: true,
+        onboardingCompleted: false,
+        onboardingCompletedAt: null,
+        profile: {},
+        goals: {},
+        activity: {},
+        diet: {},
+        preferences: {},
+        commitment: {},
+        calculatedValues: defaultCalculatedValues,
+        progress: {},
+        createdAt: null,
+        updatedAt: null,
+        lastUpdated: null,
+        version: null,
+      };
+      setUserData(fallbackData);
+      return fallbackData;
     }
   };
 
@@ -475,20 +574,26 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.warn('completeOnboarding: Could not calculate values, but continuing:', calcError);
       }
 
-      // Update onboarding status
+      // Use set with merge instead of update to ensure document exists
+      const currentUser = auth().currentUser;
       await firestore()
         .collection(FIREBASE_CONFIG.collections.users)
         .doc(user.uid)
-        .update({
+        .set({
+          uid: user.uid,
+          isAnonymous: currentUser?.isAnonymous || true,
+          email: user.email || currentUser?.email,
+          displayName: user.displayName || currentUser?.displayName,
           onboardingCompleted: true,
-          onboardingCompletedAt: new Date().toISOString(),
+          onboardingCompletedAt: firestore.FieldValue.serverTimestamp(),
           updatedAt: firestore.FieldValue.serverTimestamp(),
-        });
+          // Merge with existing data
+          ...userData,
+        }, { merge: true });
 
       console.log('completeOnboarding: Onboarding status updated to true');
       await refreshUserData();
 
-  
       console.log('completeOnboarding: User data refreshed successfully');
     } catch (error) {
       console.error('Error completing onboarding:', error);
@@ -509,7 +614,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Refresh user data from Firestore
   const refreshUserData = async () => {
     if (user) {
+      console.log('refreshUserData: Refreshing data for user:', user.uid);
       await loadUserData(user.uid);
+    } else {
+      console.warn('refreshUserData: No user to refresh');
     }
   };
 

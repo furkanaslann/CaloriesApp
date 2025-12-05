@@ -305,14 +305,17 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         if (typeof obj !== 'object') return obj;
 
         if (Array.isArray(obj)) {
-          return obj.map(removeUndefinedValues);
+          // Filter out undefined values from arrays
+          return obj
+            .map(removeUndefinedValues)
+            .filter((item: any) => item !== undefined && item !== null);
         }
 
         const cleaned: any = {};
         for (const key in obj) {
           if (obj.hasOwnProperty(key)) {
             const value = removeUndefinedValues(obj[key]);
-            if (value !== undefined) {
+            if (value !== undefined && value !== null) {
               cleaned[key] = value;
             }
           }
@@ -385,14 +388,14 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         },
 
         // Commitment data
-        commitment: commitment.firstName ? {
-          firstName: commitment.firstName!,
-          lastName: commitment.lastName!,
-          email: commitment.email!,
-          phone: commitment.phone || undefined,
+        commitment: (commitment.firstName && commitment.lastName && commitment.email) ? {
+          firstName: commitment.firstName,
+          lastName: commitment.lastName,
+          email: commitment.email,
+          phone: commitment.phone || null,
           commitmentStatement: commitment.commitmentStatement || '',
           timestamp: commitment.timestamp || new Date().toISOString(),
-        } : undefined,
+        } : null,
 
         // Calculated nutritional values
         calculatedValues: {
@@ -419,16 +422,34 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
           lastWeightUpdate: new Date().toISOString().split('T')[0],
         },
 
-        // Timestamps
-        createdAt: firestore.FieldValue.serverTimestamp(),
-        updatedAt: firestore.FieldValue.serverTimestamp(),
+        // Note: Timestamps will be added in Firebase utils
       };
 
       // Clean the data to remove any remaining undefined values
       const cleanedUserDocument = removeUndefinedValues(userDocument);
 
-      await saveOnboardingData(currentUser.uid, cleanedUserDocument);
+      // Debug log to check the cleaned data
+      console.log('Cleaned user document for Firestore:', JSON.stringify(cleanedUserDocument, null, 2));
+
+      // Ensure no undefined values and convert to safe format
+      const safeDocument = {
+        ...cleanedUserDocument,
+        // Remove any potential undefined values from nested objects
+        profile: cleanedUserDocument.profile || {},
+        goals: cleanedUserDocument.goals || {},
+        activity: cleanedUserDocument.activity || {},
+        diet: cleanedUserDocument.diet || {},
+        preferences: cleanedUserDocument.preferences || {},
+        commitment: cleanedUserDocument.commitment || null,
+        calculatedValues: cleanedUserDocument.calculatedValues || {},
+        progress: cleanedUserDocument.progress || {},
+      };
+
+      await saveOnboardingData(currentUser.uid, safeDocument);
       console.log('Onboarding data successfully synced to Firestore as UserDocument');
+
+      // Wait a moment for Firestore to update
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
       console.error('Error syncing onboarding data to Firestore:', error);
       throw error;

@@ -35,7 +35,7 @@ const FIGMA_IMAGES = {
 
 const DashboardIndexScreen = () => {
   const router = useRouter();
-  const { userData, user, isLoading: userLoading, isOnboardingCompleted } = useUser();
+  const { userData, user, isLoading: userLoading, isOnboardingCompleted, refreshUserData } = useUser();
   const [isLoading, setIsLoading] = useState(true);
 
   // Use dashboard hook for data management
@@ -88,6 +88,17 @@ const DashboardIndexScreen = () => {
 
           if (isLocalCompleted) {
             console.log('⚠️ Local flag set but Firebase not updated - showing dashboard');
+            // Try refreshing user data immediately and again after delay
+            if (userData) {
+              console.log('Refreshing user data immediately...');
+              refreshUserData();
+
+              // Second refresh after a longer delay
+              setTimeout(() => {
+                console.log('Refreshing user data again to check for onboarding completion...');
+                refreshUserData();
+              }, 3000);
+            }
             setIsLoading(false);
             return;
           }

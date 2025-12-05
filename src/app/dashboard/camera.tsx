@@ -462,7 +462,7 @@ const CameraDashboardScreen = () => {
     setShowGeminiAnalyzer(true);
   };
 
-  const handleAnalysisComplete = async (result: FoodAnalysisResult) => {
+  const handleAnalysisComplete = async (result: FoodAnalysisResult, imageUrl?: string) => {
     try {
       setIsAnalyzing(true);
 
@@ -479,7 +479,8 @@ const CameraDashboardScreen = () => {
         },
         confidence: Math.round(result.confidence_score * 100),
         ingredients: result.ingredients,
-        health_tips: result.health_tips
+        health_tips: result.health_tips,
+        imageUrl: imageUrl // Firebase Storage URL'sini ekle
       };
 
       // Add meal to Firestore via dashboard service
@@ -489,9 +490,13 @@ const CameraDashboardScreen = () => {
       await loadRecentMeals();
 
       setIsAnalyzing(false);
+      const message = imageUrl
+        ? `🍽️ ${addedMeal.name}\n🔥 ${addedMeal.calories} kcal\n💪 Protein: ${addedMeal.nutrition.protein}g\n🌾 Karbonhidrat: ${addedMeal.nutrition.carbohydrates}g\n🥑 Yağ: ${addedMeal.nutrition.fats}g\n📸 Fotoğraf kaydedildi\n\nGüven Skoru: ${addedMeal.confidence}%`
+        : `🍽️ ${addedMeal.name}\n🔥 ${addedMeal.calories} kcal\n💪 Protein: ${addedMeal.nutrition.protein}g\n🌾 Karbonhidrat: ${addedMeal.nutrition.carbohydrates}g\n🥑 Yağ: ${addedMeal.nutrition.fats}g\n\nGüven Skoru: ${addedMeal.confidence}%`;
+
       Alert.alert(
         '✅ AI Analiz Tamamlandı!',
-        `🍽️ ${addedMeal.name}\n🔥 ${addedMeal.calories} kcal\n💪 Protein: ${addedMeal.nutrition.protein}g\n🌾 Karbonhidrat: ${addedMeal.nutrition.carbohydrates}g\n🥑 Yağ: ${addedMeal.nutrition.fats}g\n\nGüven Skoru: ${addedMeal.confidence}%`,
+        message,
         [
           { text: 'Dashboard', onPress: () => router.push('/dashboard') },
           { text: 'Tamam', style: 'default' }

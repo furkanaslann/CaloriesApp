@@ -6,6 +6,7 @@
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
+import { signIn, signUp, signInAnonymously } from '@/utils/firebase';
 import {
   Alert,
   ScrollView,
@@ -126,6 +127,12 @@ const AccountCreationScreen = () => {
     }));
   };
 
+  // Email validation function
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const validateForm = () => {
     if (!accountData.username.trim()) {
       Alert.alert('Hata', 'Lütfen bir kullanıcı adı seçin.');
@@ -137,6 +144,10 @@ const AccountCreationScreen = () => {
     }
     if (!accountData.email.trim()) {
       Alert.alert('Hata', 'Lütfen e-posta adresinizi giriniz.');
+      return false;
+    }
+    if (!isValidEmail(accountData.email)) {
+      Alert.alert('Hata', 'Lütfen geçerli bir e-posta adresi giriniz.');
       return false;
     }
     if (!accountData.password) {
@@ -168,11 +179,33 @@ const AccountCreationScreen = () => {
     setIsCreating(true);
 
     try {
+      console.log('Starting account creation with email:', accountData.email);
+
+      // Create Firebase Auth user
+      let firebaseUser;
+      try {
+        firebaseUser = await signUp(accountData.email, accountData.password);
+        console.log('Firebase user created successfully:', firebaseUser.uid);
+      } catch (authError: any) {
+        console.error('Firebase auth error:', authError);
+
+        // If user already exists, try to sign in
+        if (authError.message.includes('already exists') || authError.message.includes('email address is already in use')) {
+          try {
+            firebaseUser = await signIn(accountData.email, accountData.password);
+            console.log('Existing user signed in successfully:', firebaseUser.uid);
+          } catch (signInError: any) {
+            throw new Error(`Authentication failed: ${signInError.message}`);
+          }
+        } else {
+          throw new Error(`Authentication failed: ${authError.message}`);
+        }
+      }
+
       // Update account data in onboarding context
       const accountUpdate = {
         username: accountData.username,
         email: accountData.email,
-        passwordHash: 'hashed_password', // In real app, this should be properly hashed
         createdAt: new Date().toISOString(),
         preferences: {
           agreeToTerms: accountData.agreeToTerms,
@@ -182,9 +215,6 @@ const AccountCreationScreen = () => {
       };
 
       updateAccount(accountUpdate);
-
-      // Simulate API call for account creation
-      await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Complete onboarding process (this now handles both local storage and Firestore sync)
       try {
@@ -207,9 +237,9 @@ const AccountCreationScreen = () => {
         console.log('Forcing navigation to main app...');
         router.replace('/dashboard');
       }, 1000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating account:', error);
-      Alert.alert('Hata', 'Hesap oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
+      Alert.alert('Hata', error.message || 'Hesap oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setIsCreating(false);
     }
