@@ -3,18 +3,21 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
-import { useRouter } from 'expo-router';
+import { FIREBASE_CONFIG } from '@/constants/firebase';
+import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
+import { useUser } from '@/context/user-context';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import firestore from '@react-native-firebase/firestore';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
+  ScrollView,
   StyleSheet,
   Text,
   TextStyle,
-  View,
   TouchableOpacity,
-  ScrollView
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -22,6 +25,15 @@ const { width } = Dimensions.get('window');
 
 const ProfileDashboardScreen = () => {
   const router = useRouter();
+  const { userData, user, refreshUserData } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [userStats, setUserStats] = useState({
+    totalDays: 0,
+    totalCalories: 0,
+    goalsCompleted: 0,
+    currentStreak: 0
+  });
+
   // Create theme object that matches expected structure
   const theme = {
     semanticColors: {
@@ -63,49 +75,179 @@ const ProfileDashboardScreen = () => {
     coloredShadows: { gradient: SHADOWS.lg },
   };
 
-  // Profile data
-  const profileData = {
-    name: 'Ahmet Yılmaz',
-    email: 'ahmet.yilmaz@email.com',
-    joinDate: '15 Ocak 2024',
-    memberSince: '3 ay',
-    level: 'Altın Üye',
-    avatar: '👨‍💼'
+  // Get user display name
+  const getDisplayName = () => {
+    if (userData?.profile?.name) {
+      return `${userData.profile.name} ${userData.profile.lastName || ''}`;
+    }
+    if (user?.displayName) {
+      return user.displayName;
+    }
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return 'Kullanıcı';
   };
 
-  const stats = [
-    { label: 'Toplam Gün', value: '92', icon: '📅' },
-    { label: 'Kalori Kaydedilen', value: '184.5k', icon: '🔥' },
-    { label: 'Hedef Tamamlanan', value: '12', icon: '🎯' },
-    { label: 'Aktif Seri', value: '15 gün', icon: '⚡' },
-  ];
+  // Get formatted join date
+  const getJoinDate = () => {
+    if (userData?.createdAt) {
+      const date = new Date(userData.createdAt);
+      return date.toLocaleDateString('tr-TR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+    return 'Bilinmiyor';
+  };
+
+  // Calculate stats from user data
+  useEffect(() => {
+    const calculateStats = async () => {
+      if (!userData || !user) return;
+
+      try {
+        // Calculate days since joining
+        let totalDays = 0;
+        if (userData.createdAt) {
+          const joinDate = new Date(userData.createdAt);
+          const today = new Date();
+          const diffTime = Math.abs(today.getTime() - joinDate.getTime());
+          totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        // Get food logs for calorie count
+        let totalCalories = 0;
+        let goalsCompleted = 0;
+
+        const foodLogsSnapshot = await firestore()
+          .collection(FIREBASE_CONFIG.collections.foodLogs)
+          .where('userId', '==', user.uid)
+          .get();
+
+        foodLogsSnapshot.forEach(doc => {
+          const log = doc.data();
+          if (log.calories) {
+            totalCalories += log.calories;
+          }
+        });
+
+        // Check for completed goals (simplified logic)
+        if (userData.goals?.targetWeight && userData.progress?.currentWeight) {
+          const currentWeight = userData.progress.currentWeight;
+          const targetWeight = userData.goals.targetWeight;
+          const startingWeight = userData.progress.startingWeight || currentWeight;
+
+          // Calculate progress percentage
+          const totalGoal = Math.abs(startingWeight - targetWeight);
+          const currentProgress = Math.abs(startingWeight - currentWeight);
+
+          if (totalGoal > 0 && currentProgress >= totalGoal) {
+            goalsCompleted = 1;
+          }
+        }
+
+        setUserStats({
+          totalDays,
+          totalCalories: Math.round(totalCalories),
+          goalsCompleted,
+          currentStreak: userData.progress?.timeOnApp || 0
+        });
+      } catch (error) {
+        console.error('Error calculating stats:', error);
+      }
+    };
+
+    calculateStats();
+  }, [userData, user]);
 
   const profileSections = [
     {
       title: 'Kişisel Bilgiler',
       items: [
-        { label: 'Ad Soyad', value: profileData.name, icon: '👤' },
-        { label: 'E-posta', value: profileData.email, icon: '📧' },
-        { label: 'Telefon', value: '+90 532 123 4567', icon: '📱' },
-        { label: 'Doğum Tarihi', value: '15 Mart 1990', icon: '🎂' },
+        { label: 'Ad Soyad', value: getDisplayName(), icon: '👤' },
+        { label: 'E-posta', value: user?.email || 'Bilinmiyor', icon: '📧' },
+        { label: 'Telefon', value: userData?.commitment?.phone || 'Belirtilmemiş', icon: '📱' },
+        {
+          label: 'Doğum Tarihi',
+          value: userData?.profile?.dateOfBirth || 'Belirtilmemiş',
+          icon: '🎂'
+        },
+        {
+          label: 'Yaş',
+          value: userData?.profile?.age ? `${userData.profile.age} yaş` : 'Belirtilmemiş',
+          icon: '🎂'
+        },
       ]
     },
     {
       title: 'Sağlık Bilgileri',
       items: [
-        { label: 'Boy', value: '175 cm', icon: '📏' },
-        { label: 'Kilo', value: '72.5 kg', icon: '⚖️' },
-        { label: 'Hedef Kilo', value: '70 kg', icon: '🎯' },
-        { label: 'Aktivite Seviyesi', value: 'Orta', icon: '🏃' },
+        {
+          label: 'Boy',
+          value: userData?.profile?.height ? `${userData.profile.height} cm` : 'Belirtilmemiş',
+          icon: '📏'
+        },
+        {
+          label: 'Mevcut Kilo',
+          value: userData?.profile?.currentWeight ? `${userData.profile.currentWeight} kg` : 'Belirtilmemiş',
+          icon: '⚖️'
+        },
+        {
+          label: 'Hedef Kilo',
+          value: userData?.goals?.targetWeight ? `${userData.goals.targetWeight} kg` : 'Belirtilmemiş',
+          icon: '🎯'
+        },
+        {
+          label: 'Aktivite Seviyesi',
+          value: userData?.activity?.level === 'sedentary' ? 'Düşük' :
+                userData?.activity?.level === 'lightly_active' ? 'Hafif Aktif' :
+                userData?.activity?.level === 'moderately_active' ? 'Orta Aktif' :
+                userData?.activity?.level === 'very_active' ? 'Çok Aktif' : 'Bilinmiyor',
+          icon: '🏃'
+        },
+        {
+          label: 'Cinsiyet',
+          value: userData?.profile?.gender === 'male' ? 'Erkek' :
+                userData?.profile?.gender === 'female' ? 'Kadın' : 'Belirtilmemiş',
+          icon: '⚧️'
+        }
       ]
     },
     {
       title: 'Hedefler',
       items: [
-        { label: 'Ana Hedef', value: 'Kilo Verme', icon: '🏆' },
-        { label: 'Haftalık Hedef', value: '0.5 kg', icon: '📊' },
-        { label: 'Günlük Kalori', value: '2000 kcal', icon: '🔥' },
-        { label: 'Beslenme Tipi', value: 'Dengeli', icon: '🥗' },
+        {
+          label: 'Ana Hedef',
+          value: userData?.goals?.primaryGoal === 'weight_loss' ? 'Kilo Verme' :
+                userData?.goals?.primaryGoal === 'muscle_gain' ? 'Kas Kazanma' :
+                userData?.goals?.primaryGoal === 'maintenance' ? 'Koruma' : 'Belirtilmemiş',
+          icon: '🏆'
+        },
+        {
+          label: 'Haftalık Hedef',
+          value: userData?.goals?.weeklyGoal ? `${userData.goals.weeklyGoal} kg` : 'Belirtilmemiş',
+          icon: '📊'
+        },
+        {
+          label: 'Günlük Kalori Hedefi',
+          value: userData?.calculatedValues?.dailyCalorieGoal ? `${userData.calculatedValues.dailyCalorieGoal} kcal` : 'Belirtilmemiş',
+          icon: '🔥'
+        },
+        {
+          label: 'Beslenme Tipi',
+          value: userData?.diet?.type === 'omnivore' ? 'Her Şeyden Yer' :
+                userData?.diet?.type === 'vegetarian' ? 'Vejetaryen' :
+                userData?.diet?.type === 'vegan' ? 'Vegan' :
+                userData?.diet?.type === 'pescatarian' ? 'Pesketaryen' : 'Belirtilmemiş',
+          icon: '🥗'
+        },
+        {
+          label: 'Katılım Tarihi',
+          value: getJoinDate(),
+          icon: '📅'
+        }
       ]
     },
   ];
@@ -361,27 +503,40 @@ const ProfileDashboardScreen = () => {
           {/* Profile Header */}
           <View style={styles.profileHeader}>
             <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>{profileData.avatar}</Text>
+              <Text style={styles.avatarText}>{getDisplayName().charAt(0).toUpperCase()}</Text>
             </View>
-            <Text style={styles.name}>{profileData.name}</Text>
-            <Text style={styles.email}>{profileData.email}</Text>
+            <Text style={styles.name}>{getDisplayName()}</Text>
+            <Text style={styles.email}>{user?.email || 'Bilinmiyor'}</Text>
             <View style={styles.levelBadge}>
-              <Text style={styles.levelText}>{profileData.level}</Text>
+              <Text style={styles.levelText}>Aktif Üye</Text>
             </View>
             <Text style={styles.memberInfo}>
-              {profileData.memberSince} • {profileData.joinDate}'den beri üye
+              {userStats.totalDays} gün • {getJoinDate()}'den beri üye
             </Text>
           </View>
 
           {/* Stats Grid */}
           <View style={styles.statsGrid}>
-            {stats.map((stat, index) => (
-              <View key={index} style={styles.statCard}>
-                <Text style={styles.statIcon}>{stat.icon}</Text>
-                <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
-              </View>
-            ))}
+            <View style={styles.statCard}>
+              <Text style={styles.statIcon}>📅</Text>
+              <Text style={styles.statValue}>{userStats.totalDays}</Text>
+              <Text style={styles.statLabel}>Toplam Gün</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statIcon}>🔥</Text>
+              <Text style={styles.statValue}>{userStats.totalCalories.toLocaleString('tr-TR')}</Text>
+              <Text style={styles.statLabel}>Kalori Kaydedilen</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statIcon}>🎯</Text>
+              <Text style={styles.statValue}>{userStats.goalsCompleted}</Text>
+              <Text style={styles.statLabel}>Hedef Tamamlanan</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statIcon}>⚡</Text>
+              <Text style={styles.statValue}>{userStats.currentStreak} gün</Text>
+              <Text style={styles.statLabel}>Uygulamada Geçen Süre</Text>
+            </View>
           </View>
 
           {/* Profile Sections */}

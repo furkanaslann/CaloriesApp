@@ -4,7 +4,8 @@
  */
 
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
-import React from 'react';
+import { useUser } from '@/context/user-context';
+import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
   StyleSheet,
@@ -12,13 +13,18 @@ import {
   TextStyle,
   View,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
 const GoalsDashboardScreen = () => {
+  const { userData, user, updateUserGoals } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [activeGoals, setActiveGoals] = useState([]);
+
   // Create theme object that matches expected structure
   const theme = {
     semanticColors: {
@@ -60,83 +66,100 @@ const GoalsDashboardScreen = () => {
     coloredShadows: { gradient: SHADOWS.lg },
   };
 
-  // Goals data
-  const activeGoals = [
-    {
-      id: '1',
-      title: 'Kilo Verme',
-      target: '70 kg',
-      current: '72.5 kg',
-      progress: 65,
-      unit: 'kg',
-      deadline: '15 Mart 2024',
-      category: 'weight',
-      icon: '⚖️',
-      color: theme.colors.primary
-    },
-    {
-      id: '2',
-      title: 'Günlük Adım',
-      target: '10.000',
-      current: '7.500',
-      progress: 75,
-      unit: 'adım',
-      deadline: 'Her gün',
-      category: 'activity',
-      icon: '👟',
-      color: theme.colors.success
-    },
-    {
-      id: '3',
-      title: 'Su Tüketimi',
-      target: '2.5',
-      current: '1.8',
-      progress: 72,
-      unit: 'litre',
-      deadline: 'Her gün',
-      category: 'hydration',
-      icon: '💧',
-      color: theme.colors.warning
-    },
-    {
-      id: '4',
-      title: 'Protein Alımı',
-      target: '150',
-      current: '125',
-      progress: 83,
-      unit: 'gram',
-      deadline: 'Her gün',
-      category: 'nutrition',
-      icon: '🥩',
-      color: theme.colors.primary
-    },
-  ];
+  // Calculate goals progress from user data
+  useEffect(() => {
+    const calculateGoalsProgress = () => {
+      if (!userData) return;
 
-  const completedGoals = [
-    {
-      id: '5',
-      title: 'Haftalık Egzersiz',
-      description: '5 gün egzersiz yapma hedefi tamamlandı',
-      completedDate: '10 Ocak 2024',
-      icon: '🏃',
-      points: 100
-    },
-    {
-      id: '6',
-      title: '30 Günlük Seri',
-      description: '30 gün üst üste giriş yapıldı',
-      completedDate: '5 Ocak 2024',
-      icon: '🔥',
-      points: 150
-    },
-  ];
+      const goals = [];
 
-  const goalSuggestions = [
-    { title: 'Daha Fazla Sebze Tüketimi', difficulty: 'Kolay', icon: '🥬' },
-    { title: 'Uyku Saatlerini Düzenleme', difficulty: 'Orta', icon: '😴' },
-    { title: 'Meditasyon Pratiği', difficulty: 'Kolay', icon: '🧘' },
-    { title: 'Haftalık 3 Gün Antrenman', difficulty: 'Zor', icon: '💪' },
-  ];
+      // Weight goal
+      if (userData.goals?.targetWeight && userData.profile?.currentWeight) {
+        const targetWeight = userData.goals.targetWeight;
+        const currentWeight = userData.profile.currentWeight;
+        const startingWeight = userData.progress?.startingWeight || currentWeight;
+
+        let progress = 0;
+        const totalGoal = Math.abs(startingWeight - targetWeight);
+        const currentProgress = Math.abs(startingWeight - currentWeight);
+
+        if (totalGoal > 0) {
+          progress = Math.min((currentProgress / totalGoal) * 100, 100);
+        }
+
+        goals.push({
+          id: 'weight',
+          title: userData.goals.primaryGoal === 'weight_loss' ? 'Kilo Verme' :
+                 userData.goals.primaryGoal === 'muscle_gain' ? 'Kilo Alma' : 'Kilo Koruma',
+          target: `${targetWeight} kg`,
+          current: `${currentWeight} kg`,
+          progress: Math.round(progress),
+          unit: 'kg',
+          deadline: userData.goals?.timeline || 'Hedeflenen Tarih',
+          category: 'weight',
+          icon: '⚖️',
+          color: userData.goals.primaryGoal === 'weight_loss' ? theme.colors.danger :
+                 userData.goals.primaryGoal === 'muscle_gain' ? theme.colors.success : theme.colors.primary
+        });
+      }
+
+      // Daily calorie goal
+      if (userData.calculatedValues?.dailyCalorieGoal) {
+        const dailyGoal = userData.calculatedValues.dailyCalorieGoal;
+        // Assume consumed calories for demo (in real app, get from today's food logs)
+        const consumed = 0; // This would come from today's logs
+        const progress = Math.min((consumed / dailyGoal) * 100, 100);
+
+        goals.push({
+          id: 'calories',
+          title: 'Günlük Kalori',
+          target: `${dailyGoal}`,
+          current: `${consumed}`,
+          progress: Math.round(progress),
+          unit: 'kcal',
+          deadline: 'Her gün',
+          category: 'nutrition',
+          icon: '🔥',
+          color: theme.colors.warning
+        });
+      }
+
+      // Water goal
+      goals.push({
+        id: 'water',
+        title: 'Su Tüketimi',
+        target: '8',
+        current: '0',
+        progress: 0,
+        unit: 'bardak',
+        deadline: 'Her gün',
+        category: 'hydration',
+        icon: '💧',
+        color: theme.colors.primary
+      });
+
+      // Steps goal
+      goals.push({
+        id: 'steps',
+        title: 'Günlük Adım',
+        target: '10.000',
+        current: '0',
+        progress: 0,
+        unit: 'adım',
+        deadline: 'Her gün',
+        category: 'activity',
+        icon: '👟',
+        color: theme.colors.success
+      });
+
+      setActiveGoals(goals);
+    };
+
+    calculateGoalsProgress();
+  }, [userData]);
+
+  const completedGoals = [];
+  const goalSuggestions = [];
 
   // Dynamic styles using updated theme
   const styles = StyleSheet.create({
@@ -173,21 +196,23 @@ const GoalsDashboardScreen = () => {
       marginBottom: theme.spacing['2xl'],
     },
     sectionTitle: {
-      fontSize: 18,
-      fontWeight: '600' as TextStyle['fontWeight'],
+      fontSize: theme.textStyles.onboardingSubtitle?.fontSize || 20,
+      fontWeight: (theme.textStyles.onboardingSubtitle?.fontWeight || '600') as TextStyle['fontWeight'],
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.lg,
     },
-
-    // Active Goals
     goalCard: {
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: '#FFFFFF',
       borderRadius: theme.borderRadius.lg,
-      borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
       padding: theme.spacing.lg,
       marginBottom: theme.spacing.md,
-      ...theme.shadows.sm,
+      borderWidth: 1,
+      borderColor: theme.semanticColors.border.primary,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
     },
     goalHeader: {
       flexDirection: 'row',
@@ -195,264 +220,197 @@ const GoalsDashboardScreen = () => {
       alignItems: 'center',
       marginBottom: theme.spacing.md,
     },
-    goalInfo: {
-      flex: 1,
+    goalLeft: {
       flexDirection: 'row',
       alignItems: 'center',
+      flex: 1,
     },
     goalIcon: {
-      fontSize: 20,
+      fontSize: 24,
       marginRight: theme.spacing.md,
+    },
+    goalInfo: {
+      flex: 1,
     },
     goalTitle: {
       fontSize: 16,
-      fontWeight: '600' as TextStyle['fontWeight'],
+      fontWeight: '600',
       color: theme.semanticColors.text.primary,
+      marginBottom: theme.spacing.xs,
     },
     goalDeadline: {
-      fontSize: 10,
-      color: theme.semanticColors.text.tertiary,
-      backgroundColor: `${theme.semanticColors.border.primary}50`,
-      paddingHorizontal: theme.spacing.sm,
-      paddingVertical: 2,
-      borderRadius: theme.borderRadius.sm,
-    },
-    progressInfo: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: theme.spacing.sm,
-    },
-    progressText: {
       fontSize: 14,
       color: theme.semanticColors.text.secondary,
     },
-    progressPercent: {
-      fontSize: 14,
-      fontWeight: '600' as TextStyle['fontWeight'],
+    goalProgress: {
+      fontSize: 16,
+      fontWeight: '600',
       color: theme.semanticColors.text.primary,
     },
-    progressBar: {
+    progressBarContainer: {
       height: 8,
       backgroundColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.sm,
+      borderRadius: 4,
       overflow: 'hidden',
+      marginBottom: theme.spacing.md,
     },
-    progressFill: {
+    progressBarFill: {
       height: '100%',
-      borderRadius: theme.borderRadius.sm,
+      borderRadius: 4,
     },
-
-    // Completed Goals
-    completedCard: {
-      backgroundColor: theme.semanticColors.background.primary,
-      borderRadius: theme.borderRadius.lg,
-      borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      padding: theme.spacing.lg,
-      marginBottom: theme.spacing.md,
+    goalMetrics: {
       flexDirection: 'row',
-      alignItems: 'center',
-      ...theme.shadows.sm,
-    },
-    completedIcon: {
-      fontSize: 20,
-      marginRight: theme.spacing.md,
-    },
-    completedInfo: {
-      flex: 1,
-    },
-    completedTitle: {
-      fontSize: 14,
-      fontWeight: '600' as TextStyle['fontWeight'],
-      color: theme.semanticColors.text.primary,
-      marginBottom: 2,
-    },
-    completedDescription: {
-      fontSize: 12,
-      color: theme.semanticColors.text.secondary,
-      marginBottom: 4,
-    },
-    completedDate: {
-      fontSize: 10,
-      color: theme.semanticColors.text.tertiary,
-    },
-    pointsBadge: {
-      backgroundColor: `${theme.colors.success}20`,
-      paddingHorizontal: theme.spacing.sm,
-      paddingVertical: 4,
-      borderRadius: theme.borderRadius.md,
-    },
-    pointsText: {
-      fontSize: 10,
-      fontWeight: '600' as TextStyle['fontWeight'],
-      color: theme.colors.success,
-    },
-
-    // Suggestions
-    suggestionGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
       justifyContent: 'space-between',
-    },
-    suggestionCard: {
-      width: (width - theme.spacing['2xl'] * 2 - theme.spacing.md) / 2,
-      backgroundColor: theme.semanticColors.background.primary,
-      borderRadius: theme.borderRadius.lg,
-      borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      padding: theme.spacing.lg,
       alignItems: 'center',
-      marginBottom: theme.spacing.md,
-      ...theme.shadows.sm,
     },
-    suggestionIcon: {
-      fontSize: 24,
+    goalMetric: {
+      fontSize: 14,
+      color: theme.semanticColors.text.secondary,
+    },
+    goalMetricValue: {
+      fontWeight: '600',
+      color: theme.semanticColors.text.primary,
+    },
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: theme.spacing['4xl'],
+    },
+    emptyStateIcon: {
+      fontSize: 64,
+      marginBottom: theme.spacing.lg,
+    },
+    emptyStateTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.sm,
     },
-    suggestionTitle: {
-      fontSize: 12,
-      fontWeight: '600' as TextStyle['fontWeight'],
-      color: theme.semanticColors.text.primary,
-      marginBottom: 4,
+    emptyStateSubtitle: {
+      fontSize: 14,
+      color: theme.semanticColors.text.secondary,
       textAlign: 'center',
+      maxWidth: width * 0.7,
     },
-    difficultyBadge: {
-      backgroundColor: `${theme.colors.warning}20`,
-      paddingHorizontal: theme.spacing.sm,
-      paddingVertical: 2,
-      borderRadius: theme.borderRadius.sm,
-    },
-    difficultyText: {
-      fontSize: 8,
-      fontWeight: '600' as TextStyle['fontWeight'],
-      color: theme.colors.warning,
-    },
-
-    // Action Buttons
-    actionButtons: {
+    addButton: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: theme.spacing['4xl'],
-    },
-    actionButton: {
+      alignItems: 'center',
+      justifyContent: 'center',
       backgroundColor: theme.colors.primary,
-      borderRadius: theme.borderRadius.lg,
       paddingVertical: theme.spacing.md,
       paddingHorizontal: theme.spacing.lg,
-      minWidth: (width - theme.spacing['2xl'] * 2 - theme.spacing.md) / 2,
+      borderRadius: theme.borderRadius.lg,
+      marginTop: theme.spacing.md,
+    },
+    addButtonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '600',
+      marginLeft: theme.spacing.sm,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
       alignItems: 'center',
-      ...theme.shadows.md,
     },
-    secondaryButton: {
-      backgroundColor: 'transparent',
-      borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-    },
-    actionButtonText: {
-      fontSize: 14,
-      fontWeight: '600' as TextStyle['fontWeight'],
-      color: theme.semanticColors.onPrimary,
-    },
-    secondaryButtonText: {
-      color: theme.semanticColors.text.primary,
+    loadingText: {
+      marginTop: theme.spacing.md,
+      fontSize: 16,
+      color: theme.semanticColors.text.secondary,
     },
   });
 
-  const renderActiveGoal = ({ item }) => (
-    <TouchableOpacity style={styles.goalCard} key={item.id}>
-      <View style={styles.goalHeader}>
-        <View style={styles.goalInfo}>
-          <Text style={styles.goalIcon}>{item.icon}</Text>
-          <Text style={styles.goalTitle}>{item.title}</Text>
+  // Loading state
+  if (!userData) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Yükleniyor...</Text>
         </View>
-        <View style={styles.goalDeadline}>
-          <Text>{item.deadline}</Text>
-        </View>
-      </View>
-      <View style={styles.progressInfo}>
-        <Text style={styles.progressText}>
-          {item.current} / {item.target} {item.unit}
-        </Text>
-        <Text style={styles.progressPercent}>{item.progress}%</Text>
-      </View>
-      <View style={styles.progressBar}>
-        <View
-          style={[
-            styles.progressFill,
-            {
-              width: `${item.progress}%`,
-              backgroundColor: item.color,
-            }
-          ]}
-        />
-      </View>
-    </TouchableOpacity>
-  );
-
-  const renderCompletedGoal = ({ item }) => (
-    <View style={styles.completedCard} key={item.id}>
-      <Text style={styles.completedIcon}>{item.icon}</Text>
-      <View style={styles.completedInfo}>
-        <Text style={styles.completedTitle}>{item.title}</Text>
-        <Text style={styles.completedDescription}>{item.description}</Text>
-        <Text style={styles.completedDate}>Tamamlandı: {item.completedDate}</Text>
-      </View>
-      <View style={styles.pointsBadge}>
-        <Text style={styles.pointsText}>+{item.points} puan</Text>
-      </View>
-    </View>
-  );
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        <View style={styles.header}>
-          <Text style={styles.title}>Hedefler</Text>
-          <Text style={styles.subtitle}>Kişisel hedeflerinizi belirleyin</Text>
-        </View>
-
-        <View style={styles.content}>
-          {/* Active Goals */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Aktif Hedefler ({activeGoals.length})</Text>
-            {activeGoals.map(goal => renderActiveGoal({ item: goal, key: goal.id }))}
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <View style={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>Hedeflerim</Text>
+            <Text style={styles.subtitle}>Kişisel hedeflerinizi takip edin</Text>
           </View>
 
-          {/* Completed Goals */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tamamlanan Hedefler ({completedGoals.length})</Text>
-            {completedGoals.map(goal => renderCompletedGoal({ item: goal, key: goal.id }))}
-          </View>
+          <View style={styles.content}>
+            {/* Active Goals */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Aktif Hedefler</Text>
+              {activeGoals.length > 0 ? (
+                activeGoals.map((goal) => (
+                  <View key={goal.id} style={styles.goalCard}>
+                    <View style={styles.goalHeader}>
+                      <View style={styles.goalLeft}>
+                        <Text style={styles.goalIcon}>{goal.icon}</Text>
+                        <View style={styles.goalInfo}>
+                          <Text style={styles.goalTitle}>{goal.title}</Text>
+                          <Text style={styles.goalDeadline}>{goal.deadline}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.goalProgress}>{goal.progress}%</Text>
+                    </View>
 
-          {/* Goal Suggestions */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Yeni Hedef Önerileri</Text>
-            <View style={styles.suggestionGrid}>
-              {goalSuggestions.map((suggestion, index) => (
-                <TouchableOpacity key={index} style={styles.suggestionCard}>
-                  <Text style={styles.suggestionIcon}>{suggestion.icon}</Text>
-                  <Text style={styles.suggestionTitle}>{suggestion.title}</Text>
-                  <View style={styles.difficultyBadge}>
-                    <Text style={styles.difficultyText}>{suggestion.difficulty}</Text>
+                    <View style={styles.progressBarContainer}>
+                      <View
+                        style={[
+                          styles.progressBarFill,
+                          {
+                            width: `${goal.progress}%`,
+                            backgroundColor: goal.color,
+                          }
+                        ]}
+                      />
+                    </View>
+
+                    <View style={styles.goalMetrics}>
+                      <Text style={styles.goalMetric}>
+                        Mevcut: <Text style={styles.goalMetricValue}>{goal.current} {goal.unit}</Text>
+                      </Text>
+                      <Text style={styles.goalMetric}>
+                        Hedef: <Text style={styles.goalMetricValue}>{goal.target} {goal.unit}</Text>
+                      </Text>
+                    </View>
                   </View>
-                </TouchableOpacity>
-              ))}
+                ))
+              ) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateIcon}>🎯</Text>
+                  <Text style={styles.emptyStateTitle}>Henüz hedef belirlemediniz</Text>
+                  <Text style={styles.emptyStateSubtitle}>
+                    Sağlık hedeflerinizi belirleyerek ilerlemenizi takip edebilirsiniz
+                  </Text>
+                </View>
+              )}
             </View>
-          </View>
 
-          {/* Action Buttons */}
-          <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>➕ Yeni Hedef Ekle</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
-              <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>📊 İstatistikler</Text>
-            </TouchableOpacity>
+            {/* Goal Suggestions */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Hedef Önerileri</Text>
+              {goalSuggestions.length > 0 ? (
+                goalSuggestions.map((suggestion, index) => (
+                  <View key={index} style={styles.goalCard}>
+                    <Text>Öneri: {suggestion.title}</Text>
+                  </View>
+                ))
+              ) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateIcon}>💡</Text>
+                  <Text style={styles.emptyStateTitle}>Öneriler yükleniyor...</Text>
+                  <Text style={styles.emptyStateSubtitle}>
+                    Yakında size özel hedef önerileri sunacağız
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
       </ScrollView>

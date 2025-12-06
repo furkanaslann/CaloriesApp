@@ -53,6 +53,7 @@ const DashboardIndexScreen = () => {
   } = useDashboard();
 
   const [isChecking, setIsChecking] = useState(true);
+  const [hasCheckedOnce, setHasCheckedOnce] = useState(false);
 
   // Check onboarding status from Firebase (primary) and AsyncStorage (fallback)
   useEffect(() => {
@@ -74,6 +75,7 @@ const DashboardIndexScreen = () => {
         if (isOnboardingCompleted) {
           console.log('✅ Onboarding completed (Firebase), showing dashboard');
           setIsLoading(false);
+          setHasCheckedOnce(true);
           return;
         }
 
@@ -100,6 +102,7 @@ const DashboardIndexScreen = () => {
               }, 3000);
             }
             setIsLoading(false);
+            setHasCheckedOnce(true);
             return;
           }
         } else {
@@ -118,6 +121,7 @@ const DashboardIndexScreen = () => {
             if (isOnboardingCompleted) {
               console.log('✅ Onboarding completed after delay, showing dashboard');
               setIsLoading(false);
+              setHasCheckedOnce(true);
             } else {
               console.log('❌ Onboarding still not completed, redirecting to onboarding...');
               router.replace('/onboarding/welcome');
@@ -131,15 +135,18 @@ const DashboardIndexScreen = () => {
         router.replace('/onboarding/welcome');
       } finally {
         // Don't set isChecking to false immediately when waiting for Firebase sync
-        setTimeout(() => setIsChecking(false), 3000);
+        setTimeout(() => {
+          setIsChecking(false);
+          setHasCheckedOnce(true);
+        }, 3000);
       }
     };
 
-    // Only run check when user is loaded
-    if (!userLoading) {
+    // Only run check when user is loaded and haven't checked before
+    if (!userLoading && !hasCheckedOnce) {
       checkOnboardingStatus();
     }
-  }, [userLoading, isOnboardingCompleted, router]);
+  }, [userLoading, isOnboardingCompleted, router, hasCheckedOnce]);
 
   // Get user display name with fallback
   const getUserDisplayName = () => {
@@ -761,8 +768,8 @@ const DashboardIndexScreen = () => {
     ]);
   }
 
-  // Show loading screen while checking onboarding status or loading dashboard data
-  if (isChecking || isLoading) {
+  // Show loading screen only during initial check or when actually loading dashboard data
+  if ((isChecking && !hasCheckedOnce) || (isLoading && !hasCheckedOnce)) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
         <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
