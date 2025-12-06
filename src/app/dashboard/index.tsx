@@ -4,27 +4,27 @@
  * Figma Design: https://www.figma.com/design/V4OjFZYz1hhZdeWSgZyYtu/Calories-Pages
  */
 
+import StreakCard from '@/components/dashboard/streak-card';
 import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
 import { useUser } from '@/context/user-context';
+import { useDashboard } from '@/hooks/use-dashboard';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
-  RefreshControl,
-  Alert
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import StreakCard from '@/components/dashboard/streak-card';
-import { useDashboard } from '@/hooks/use-dashboard';
 
 const { width } = Dimensions.get('window');
 
@@ -150,8 +150,8 @@ const DashboardIndexScreen = () => {
 
   // Get user display name with fallback
   const getUserDisplayName = () => {
-    if (userData?.profile?.firstName) {
-      return userData.profile.firstName;
+    if (userData?.profile?.name) {
+      return userData.profile.name;
     }
     if (user?.displayName) {
       return user.displayName;
