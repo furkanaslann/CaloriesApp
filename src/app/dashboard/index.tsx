@@ -107,14 +107,31 @@ const DashboardIndexScreen = () => {
         }
 
         // If neither Firebase nor AsyncStorage shows completed onboarding
-        console.log('❌ Onboarding not completed, redirecting to onboarding...');
-        router.replace('/onboarding/welcome');
+        // Wait a bit more for Firebase to sync (especially for Emulator)
+        console.log('⏳ Waiting for Firebase to sync...');
+        setTimeout(async () => {
+          console.log('Retrying onboarding status check...');
+          await refreshUserData();
+
+          // Check one more time after refresh
+          setTimeout(() => {
+            if (isOnboardingCompleted) {
+              console.log('✅ Onboarding completed after delay, showing dashboard');
+              setIsLoading(false);
+            } else {
+              console.log('❌ Onboarding still not completed, redirecting to onboarding...');
+              router.replace('/onboarding/welcome');
+            }
+          }, 1000);
+        }, 2000);
+
       } catch (error) {
         console.error('Error checking onboarding status:', error);
         // On error, redirect to onboarding to be safe
         router.replace('/onboarding/welcome');
       } finally {
-        setIsChecking(false);
+        // Don't set isChecking to false immediately when waiting for Firebase sync
+        setTimeout(() => setIsChecking(false), 3000);
       }
     };
 

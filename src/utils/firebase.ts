@@ -18,7 +18,7 @@ import { FIREBASE_CONFIG } from '@/constants/firebase';
 // Firebase Emulator Configuration for Development
 const IS_DEV = __DEV__;
 const EMULATOR_CONFIG = {
-  host: 'localhost',
+  host: '127.0.0.1', // For Android emulator
   ports: {
     auth: 9099,
     firestore: 8080,
@@ -30,18 +30,24 @@ const EMULATOR_CONFIG = {
 // Initialize Firebase Emulators in Development
 if (IS_DEV) {
   try {
-    // Connect to Auth Emulator
-    auth().useEmulator(EMULATOR_CONFIG.host + ':' + EMULATOR_CONFIG.ports.auth);
+    console.log('🔥 Attempting to connect to Firebase Emulators...');
+
+    // Connect to Auth Emulator - requires full URL
+    const authUrl = `http://${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.auth}`;
+    console.log('Connecting to Auth Emulator at:', authUrl);
+    auth().useEmulator(authUrl);
 
     // Connect to Firestore Emulator
+    console.log('Connecting to Firestore Emulator at:', `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.firestore}`);
     firestore().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.firestore);
 
     // Connect to Storage Emulator
+    console.log('Connecting to Storage Emulator at:', `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.storage}`);
     storage().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.storage);
 
-    console.log('🔥 Firebase Emulators connected successfully');
+    console.log('✅ Firebase Emulators connected successfully');
   } catch (error) {
-    console.warn('⚠️ Firebase Emulator connection failed:', error);
+    console.error('❌ Firebase Emulator connection failed:', error);
   }
 }
 

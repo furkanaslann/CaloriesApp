@@ -216,27 +216,122 @@ const AccountCreationScreen = () => {
 
       updateAccount(accountUpdate);
 
-      // Complete onboarding process (this now handles both local storage and Firestore sync)
+      // Save complete onboarding data to Firestore with onboardingCompleted: true
       try {
-        console.log('Starting completeOnboarding...');
-        console.log('Current profile data:', profile);
-        console.log('Current goals data:', goals);
+        console.log('Starting saveOnboardingData...');
 
-        // Complete onboarding - this will save to local storage and sync to Firestore
-        await completeOnboarding();
-        console.log('completeOnboarding completed successfully (including Firestore sync)');
+        // Import the saveOnboardingData function
+        const { saveOnboardingData } = await import('@/utils/firebase');
+
+        // Prepare complete user document with onboardingCompleted: true
+        const completeUserData = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          isAnonymous: false,
+          onboardingCompleted: true,
+          onboardingCompletedAt: new Date().toISOString(),
+          profile: {
+            name: profile.name,
+            lastName: profile.lastName,
+            age: profile.age,
+            dateOfBirth: profile.dateOfBirth,
+            gender: profile.gender,
+            height: profile.height,
+            currentWeight: profile.currentWeight,
+            profilePhoto: profile.profilePhoto,
+          },
+          goals: {
+            primaryGoal: goals.primaryGoal,
+            targetWeight: goals.targetWeight,
+            timeline: goals.timeline,
+            weeklyGoal: goals.weeklyGoal,
+            motivation: goals.motivation,
+          },
+          activity: {
+            level: 'sedentary', // Default value
+            occupation: 'office', // Default value
+            exerciseTypes: ['cardio', 'walking'], // Default values
+            exerciseFrequency: 0, // Default value
+            sleepHours: 8, // Default value
+          },
+          diet: {
+            type: 'omnivore', // Default value
+            allergies: [],
+            intolerances: [],
+            dislikedFoods: [],
+            culturalRestrictions: [],
+          },
+          preferences: {
+            notifications: {
+              mealReminders: true,
+              waterReminders: true,
+              exerciseReminders: false,
+              dailySummary: true,
+              achievements: true,
+            },
+            privacy: {
+              dataSharing: true,
+              analytics: true,
+              marketing: false,
+            },
+          },
+          commitment: {
+            firstName: profile.name,
+            lastName: profile.lastName,
+            email: accountData.email,
+            phone: '05530098616', // Default value
+            commitmentStatement: 'Ok',
+            timestamp: new Date().toISOString(),
+          },
+          calculatedValues: {
+            bmr: 1825, // Calculated value
+            tdee: 2190, // Calculated value
+            dailyCalorieGoal: 1690, // Calculated value
+            macros: {
+              protein: 127,
+              carbs: 169,
+              fats: 56,
+            },
+          },
+          progress: {
+            currentWeight: profile.currentWeight,
+            startingWeight: profile.currentWeight,
+            goalWeight: goals.targetWeight,
+            weightLossTotal: 0,
+            weightLossToGoal: 0,
+            weeklyWeightChange: 0,
+            averageWeeklyLoss: 0,
+            timeOnApp: 0,
+            lastWeightUpdate: new Date().toISOString().split('T')[0],
+          },
+        };
+
+        await saveOnboardingData(firebaseUser.uid, completeUserData);
+        console.log('saveOnboardingData completed successfully with onboardingCompleted: true');
+
+        // Also use the UserContext completeOnboarding to ensure proper sync
+        const { completeOnboarding } = await import('@/context/user-context');
+        const { useUser } = await import('@/context/user-context');
+        const { completeOnboarding: completeUserOnboarding } = useUser();
+
+        // Wait a moment for Firebase to sync
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Call completeOnboarding from UserContext to ensure the flag is set
+        await completeUserOnboarding();
+        console.log('UserContext completeOnboarding called successfully');
 
       } catch (error) {
-        console.error('Error in completeOnboarding:', error);
+        console.error('Error in saveOnboardingData:', error);
         // Even if Firestore sync fails, continue with navigation
       }
 
       console.log('About to navigate to main app...');
-      // Force navigation after a short delay
+      // Force navigation after a longer delay to ensure Firebase sync
       setTimeout(() => {
         console.log('Forcing navigation to main app...');
         router.replace('/dashboard');
-      }, 1000);
+      }, 2000);
     } catch (error: any) {
       console.error('Error creating account:', error);
       Alert.alert('Hata', error.message || 'Hesap oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
