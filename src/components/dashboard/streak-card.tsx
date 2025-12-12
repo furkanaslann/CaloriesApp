@@ -9,7 +9,6 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   Animated,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -67,8 +66,8 @@ const StreakCard: React.FC<StreakCardProps> = ({
   // Get week day labels (Pzt-Paz)
   const weekDayLabels = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 
-  // Image-based flame component using reference image
-  const FlameImage: React.FC<{ isCompleted: boolean; index: number }> = ({ isCompleted, index }) => {
+  // Icon-based flame component
+  const FlameIcon: React.FC<{ isCompleted: boolean; index: number }> = ({ isCompleted, index }) => {
     const animatedScale = flameAnimations[index];
     const flickerAnimation = React.useRef(new Animated.Value(1)).current;
 
@@ -96,13 +95,12 @@ const StreakCard: React.FC<StreakCardProps> = ({
     }, [isCompleted]);
 
     if (isCompleted) {
-      // Burning flame - original orange flame image
+      // Burning flame - animated icon
       return (
         <View style={styles.flameContainer}>
-          <Animated.Image
-            source={require('../../../assets/images/fire.png')}
+          <Animated.View
             style={[
-              styles.flameImage,
+              styles.flameIcon,
               {
                 transform: [{ scale: animatedScale }],
                 opacity: flickerAnimation,
@@ -112,25 +110,18 @@ const StreakCard: React.FC<StreakCardProps> = ({
                 shadowOffset: { width: 0, height: 2 },
               },
             ]}
-            resizeMode="contain"
-          />
+          >
+            <Ionicons name="flame" size={24} color="#F59E0B" />
+          </Animated.View>
         </View>
       );
     } else {
-      // Dim flame - same image with reduced opacity and grayscale
+      // Dim flame - same icon with reduced opacity
       return (
         <View style={styles.flameContainer}>
-          <Image
-            source={require('../../../assets/images/fire.png')}
-            style={[
-              styles.flameImage,
-              {
-                opacity: 0.3,
-                tintColor: '#CBD5E1',
-              },
-            ]}
-            resizeMode="contain"
-          />
+          <View style={[styles.flameIcon, { opacity: 0.3 }]}>
+            <Ionicons name="flame" size={24} color="#CBD5E1" />
+          </View>
         </View>
       );
     }
@@ -140,7 +131,7 @@ const StreakCard: React.FC<StreakCardProps> = ({
   const renderWeekDay = (isCompleted: boolean, index: number) => (
     <View key={index} style={styles.weekDayContainer}>
       <Text style={styles.weekDayLabel}>{weekDayLabels[index]}</Text>
-      <FlameImage isCompleted={isCompleted} index={index} />
+      <FlameIcon isCompleted={isCompleted} index={index} />
     </View>
   );
 
@@ -252,15 +243,17 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  // Flame Image Styles
+  // Flame Icon Styles
   flameContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     height: 40,
   },
-  flameImage: {
+  flameIcon: {
     width: 24,
     height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

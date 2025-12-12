@@ -9,9 +9,9 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "emulators": "firebase emulators:start",
-    "emulators:start": "firebase emulators:start",
-    "emulators:exec": "firebase emulators:exec"
+    "emulators": "firebase emulators:start --only auth,functions,firestore,storage",
+    "emulators:start": "firebase emulators:start --only auth,functions,firestore,storage",
+    "emulators:exec": "firebase emulators:exec --only auth,functions,firestore,storage"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

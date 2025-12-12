@@ -66,13 +66,6 @@
       "port": 8080,
       "rules": "firestore.rules"
     },
-    "database": {
-      "port": 9000,
-      "rules": "database.rules.json"
-    },
-    "hosting": {
-      "port": 5000
-    },
     "storage": {
       "port": 9199
     },

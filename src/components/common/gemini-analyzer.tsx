@@ -17,7 +17,6 @@ import * as FileSystem from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 import { useGemini } from '@/hooks/use-gemini';
 import { FoodAnalysisResult } from '@/services/gemini-service';
-import { uploadImageFromUri } from '@/utils/firebase';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -131,27 +130,9 @@ const GeminiAnalyzer: React.FC<GeminiAnalyzerProps> = ({
       const result = await analyzeFood(previewImage);
 
       if (result) {
-        let imageUrl: string | undefined;
-
-        // Başarılı analiz sonrası fotoğrafı Firebase Storage'a yükle
-        // Sadece orijinal URI varsa yükle yap
-        if (capturedImageUri) {
-          try {
-            // Doğrudan URI'den Firebase Storage'a yükle
-            imageUrl = await uploadImageFromUri(authToken, capturedImageUri);
-            console.log('Image uploaded to Firebase Storage:', imageUrl);
-          } catch (uploadError) {
-            console.error('Error uploading image to Firebase Storage:', uploadError);
-            // Yükleme başarısız olursa analizi devam ettir ama kullanıcı bilgilendir
-            Alert.alert(
-              'Analiz Tamamlandı',
-              'Yemek analizi başarıyla tamamlandı ancak fotoğraf yüklenirken bir hata oluştu.'
-            );
-          }
-        }
-
-        // Sonucu ve imageUrl'yi ana componente gönder
-        onAnalysisComplete(result, imageUrl);
+        // Fotoğrafı doğrudan Firestore'a kaydet (base64 olarak)
+        // Sonucu ve fotoğraf verisini ana componente gönder
+        onAnalysisComplete(result, previewImage);
         setPreviewImage(null);
         setCapturedImageUri(null);
       }

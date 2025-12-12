@@ -104,6 +104,7 @@ const AccountCreationScreen = () => {
   };
 
   const { profile, goals, completeOnboarding, updateAccount } = useOnboarding();
+  const { completeOnboarding: completeUserOnboarding } = useUser();
   // Firestore entegrasyonu artık onboarding context içinde otomatik yapılıyor
 
   const [accountData, setAccountData] = useState({
@@ -308,11 +309,6 @@ const AccountCreationScreen = () => {
 
         await saveOnboardingData(firebaseUser.uid, completeUserData);
         console.log('saveOnboardingData completed successfully with onboardingCompleted: true');
-
-        // Also use the UserContext completeOnboarding to ensure proper sync
-        const { completeOnboarding } = await import('@/context/user-context');
-        const { useUser } = await import('@/context/user-context');
-        const { completeOnboarding: completeUserOnboarding } = useUser();
 
         // Wait a moment for Firebase to sync
         await new Promise(resolve => setTimeout(resolve, 500));

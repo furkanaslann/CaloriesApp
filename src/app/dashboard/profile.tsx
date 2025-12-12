@@ -14,10 +14,12 @@ import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Dimensions,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
   TextStyle,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
@@ -29,6 +31,8 @@ const ProfileDashboardScreen = () => {
   const router = useRouter();
   const { userData, user, refreshUserData, signOut } = useUser();
   const [loading, setLoading] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showGoalPicker, setShowGoalPicker] = useState(false);
   const [userStats, setUserStats] = useState({
     totalDays: 0,
     totalCalories: 0,
@@ -36,15 +40,66 @@ const ProfileDashboardScreen = () => {
     currentStreak: 0
   });
 
+  const [editForm, setEditForm] = useState({
+    firstName: userData?.profile?.name || '',
+    lastName: userData?.profile?.lastName || '',
+    phone: userData?.commitment?.phone || '',
+    age: userData?.profile?.age?.toString() || '',
+    height: userData?.profile?.height?.toString() || '',
+    currentWeight: userData?.profile?.currentWeight?.toString() || '',
+    targetWeight: userData?.goals?.targetWeight?.toString() || '',
+    primaryGoal: userData?.goals?.primaryGoal || '',
+    weeklyGoal: userData?.goals?.weeklyGoal?.toString() || '',
+    timeline: userData?.goals?.timeline || ''
+  });
+
+  const goalOptions = [
+    { value: 'weight_loss', label: 'Kilo Verme', icon: '🏃‍♂️' },
+    { value: 'muscle_gain', label: 'Kas Kazanma', icon: '💪' },
+    { value: 'maintenance', label: 'Koruma', icon: '⚖️' }
+  ];
+
   // Handle edit profile
   const handleEditProfile = () => {
-    router.push('/dashboard/profile/edit');
+    setShowEditModal(true);
   };
 
   
   // Handle settings
   const handleSettings = () => {
     router.push('/dashboard/settings');
+  };
+
+  // Handle save profile
+  const handleSaveProfile = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+
+      const updateData = {
+        'profile.name': editForm.firstName,
+        'profile.lastName': editForm.lastName,
+        'profile.age': parseInt(editForm.age) || null,
+        'profile.height': parseFloat(editForm.height) || null,
+        'profile.currentWeight': parseFloat(editForm.currentWeight) || null,
+        'commitment.phone': editForm.phone,
+        'goals.targetWeight': parseFloat(editForm.targetWeight) || null,
+        'goals.primaryGoal': editForm.primaryGoal,
+        'goals.weeklyGoal': parseFloat(editForm.weeklyGoal) || null,
+        'goals.timeline': editForm.timeline,
+      };
+
+      await firestore().collection(FIREBASE_CONFIG.collections.users).doc(user.uid).update(updateData);
+      await refreshUserData();
+      setShowEditModal(false);
+      Alert.alert('Başarılı', 'Profiliniz başarıyla güncellendi.');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      Alert.alert('Hata', 'Profil güncellenirken bir hata oluştu.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle sign out
@@ -525,6 +580,177 @@ const ProfileDashboardScreen = () => {
     },
     secondaryButtonText: {
       color: theme.semanticColors.text.primary,
+    },
+
+    // Modal Styles
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'flex-end',
+    },
+    modalContainer: {
+      backgroundColor: theme.semanticColors.background.primary,
+      borderTopLeftRadius: theme.borderRadius.xl,
+      borderTopRightRadius: theme.borderRadius.xl,
+      maxHeight: '90%',
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: theme.spacing.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.semanticColors.border.primary,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: '600' as TextStyle['fontWeight'],
+      color: theme.semanticColors.text.primary,
+    },
+    modalClose: {
+      fontSize: 24,
+      color: theme.semanticColors.text.secondary,
+      paddingHorizontal: theme.spacing.sm,
+    },
+    modalContent: {
+      padding: theme.spacing.lg,
+      maxHeight: '70%',
+    },
+    inputGroup: {
+      marginBottom: theme.spacing.lg,
+    },
+    inputLabel: {
+      fontSize: 14,
+      fontWeight: '500' as TextStyle['fontWeight'],
+      color: theme.semanticColors.text.primary,
+      marginBottom: theme.spacing.sm,
+    },
+    input: {
+      backgroundColor: theme.semanticColors.background.primary,
+      borderWidth: 1,
+      borderColor: theme.semanticColors.border.primary,
+      borderRadius: theme.borderRadius.md,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      fontSize: 16,
+      color: theme.semanticColors.text.primary,
+    },
+    inputRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    inputHalf: {
+      width: '48%',
+    },
+    goalsSection: {
+      marginTop: theme.spacing.xl,
+    },
+    sectionLabel: {
+      fontSize: 16,
+      fontWeight: '600' as TextStyle['fontWeight'],
+      color: theme.semanticColors.text.primary,
+      marginBottom: theme.spacing.lg,
+    },
+    pickerButton: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: theme.semanticColors.background.primary,
+      borderWidth: 1,
+      borderColor: theme.semanticColors.border.primary,
+      borderRadius: theme.borderRadius.md,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+    },
+    pickerContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    pickerText: {
+      fontSize: 16,
+      color: theme.semanticColors.text.primary,
+      marginLeft: theme.spacing.sm,
+    },
+    pickerArrow: {
+      fontSize: 12,
+      color: theme.semanticColors.text.secondary,
+    },
+    dropdownList: {
+      backgroundColor: theme.semanticColors.background.primary,
+      borderWidth: 1,
+      borderColor: theme.semanticColors.border.primary,
+      borderRadius: theme.borderRadius.md,
+      marginTop: theme.spacing.xs,
+      position: 'absolute',
+      top: '100%',
+      left: 0,
+      right: 0,
+      zIndex: 1000,
+      ...theme.shadows.lg,
+    },
+    dropdownItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+    },
+    dropdownItemFirst: {
+      borderTopLeftRadius: theme.borderRadius.md,
+      borderTopRightRadius: theme.borderRadius.md,
+    },
+    dropdownItemLast: {
+      borderBottomLeftRadius: theme.borderRadius.md,
+      borderBottomRightRadius: theme.borderRadius.md,
+    },
+    dropdownItemSelected: {
+      backgroundColor: `${theme.colors.primary}20`,
+    },
+    dropdownIcon: {
+      fontSize: 16,
+      marginRight: theme.spacing.sm,
+    },
+    dropdownLabel: {
+      flex: 1,
+      fontSize: 16,
+      color: theme.semanticColors.text.primary,
+    },
+    dropdownCheck: {
+      fontSize: 16,
+      color: theme.colors.primary,
+    },
+    selectedIcon: {
+      fontSize: 16,
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      padding: theme.spacing.lg,
+      borderTopWidth: 1,
+      borderTopColor: theme.semanticColors.border.primary,
+      gap: theme.spacing.md,
+    },
+    modalButton: {
+      flex: 1,
+      paddingVertical: theme.spacing.md,
+      borderRadius: theme.borderRadius.lg,
+      alignItems: 'center',
+    },
+    modalCancelButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: theme.semanticColors.border.primary,
+    },
+    modalSaveButton: {
+      backgroundColor: theme.colors.primary,
+    },
+    modalButtonText: {
+      fontSize: 16,
+      fontWeight: '600' as TextStyle['fontWeight'],
+    },
+    modalCancelText: {
+      color: theme.semanticColors.text.primary,
+    },
+    modalSaveText: {
+      color: theme.semanticColors.onPrimary,
     },
   });
 
