@@ -54,12 +54,16 @@ export const initializeFirebaseEmulators = () => {
       // Storage emulator'ü kullanmadığımızı belirt
       console.log('📦 Storage will use: gs://calories-app-185b6.firebasestorage.app');
 
-      console.log('✅ Firebase configuration: Auth: Emulator, Firestore: Emulator, Storage: Production');
+      console.log('✅ Firebase configuration: Auth: Emulator, Firestore: Emulator, Functions: Emulator, Storage: Production');
       emulatorsInitialized = true;
+      return true; // Success
     } catch (error) {
       console.error('❌ Firebase Emulator connection failed:', error);
+      emulatorsInitialized = false;
+      return false; // Failed
     }
   }
+  return emulatorsInitialized;
 };
 
 // ============================================================================
@@ -555,11 +559,11 @@ const filterUndefinedValues = (obj: any): any => {
 
 export const saveOnboardingData = async (userId: string, onboardingData: any) => {
   try {
-    console.log('Original onboarding data:', JSON.stringify(onboardingData, null, 2));
+    //console.log('Original onboarding data:', JSON.stringify(onboardingData, null, 2));
 
     // Filter out any undefined values before sending to Firestore
     const filteredData = filterUndefinedValues(onboardingData);
-    console.log('Filtered onboarding data:', JSON.stringify(filteredData, null, 2));
+    //console.log('Filtered onboarding data:', JSON.stringify(filteredData, null, 2));
 
     // If filtered data is null, create minimal structure
     if (filteredData === null) {

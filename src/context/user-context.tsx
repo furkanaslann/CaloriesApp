@@ -43,27 +43,34 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Listen to auth state changes
   useEffect(() => {
-    // Check if Firebase is initialized before using auth
-    try {
-      const unsubscribe = auth().onAuthStateChanged(async (firebaseUser) => {
-        console.log('Auth state changed. User:', firebaseUser?.uid);
-        setUser(firebaseUser);
+    // Small delay to ensure Firebase emulators are initialized
+    const initializeAuth = async () => {
+      await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
 
-      if (firebaseUser) {
-        // Load user data from Firestore
-        await loadUserData(firebaseUser.uid);
-      } else {
-        setUserData(null);
-      }
+      // Check if Firebase is initialized before using auth
+      try {
+        const unsubscribe = auth().onAuthStateChanged(async (firebaseUser) => {
+          console.log('Auth state changed. User:', firebaseUser?.uid);
+          setUser(firebaseUser);
 
+        if (firebaseUser) {
+          // Load user data from Firestore
+          await loadUserData(firebaseUser.uid);
+        } else {
+          setUserData(null);
+        }
+
+          setIsLoading(false);
+        });
+
+        return unsubscribe;
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
         setIsLoading(false);
-      });
+      }
+    };
 
-      return unsubscribe;
-    } catch (error) {
-      console.error('Firebase initialization error:', error);
-      setIsLoading(false);
-    }
+    initializeAuth();
   }, []);
 
   // Load user data from Firestore

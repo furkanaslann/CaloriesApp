@@ -16,7 +16,7 @@ export const unstable_settings = {
 
 function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
   const colorScheme = useColorScheme();
-  const { isLoading, isOnboardingCompleted, createAnonymousUser, user } = useUser();
+  const { isLoading, user, createAnonymousUser } = useUser();
   const router = useRouter();
 
   // Initialize user and always start with dashboard route
@@ -37,9 +37,8 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
         }
 
         console.log('User initialized:', user.uid);
-        console.log('Onboarding completed:', isOnboardingCompleted);
 
-        // Always start with dashboard route - dashboard will handle onboarding check internally
+        // Always route to dashboard - dashboard will handle onboarding check internally
         console.log('Routing to dashboard (will handle onboarding check internally)');
         router.replace('/dashboard');
       } catch (error) {
@@ -49,11 +48,11 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
       }
     };
 
-    // Only run this once on mount, or when loading/user state changes significantly
+    // Only run this once on mount, or when loading/user state changes
     if (isLoading === false) {
       initializeApp();
     }
-  }, [isLoading, user, isOnboardingCompleted]);
+  }, [isLoading, user]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -77,6 +76,9 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
+  // Initialize Firebase Emulators immediately on app start (before UserProvider)
+  initializeFirebaseEmulators();
 
   return (
     <CustomThemeProvider defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}>

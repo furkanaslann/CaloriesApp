@@ -311,11 +311,7 @@ const AccountCreationScreen = () => {
         console.log('saveOnboardingData completed successfully with onboardingCompleted: true');
 
         // Wait a moment for Firebase to sync
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Call completeOnboarding from UserContext to ensure the flag is set
-        await completeUserOnboarding();
-        console.log('UserContext completeOnboarding called successfully');
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
       } catch (error) {
         console.error('Error in saveOnboardingData:', error);
@@ -327,7 +323,7 @@ const AccountCreationScreen = () => {
       setTimeout(() => {
         console.log('Forcing navigation to main app...');
         router.replace('/dashboard');
-      }, 2000);
+      }, 3000);
     } catch (error: any) {
       console.error('Error creating account:', error);
       Alert.alert('Hata', error.message || 'Hesap oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');

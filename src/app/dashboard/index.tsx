@@ -25,6 +25,8 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import firestore from '@react-native-firebase/firestore';
+import { FIREBASE_CONFIG } from '@/constants/firebase';
 
 const { width } = Dimensions.get('window');
 
@@ -37,6 +39,25 @@ const DashboardIndexScreen = () => {
   const router = useRouter();
   const { userData, user, isLoading: userLoading, isOnboardingCompleted, refreshUserData } = useUser();
   const [isLoading, setIsLoading] = useState(true);
+
+  // Function to get fresh user data directly from Firestore
+  const getUserData = async () => {
+    if (!user) return null;
+    try {
+      const doc = await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .get();
+
+      if (doc.exists) {
+        return doc.data();
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting user data:', error);
+      return null;
+    }
+  };
 
   // Use dashboard hook for data management
   const {
@@ -72,10 +93,11 @@ const DashboardIndexScreen = () => {
         console.log('Onboarding completed from Firebase:', isOnboardingCompleted);
 
         // Primary check: Use Firebase user data
-        if (isOnboardingCompleted) {
+        if (userData?.onboardingCompleted || isOnboardingCompleted) {
           console.log('✅ Onboarding completed (Firebase), showing dashboard');
           setIsLoading(false);
           setHasCheckedOnce(true);
+          setIsChecking(false);
           return;
         }
 
@@ -90,19 +112,9 @@ const DashboardIndexScreen = () => {
 
           if (isLocalCompleted) {
             console.log('⚠️ Local flag set but Firebase not updated - showing dashboard');
-            // Try refreshing user data immediately and again after delay
-            if (userData) {
-              console.log('Refreshing user data immediately...');
-              refreshUserData();
-
-              // Second refresh after a longer delay
-              setTimeout(() => {
-                console.log('Refreshing user data again to check for onboarding completion...');
-                refreshUserData();
-              }, 3000);
-            }
             setIsLoading(false);
             setHasCheckedOnce(true);
+            setIsChecking(false);
             return;
           }
         } else {
@@ -116,29 +128,25 @@ const DashboardIndexScreen = () => {
           console.log('Retrying onboarding status check...');
           await refreshUserData();
 
-          // Check one more time after refresh
-          setTimeout(() => {
-            if (isOnboardingCompleted) {
-              console.log('✅ Onboarding completed after delay, showing dashboard');
-              setIsLoading(false);
-              setHasCheckedOnce(true);
-            } else {
-              console.log('❌ Onboarding still not completed, redirecting to onboarding...');
-              router.replace('/onboarding/welcome');
-            }
-          }, 1000);
-        }, 2000);
+          // Get fresh user data directly from Firestore
+          const freshUserData = await getUserData();
+
+          if (freshUserData?.onboardingCompleted) {
+            console.log('✅ Onboarding completed after delay, showing dashboard');
+            setIsLoading(false);
+            setHasCheckedOnce(true);
+            setIsChecking(false);
+          } else {
+            console.log('❌ Onboarding still not completed, redirecting to onboarding...');
+            router.replace('/onboarding/welcome');
+          }
+        }, 5000); // 5 seconds wait for Firebase sync
 
       } catch (error) {
         console.error('Error checking onboarding status:', error);
         // On error, redirect to onboarding to be safe
         router.replace('/onboarding/welcome');
-      } finally {
-        // Don't set isChecking to false immediately when waiting for Firebase sync
-        setTimeout(() => {
-          setIsChecking(false);
-          setHasCheckedOnce(true);
-        }, 3000);
+        setIsChecking(false);
       }
     };
 
@@ -146,7 +154,7 @@ const DashboardIndexScreen = () => {
     if (!userLoading && !hasCheckedOnce) {
       checkOnboardingStatus();
     }
-  }, [userLoading, isOnboardingCompleted, router, hasCheckedOnce]);
+  }, [userLoading, hasCheckedOnce]); // Removed dependencies that cause re-runs
 
   // Get user display name with fallback
   const getUserDisplayName = () => {
