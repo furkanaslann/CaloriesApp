@@ -5,6 +5,7 @@
  */
 
 import { useUser } from '@/context/user-context';
+import { FIREBASE_CONFIG } from '@/constants/firebase';
 import {
   Achievement,
   DailyLog,
@@ -14,6 +15,7 @@ import {
   UserDocument
 } from '@/types/user';
 import { useCallback, useEffect, useState } from 'react';
+import firestore from '@react-native-firebase/firestore';
 
 // Hook return interface
 interface UseDashboardReturn {
@@ -74,14 +76,97 @@ export const useDashboard = (): UseDashboardReturn => {
     try {
       updateState({ isLoading: true, error: null });
 
-      // TODO: Implement dashboard data loading when service is ready
+      // Get today's date
+      const today = new Date().toISOString().split('T')[0];
+
+      // Fetch user document
+      const userDoc = await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .get();
+
+      const userDocument = userDoc.exists ? userDoc.data() as UserDocument : null;
+
+      // Fetch today's meals
+      const mealsSnapshot = await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .collection('meals')
+        .where('date', '==', today)
+        .orderBy('timestamp', 'desc')
+        .get();
+
+      const recentMeals = mealsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        timestamp: doc.data().timestamp?.toDate(),
+      }));
+
+      // Calculate today's nutrition totals
+      const totals = recentMeals.reduce((acc, meal) => ({
+        calories: acc.calories + (meal.calories || 0),
+        protein: acc.protein + (meal.nutrition?.protein || 0),
+        carbs: acc.carbs + (meal.nutrition?.carbohydrates || 0),
+        fats: acc.fats + (meal.nutrition?.fats || 0),
+        fiber: acc.fiber + (meal.nutrition?.fiber || 0),
+        water: acc.water + 1, // Placeholder for water tracking
+      }), {
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fats: 0,
+        fiber: 0,
+        water: 0,
+      });
+
+      // Create today log object
+      const todayLog: DailyLog = {
+        id: today,
+        date: today,
+        calories: {
+          consumed: totals.calories,
+          goal: userDocument?.calculatedValues?.dailyCalorieGoal || 2000,
+          remaining: Math.max(0, (userDocument?.calculatedValues?.dailyCalorieGoal || 2000) - totals.calories),
+        },
+        nutrition: {
+          protein: {
+            current: totals.protein,
+            goal: userDocument?.calculatedValues?.macros?.protein || 120,
+          },
+          carbs: {
+            current: totals.carbs,
+            goal: userDocument?.calculatedValues?.macros?.carbs || 250,
+          },
+          fats: {
+            current: totals.fats,
+            goal: userDocument?.calculatedValues?.macros?.fats || 65,
+          },
+          fiber: {
+            current: totals.fiber,
+            goal: 25,
+          },
+        },
+        water: {
+          glasses: totals.water,
+          goal: 8,
+        },
+        steps: {
+          count: 0,
+          goal: 10000,
+        },
+        meals: recentMeals,
+      };
+
+      // Calculate streak data
+      const streakData = await calculateStreakData(user.uid);
+
       updateState({
-        userDocument: null,
-        streakData: null,
-        recentMeals: [],
-        achievements: [],
-        notifications: [],
-        todayLog: null,
+        userDocument,
+        streakData,
+        recentMeals,
+        todayLog,
+        achievements: [], // TODO: Implement achievements
+        notifications: [], // TODO: Implement notifications
         isLoading: false,
         error: null,
       });
@@ -158,24 +243,71 @@ export const useDashboard = (): UseDashboardReturn => {
     }
   }, []);
 
-  // Update streak data
-  const updateStreak = useCallback(async (): Promise<StreakData> => {
+  // Calculate streak data
+  const calculateStreakData = useCallback(async (userId: string): Promise<StreakData> => {
     try {
-      // TODO: Implement streak update when service is ready
-      const mockStreak: StreakData = {
-        current: 0,
-        longest: 0,
-        lastLogDate: null,
-      };
+      const today = new Date();
+      const weekDays = [false, false, false, false, false, false, false];
 
-      updateState({ streakData: mockStreak });
-      return mockStreak;
+      // Check last 7 days for meal logging
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+
+        const dayMeals = await firestore()
+          .collection(FIREBASE_CONFIG.collections.users)
+          .doc(userId)
+          .collection('meals')
+          .where('date', '==', dateStr)
+          .limit(1)
+          .get();
+
+        weekDays[6 - i] = !dayMeals.empty;
+      }
+
+      // Calculate current streak
+      let currentStreak = 0;
+      let checkDate = new Date(today);
+
+      while (true) {
+        const dateStr = checkDate.toISOString().split('T')[0];
+        const dayMeals = await firestore()
+          .collection(FIREBASE_CONFIG.collections.users)
+          .doc(userId)
+          .collection('meals')
+          .where('date', '==', dateStr)
+          .limit(1)
+          .get();
+
+        if (!dayMeals.empty) {
+          currentStreak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+
+      return {
+        currentStreak,
+        bestStreak: currentStreak, // TODO: Calculate best streak from history
+        weekDays,
+      };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Seri güncellenemedi';
-      updateState({ error: errorMessage });
-      throw error;
+      console.error('Error calculating streak data:', error);
+      return {
+        currentStreak: 0,
+        bestStreak: 0,
+        weekDays: [false, false, false, false, false, false, false],
+      };
     }
   }, []);
+
+  // Update streak data
+  const updateStreak = useCallback(async (): Promise<StreakData> => {
+    if (!user) throw new Error('User not found');
+    return calculateStreakData(user.uid);
+  }, [user, calculateStreakData]);
 
   // Refresh streak specifically
   const refreshStreak = useCallback(async () => {

@@ -134,3 +134,7 @@ Java(TM) SE Runtime Environment (build 21.0.9+7-LTS-338)
 
 Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
  
+[debug] [2025-12-13T16:49:04.486Z] >>> [apiv2][query] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast [none]
+[debug] [2025-12-13T16:49:04.486Z] >>> [apiv2][body] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast {"eventId":"123e1341-367a-45de-bd69-a77bef9c67b6","eventType":"providers/firebase.auth/eventTypes/user.create","resource":{"name":"projects/calories-app-185b6","service":"firebaseauth.googleapis.com"},"params":{},"timestamp":"2025-12-13T16:49:04.485Z","data":{"uid":"4BwBDCetMu4XD3BfZyiE6vcCz1RH","email":"furkansln.011@gmail.com","emailVerified":false,"metadata":{"creationTime":"2025-12-13T16:49:04.484Z","lastSignInTime":"2025-12-13T16:49:04.484Z"},"customClaims":{},"providerData":[{"rawId":"furkansln.011@gmail.com","providerId":"password","email":"furkansln.011@gmail.com","federatedId":"furkansln.011@gmail.com"}]}}
+[debug] [2025-12-13T16:49:04.497Z] <<< [apiv2][status] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast 200
+[debug] [2025-12-13T16:49:04.498Z] <<< [apiv2][body] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast {"status":"multicast_acknowledged"}

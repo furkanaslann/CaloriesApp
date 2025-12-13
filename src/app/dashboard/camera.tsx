@@ -580,14 +580,37 @@ const CameraDashboardScreen = () => {
         message += `\n\n📝 Sağlık İpucu:\n${result.health_tips[0]}`;
       }
 
-      Alert.alert(
-        '✅ Detaylı AI Analiz Tamamlandı!',
-        message,
-        [
-          { text: 'Dashboard', onPress: () => router.push('/dashboard') },
-          { text: 'Tamam', style: 'default' }
-        ]
-      );
+      // Instead of showing alert, navigate to food detail screen
+      const foodData = {
+        name: result.food_name,
+        calories: result.calories,
+        protein: result.protein,
+        carbohydrates: result.carbs,
+        fats: result.fat,
+        fiber: result.fiber || 0,
+        sugar: result.sugar || 0,
+        sodium: result.sodium || 0,
+        ingredients: result.ingredients || [],
+        tags: generateTags(result),
+        portion: '1 porsiyon',
+        healthScore: result.health_score,
+        allergens: result.allergens,
+        processingLevel: result.processing_level,
+        vitamins: result.vitamins,
+        suggestions: result.suggestions,
+        healthTips: result.health_tips,
+        confidence: Math.round(result.confidence_score * 100),
+        imageBase64: imageData,
+        imageUri: imageUri,
+      };
+
+      // Navigate to food detail screen
+      router.push({
+        pathname: '/dashboard/food-detail',
+        params: {
+          foodData: JSON.stringify(foodData),
+        },
+      });
     } catch (error) {
       setIsAnalyzing(false);
       Alert.alert(
@@ -596,6 +619,46 @@ const CameraDashboardScreen = () => {
         [{ text: 'Tamam', style: 'default' }]
       );
     }
+  };
+
+  // Generate tags based on food analysis
+  const generateTags = (result: FoodAnalysisResult): string[] => {
+    const tags: string[] = [];
+
+    // Add meal type based on time
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) tags.push('Kahvaltı');
+    else if (hour >= 12 && hour < 17) tags.push('Öğle Yemeği');
+    else if (hour >= 17 && hour < 22) tags.push('Akşam Yemeği');
+    else tags.push('Atıştırmalık');
+
+    // Add health-related tags
+    if (result.health_score && result.health_score >= 8) {
+      tags.push('Sağlıklı');
+    }
+    if (result.fiber && result.fiber > 5) {
+      tags.push('Lifli');
+    }
+    if (result.protein && result.protein > 20) {
+      tags.push('Proteinli');
+    }
+    if (result.calories < 200) {
+      tags.push('Düşük Kalorili');
+    }
+
+    // Add allergen tags
+    if (result.allergens && result.allergens.length > 0) {
+      tags.push('Alerjen İçerir');
+    }
+
+    // Add processing level tags
+    if (result.processing_level === 'unprocessed') {
+      tags.push('Doğal');
+    } else if (result.processing_level === 'ultra_processed') {
+      tags.push('İşlenmiş');
+    }
+
+    return tags;
   };
 
   const renderFoodItem = ({ item }) => (
