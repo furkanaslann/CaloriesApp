@@ -28,28 +28,39 @@ const EMULATOR_CONFIG = {
 };
 
 // Initialize Firebase Emulators in Development
-if (IS_DEV) {
-  try {
-    console.log('🔥 Attempting to connect to Firebase Emulators...');
+// Note: Firebase is automatically initialized by react-native-firebase
+// We'll initialize emulators in a separate function that can be called after Firebase is ready
+let emulatorsInitialized = false;
 
-    // Connect to Auth Emulator - requires full URL
-    const authUrl = `http://${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.auth}`;
-    console.log('Connecting to Auth Emulator at:', authUrl);
-    auth().useEmulator(authUrl);
+export const initializeFirebaseEmulators = () => {
+  if (IS_DEV && !emulatorsInitialized) {
+    try {
+      console.log('🔥 Initializing Firebase Emulators...');
 
-    // Connect to Firestore Emulator
-    console.log('Connecting to Firestore Emulator at:', `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.firestore}`);
-    firestore().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.firestore);
+      // Connect to Auth Emulator - requires full URL
+      const authUrl = `http://${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.auth}`;
+      console.log('Connecting to Auth Emulator at:', authUrl);
+      auth().useEmulator(authUrl);
 
-    // Connect to Storage Emulator
-    console.log('Connecting to Storage Emulator at:', `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.storage}`);
-    storage().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.storage);
+      // Connect to Firestore Emulator
+      console.log('Connecting to Firestore Emulator at:', `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.firestore}`);
+      firestore().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.firestore);
 
-    console.log('✅ Firebase Emulators connected successfully');
-  } catch (error) {
-    console.error('❌ Firebase Emulator connection failed:', error);
+      // NOT: Storage Emulator'üne bağlanmıyoruz
+      // Storage için özel bir solution gerekiyor
+      console.log('⚠️  Storage Emulator disabled - Using production Firebase Storage');
+      console.log('⚠️  Need to handle Auth token sync between emulator and production');
+
+      // Storage emulator'ü kullanmadığımızı belirt
+      console.log('📦 Storage will use: gs://calories-app-185b6.firebasestorage.app');
+
+      console.log('✅ Firebase configuration: Auth: Emulator, Firestore: Emulator, Storage: Production');
+      emulatorsInitialized = true;
+    } catch (error) {
+      console.error('❌ Firebase Emulator connection failed:', error);
+    }
   }
-}
+};
 
 // ============================================================================
 // AUTHENTICATION FUNCTIONS
@@ -374,12 +385,21 @@ export const uploadImage = async (
   imageName: string = `meal_${Date.now()}.jpg`
 ) => {
   try {
-    const reference = storage().ref(`users/${userId}/meals/${imageName}`);
-    await reference.putFile(imageUri);
-    const downloadURL = await reference.getDownloadURL();
+    // React Native Firebase v9+ formatı
+    const storageReference = storage().ref(`users/${userId}/meals/${imageName}`);
+    console.log('Storage ref created:', `users/${userId}/meals/${imageName}`);
+
+    await storageReference.putFile(imageUri);
+    console.log('File uploaded successfully');
+
+    const downloadURL = await storageReference.getDownloadURL();
+    console.log('Download URL obtained:', downloadURL);
+
     return downloadURL;
   } catch (error: any) {
     console.error('Error uploading image:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
     throw new Error(error.message);
   }
 };

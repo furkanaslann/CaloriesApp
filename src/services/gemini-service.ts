@@ -2,15 +2,81 @@ import axios from 'axios';
 
 const FUNCTIONS_URL = process.env.EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL || 'https://us-central1-calories-app-185b6.cloudfunctions.net';
 
+export interface Vitamins {
+  vitamin_a?: number;
+  vitamin_c?: number;
+  vitamin_d?: number;
+  vitamin_e?: number;
+  vitamin_k?: number;
+  thiamine?: number;
+  riboflavin?: number;
+  niacin?: number;
+  vitamin_b6?: number;
+  folate?: number;
+  vitamin_b12?: number;
+}
+
+export interface Minerals {
+  calcium?: number;
+  iron?: number;
+  magnesium?: number;
+  phosphorus?: number;
+  potassium?: number;
+  zinc?: number;
+  copper?: number;
+  manganese?: number;
+  selenium?: number;
+}
+
+export interface IngredientDetail {
+  name: string;
+  amount?: number;
+  unit?: string;
+  notes?: string;
+}
+
 export interface FoodAnalysisResult {
+  // Basic nutrition
   food_name: string;
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
   fiber: number;
-  ingredients: string[];
-  health_tips: string[];
+
+  // Detailed nutrition
+  sugar?: number;
+  sodium?: number;
+  cholesterol?: number;
+  saturated_fat?: number;
+  unsaturated_fat?: number;
+
+  // Vitamins and minerals
+  vitamins?: Vitamins;
+  minerals?: Minerals;
+
+  // Health metrics
+  health_score?: number; // 1-10 scale
+  allergens?: string[];
+  processing_level?: 'unprocessed' | 'minimally_processed' | 'processed' | 'ultra_processed';
+
+  // Meal analysis
+  meal_type?: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'dessert' | 'beverage' | 'other';
+  cuisine_type?: string;
+  cooking_method?: string;
+
+  // Dietary information
+  dietary_restrictions?: string[];
+
+  // Ingredients
+  ingredients?: string[];
+  ingredient_details?: IngredientDetail[];
+
+  // Recommendations
+  health_tips?: string[];
+  suggestions?: string[];
+
+  // Meta
   confidence_score: number;
 }
 

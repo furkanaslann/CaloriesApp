@@ -7,6 +7,7 @@ import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { FIREBASE_CONFIG } from '@/constants/firebase';
+import { initializeFirebaseEmulators } from '@/utils/firebase';
 import {
   UserDocument,
   UserContextType,
@@ -42,9 +43,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Listen to auth state changes
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged(async (firebaseUser) => {
-      console.log('Auth state changed. User:', firebaseUser?.uid);
-      setUser(firebaseUser);
+    // Check if Firebase is initialized before using auth
+    try {
+      const unsubscribe = auth().onAuthStateChanged(async (firebaseUser) => {
+        console.log('Auth state changed. User:', firebaseUser?.uid);
+        setUser(firebaseUser);
 
       if (firebaseUser) {
         // Load user data from Firestore
@@ -53,10 +56,14 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUserData(null);
       }
 
-      setIsLoading(false);
-    });
+        setIsLoading(false);
+      });
 
-    return unsubscribe;
+      return unsubscribe;
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+      setIsLoading(false);
+    }
   }, []);
 
   // Load user data from Firestore

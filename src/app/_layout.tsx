@@ -8,6 +8,7 @@ import { OnboardingProvider } from '@/context/onboarding-context';
 import { ThemeProvider as CustomThemeProvider } from '@/context/theme-context';
 import { UserProvider, useUser } from '@/context/user-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { initializeFirebaseEmulators } from '@/utils/firebase';
 
 export const unstable_settings = {
   anchor: 'dashboard',

@@ -1,27 +1,26 @@
-import React, { useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-  Modal,
-  ScrollView,
-  Dimensions,
-  Image,
-} from 'react-native';
-import { Camera, CameraView } from 'expo-camera';
-import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
-import { Ionicons } from '@expo/vector-icons';
 import { useGemini } from '@/hooks/use-gemini';
 import { FoodAnalysisResult } from '@/services/gemini-service';
+import { Ionicons } from '@expo/vector-icons';
+import { Camera, CameraView } from 'expo-camera';
+import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
+import React, { useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 interface GeminiAnalyzerProps {
-  onAnalysisComplete: (result: FoodAnalysisResult, imageUrl?: string) => void;
+  onAnalysisComplete: (result: FoodAnalysisResult, imageData?: string, imageUri?: string) => void;
   authToken?: string;
 }
 
@@ -84,7 +83,7 @@ const GeminiAnalyzer: React.FC<GeminiAnalyzerProps> = ({
         selectionLimit: 1,
       });
 
-      console.log('ImagePicker result:', result);
+      // console.log('ImagePicker result:', result);
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
@@ -130,9 +129,8 @@ const GeminiAnalyzer: React.FC<GeminiAnalyzerProps> = ({
       const result = await analyzeFood(previewImage);
 
       if (result) {
-        // Fotoğrafı doğrudan Firestore'a kaydet (base64 olarak)
-        // Sonucu ve fotoğraf verisini ana componente gönder
-        onAnalysisComplete(result, previewImage);
+        // Sonucu ve fotoğraf verilerini ana componente gönder
+        onAnalysisComplete(result, previewImage, capturedImageUri);
         setPreviewImage(null);
         setCapturedImageUri(null);
       }

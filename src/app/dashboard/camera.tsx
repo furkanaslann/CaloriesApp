@@ -462,9 +462,28 @@ const CameraDashboardScreen = () => {
     setShowGeminiAnalyzer(true);
   };
 
-  const handleAnalysisComplete = async (result: FoodAnalysisResult, imageData?: string) => {
+  const handleAnalysisComplete = async (result: FoodAnalysisResult, imageData?: string, imageUri?: string) => {
     try {
       setIsAnalyzing(true);
+
+      // TODO: Storage upload devre dışı - Auth emulator ve Production Storage uyuşmazlığı
+      // Fotoğrafı Storage'a yükle
+      let imageUrl = '';
+      if (false && imageUri && user?.uid) {  // Geçici olarak devre dışı
+        try {
+          console.log('Uploading image for user:', user.uid);
+          console.log('Image URI:', imageUri);
+
+          // import edelim
+          const { uploadImage } = await import('@/utils/firebase');
+          const imageName = `meal_${Date.now()}.jpg`;
+          imageUrl = await uploadImage(user.uid, imageUri, imageName);
+          console.log('Image uploaded to Storage:', imageUrl);
+        } catch (uploadError) {
+          console.error('Image upload error:', uploadError);
+          // Upload hatası olsa da devam et
+        }
+      }
 
       // Create meal object from AI analysis
       const analyzedMeal = {
@@ -480,7 +499,8 @@ const CameraDashboardScreen = () => {
         confidence: Math.round(result.confidence_score * 100),
         ingredients: result.ingredients,
         health_tips: result.health_tips,
-        imageBase64: imageData // Base64 fotoğraf verisini ekle
+        imageUrl: imageUrl, // Storage URL'ini kullan
+        imageBase64: imageData // Base64'i de sakla (fallback için)
       };
 
       // Add meal to Firestore via dashboard service
@@ -490,10 +510,78 @@ const CameraDashboardScreen = () => {
       await loadRecentMeals();
 
       setIsAnalyzing(false);
-      const message = `🍽️ ${addedMeal.name}\n🔥 ${addedMeal.calories} kcal\n💪 Protein: ${addedMeal.nutrition.protein}g\n🌾 Karbonhidrat: ${addedMeal.nutrition.carbohydrates}g\n🥑 Yağ: ${addedMeal.nutrition.fats}g\n📸 Fotoğraf kaydedildi\n\nGüven Skoru: ${addedMeal.confidence}%`;
+
+      // Detaylı analiz mesajını oluştur
+      let message = `🍽️ ${addedMeal.name}\n🔥 ${addedMeal.calories} kcal\n💪 Protein: ${addedMeal.nutrition.protein}g\n🌾 Karbonhidrat: ${addedMeal.nutrition.carbohydrates}g\n🥑 Yağ: ${addedMeal.nutrition.fats}g`;
+
+      // Yeni alanları ekle
+      if (result.fiber) {
+        message += `\n🌾 Lif: ${result.fiber}g`;
+      }
+      if (result.sugar) {
+        message += `\n🍯 Şeker: ${result.sugar}g`;
+      }
+      if (result.sodium) {
+        message += `\�️ Sodyum: ${result.sodium}mg`;
+      }
+      if (result.health_score) {
+        message += `\n💯 Sağlık Skoru: ${result.health_score}/10`;
+      }
+
+      message += `\n📸 Fotoğraf kaydedildi`;
+      message += `\n\nGüven Skoru: ${addedMeal.confidence}%`;
+
+      // Alerjenleri ekle
+      if (result.allergens && result.allergens.length > 0) {
+        message += `\n⚠️ Alerjenler: ${result.allergens.join(', ')}`;
+      }
+
+      // İşleme seviyesi
+      if (result.processing_level) {
+        const levelMap = {
+          'unprocessed': 'İşlenmemiş',
+          'minimally_processed': 'Az işlenmiş',
+          'processed': 'İşlenmiş',
+          'ultra_processed': 'Çok işlenmiş'
+        };
+        message += `\n📊 İşleme Seviyesi: ${levelMap[result.processing_level] || result.processing_level}`;
+      }
+
+      // Vitaminler
+      if (result.vitamins) {
+        const vitamins = Object.entries(result.vitamins)
+          .filter(([_, value]) => value && value > 0)
+          .map(([key, value]) => `${key}: ${value}`)
+          .slice(0, 3); // İlk 3 vitamini göster
+        if (vitamins.length > 0) {
+          message += `\n🍊 Vitaminler: ${vitamins.join(', ')}`;
+        }
+      }
+
+      // Öneriler
+      if (result.suggestions && result.suggestions.length > 0) {
+        const suggestionMap = {
+          'add_vegetables': 'Daha fazla sebze ekleyin',
+          'reduce_salt': 'Tuz miktarını azaltın',
+          'choose_lean_protein': 'Yağsız protein tercih edin',
+          'add_fiber': 'Lif alımını artırın',
+          'portion_control': 'Porsiyon kontrolü yapın'
+        };
+        const suggestions = result.suggestions
+          .map(s => suggestionMap[s] || s)
+          .slice(0, 2); // İlk 2 öneriyi göster
+        if (suggestions.length > 0) {
+          message += `\n💡 Öneriler: ${suggestions.join(', ')}`;
+        }
+      }
+
+      // Sağlık ipuçları
+      if (result.health_tips && result.health_tips.length > 0) {
+        message += `\n\n📝 Sağlık İpucu:\n${result.health_tips[0]}`;
+      }
 
       Alert.alert(
-        '✅ AI Analiz Tamamlandı!',
+        '✅ Detaylı AI Analiz Tamamlandı!',
         message,
         [
           { text: 'Dashboard', onPress: () => router.push('/dashboard') },

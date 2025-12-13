@@ -59,9 +59,18 @@
       ],
       "expo-notifications",
       "expo-camera",
-      "@react-native-firebase/app",
+      [
+        "@react-native-firebase/app",
+        {
+          "android": {
+            "googleServicesFile": "./google-services.json"
+          },
+          "ios": {
+            "googleServicesFile": "./GoogleService-Info.plist"
+          }
+        }
+      ],
       "@react-native-firebase/auth",
-      //"@react-native-firebase/firestore",
       [
         "expo-build-properties",
         {

@@ -166,10 +166,48 @@ exports.analyzeFood = functions.https.onRequest({
                 "carbs": 20,
                 "fat": 6,
                 "fiber": 3,
+                "sugar": 8,
+                "sodium": 450,
+                "cholesterol": 40,
+                "saturated_fat": 3,
+                "unsaturated_fat": 3,
+                "vitamins": {
+                  "vitamin_c": 10,
+                  "vitamin_a": 200,
+                  "vitamin_d": 50
+                },
+                "minerals": {
+                  "iron": 2,
+                  "calcium": 80,
+                  "potassium": 300
+                },
+                "health_score": 7,
+                "allergens": ["gluten"],
+                "processing_level": "minimally_processed",
+                "meal_type": "lunch",
+                "cuisine_type": "turkish",
+                "cooking_method": "grilled",
+                "dietary_restrictions": ["gluten_free"],
                 "ingredients": ["malzeme1", "malzeme2"],
+                "ingredient_details": [
+                  {
+                    "name": "tavuk",
+                    "amount": 150,
+                    "unit": "gram",
+                    "notes": "ızgara"
+                  }
+                ],
                 "health_tips": ["sağlık ipucu1"],
+                "suggestions": ["add_vegetables", "reduce_salt"],
                 "confidence_score": 0.85
-              }`
+              }
+
+              Notlar:
+              - health_score: 1-10 arası (1=düşük, 10=çok sağlıklı)
+              - processing_level: "unprocessed", "minimally_processed", "processed", "ultra_processed"
+              - meal_type: "breakfast", "lunch", "dinner", "snack", "dessert", "beverage", "other"
+              - dietary_restrictions: "vegetarian", "vegan", "gluten_free", "dairy_free", "keto", "paleo", "low_carb", "low_fat", "low_sodium", "sugar_free"
+              - suggestions: "add_vegetables", "reduce_salt", "choose_lean_protein", "add_fiber", "portion_control"`
                         },
                         {
                             inline_data: {
@@ -211,14 +249,65 @@ exports.analyzeFood = functions.https.onRequest({
                 throw new Error('Invalid response format');
             }
             analysisResult = {
+                // Basic nutrition
                 food_name: parsed.food_name || 'Bilinmeyen Yiyecek',
                 calories: Math.max(0, parsed.calories || 0),
                 protein: Math.max(0, parsed.protein || 0),
                 carbs: Math.max(0, parsed.carbs || 0),
                 fat: Math.max(0, parsed.fat || 0),
                 fiber: Math.max(0, parsed.fiber || 0),
-                ingredients: Array.isArray(parsed.ingredients) ? parsed.ingredients : [],
-                health_tips: Array.isArray(parsed.health_tips) ? parsed.health_tips : [],
+                // Detailed nutrition
+                sugar: parsed.sugar ? Math.max(0, parsed.sugar) : undefined,
+                sodium: parsed.sodium ? Math.max(0, parsed.sodium) : undefined,
+                cholesterol: parsed.cholesterol ? Math.max(0, parsed.cholesterol) : undefined,
+                saturated_fat: parsed.saturated_fat ? Math.max(0, parsed.saturated_fat) : undefined,
+                unsaturated_fat: parsed.unsaturated_fat ? Math.max(0, parsed.unsaturated_fat) : undefined,
+                // Vitamins and minerals
+                vitamins: parsed.vitamins && typeof parsed.vitamins === 'object' ? {
+                    vitamin_a: parsed.vitamins.vitamin_a ? Math.max(0, parsed.vitamins.vitamin_a) : undefined,
+                    vitamin_c: parsed.vitamins.vitamin_c ? Math.max(0, parsed.vitamins.vitamin_c) : undefined,
+                    vitamin_d: parsed.vitamins.vitamin_d ? Math.max(0, parsed.vitamins.vitamin_d) : undefined,
+                    vitamin_e: parsed.vitamins.vitamin_e ? Math.max(0, parsed.vitamins.vitamin_e) : undefined,
+                    vitamin_k: parsed.vitamins.vitamin_k ? Math.max(0, parsed.vitamins.vitamin_k) : undefined,
+                    thiamine: parsed.vitamins.thiamine ? Math.max(0, parsed.vitamins.thiamine) : undefined,
+                    riboflavin: parsed.vitamins.riboflavin ? Math.max(0, parsed.vitamins.riboflavin) : undefined,
+                    niacin: parsed.vitamins.niacin ? Math.max(0, parsed.vitamins.niacin) : undefined,
+                    vitamin_b6: parsed.vitamins.vitamin_b6 ? Math.max(0, parsed.vitamins.vitamin_b6) : undefined,
+                    folate: parsed.vitamins.folate ? Math.max(0, parsed.vitamins.folate) : undefined,
+                    vitamin_b12: parsed.vitamins.vitamin_b12 ? Math.max(0, parsed.vitamins.vitamin_b12) : undefined,
+                } : undefined,
+                minerals: parsed.minerals && typeof parsed.minerals === 'object' ? {
+                    calcium: parsed.minerals.calcium ? Math.max(0, parsed.minerals.calcium) : undefined,
+                    iron: parsed.minerals.iron ? Math.max(0, parsed.minerals.iron) : undefined,
+                    magnesium: parsed.minerals.magnesium ? Math.max(0, parsed.minerals.magnesium) : undefined,
+                    phosphorus: parsed.minerals.phosphorus ? Math.max(0, parsed.minerals.phosphorus) : undefined,
+                    potassium: parsed.minerals.potassium ? Math.max(0, parsed.minerals.potassium) : undefined,
+                    zinc: parsed.minerals.zinc ? Math.max(0, parsed.minerals.zinc) : undefined,
+                    copper: parsed.minerals.copper ? Math.max(0, parsed.minerals.copper) : undefined,
+                    manganese: parsed.minerals.manganese ? Math.max(0, parsed.minerals.manganese) : undefined,
+                    selenium: parsed.minerals.selenium ? Math.max(0, parsed.minerals.selenium) : undefined,
+                } : undefined,
+                // Health metrics
+                health_score: parsed.health_score ? Math.min(10, Math.max(1, parsed.health_score)) : undefined,
+                allergens: Array.isArray(parsed.allergens) ? parsed.allergens : undefined,
+                processing_level: ['unprocessed', 'minimally_processed', 'processed', 'ultra_processed'].includes(parsed.processing_level)
+                    ? parsed.processing_level
+                    : undefined,
+                // Meal analysis
+                meal_type: ['breakfast', 'lunch', 'dinner', 'snack', 'dessert', 'beverage', 'other'].includes(parsed.meal_type)
+                    ? parsed.meal_type
+                    : undefined,
+                cuisine_type: parsed.cuisine_type || undefined,
+                cooking_method: parsed.cooking_method || undefined,
+                // Dietary information
+                dietary_restrictions: Array.isArray(parsed.dietary_restrictions) ? parsed.dietary_restrictions : undefined,
+                // Ingredients
+                ingredients: Array.isArray(parsed.ingredients) ? parsed.ingredients : undefined,
+                ingredient_details: Array.isArray(parsed.ingredient_details) ? parsed.ingredient_details : undefined,
+                // Recommendations
+                health_tips: Array.isArray(parsed.health_tips) ? parsed.health_tips : undefined,
+                suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : undefined,
+                // Meta
                 confidence_score: Math.min(1, Math.max(0, parsed.confidence_score || 0.5))
             };
         }
