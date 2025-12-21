@@ -200,26 +200,44 @@ export const useDashboard = (): UseDashboardReturn => {
 
   // Add meal entry
   const addMeal = useCallback(async (mealData: Omit<MealLog, 'id' | 'createdAt'>): Promise<MealLog> => {
+    if (!user) {
+      throw new Error('Kullanıcı giriş yapmamış');
+    }
+
     try {
-      // TODO: Implement meal addition when service is ready
+      const db = firestore();
+      const docRef = await db
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .collection('meals')
+        .add({
+          ...mealData,
+          createdAt: firestore.FieldValue.serverTimestamp(),
+          userId: user.uid,
+        });
+
+      // Get the created document
+      const newDoc = await docRef.get();
       const newMeal: MealLog = {
-        id: Date.now().toString(),
-        ...mealData,
+        id: docRef.id,
+        ...newDoc.data(),
         createdAt: new Date().toISOString(),
-      };
+      } as MealLog;
 
       // Update local state
       updateState({
         recentMeals: [newMeal, ...(state.recentMeals || [])].slice(0, 20), // Keep last 20 meals
       });
 
+      console.log('✅ Meal successfully added to Firebase:', newMeal.id);
       return newMeal;
     } catch (error) {
+      console.error('Error adding meal to Firebase:', error);
       const errorMessage = error instanceof Error ? error.message : 'Öğün eklenemedi';
       updateState({ error: errorMessage });
       throw error;
     }
-  }, [state.recentMeals]);
+  }, [user, state.recentMeals]);
 
   // Update daily log
   const updateDailyLog = useCallback(async (
@@ -340,14 +358,37 @@ export const useDashboard = (): UseDashboardReturn => {
 
   // Get recent meals
   const getRecentMeals = useCallback(async (limit: number = 10): Promise<any[]> => {
+    if (!user) return [];
+
     try {
-      // TODO: Implement recent meals retrieval when service is ready
-      return [];
+      const db = firestore();
+      const mealsSnapshot = await db
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .collection('meals')
+        .orderBy('createdAt', 'desc')
+        .limit(limit)
+        .get();
+
+      return mealsSnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          timestamp: doc.data().createdAt?.toDate(),
+          date: doc.data().createdAt?.toDate()?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+          time: doc.data().createdAt?.toDate()?.toTimeString().slice(0, 5) || new Date().toTimeString().slice(0, 5),
+        }))
+        .sort((a, b) => {
+          // En son eklenenler üstte olacak
+          const timeA = a.timestamp ? a.timestamp.getTime() : 0;
+          const timeB = b.timestamp ? b.timestamp.getTime() : 0;
+          return timeB - timeA;
+        });
     } catch (error) {
       console.error('Error getting recent meals:', error);
       return [];
     }
-  }, []);
+  }, [user]);
 
   // Clear error
   const clearError = useCallback(() => {

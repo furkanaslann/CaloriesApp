@@ -39,6 +39,7 @@ const DashboardIndexScreen = () => {
   const router = useRouter();
   const { userData, user, isLoading: userLoading, isOnboardingCompleted, refreshUserData } = useUser();
   const [isLoading, setIsLoading] = useState(true);
+  const [waterCount, setWaterCount] = useState(0); // Su sayacı için state
 
   // Function to get fresh user data directly from Firestore
   const getUserData = async () => {
@@ -514,6 +515,25 @@ const DashboardIndexScreen = () => {
       justifyContent: 'center',
       alignItems: 'center',
     },
+    waterControls: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    waterButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#EBF8FF',
+    },
+    waterButtonPlus: {
+      backgroundColor: '#EBF8FF',
+    },
+    waterButtonMinus: {
+      backgroundColor: '#EBF8FF',
+    },
     detailedStatProgress: {
       marginBottom: 12,
     },
@@ -988,7 +1008,10 @@ const DashboardIndexScreen = () => {
                     <Text style={styles.detailedStatSubtitle}>Günlük hedefin</Text>
                   </View>
                 </View>
-                <TouchableOpacity style={[styles.detailedStatAction, { backgroundColor: '#F3E8FF' }]}>
+                <TouchableOpacity
+                  style={[styles.detailedStatAction, { backgroundColor: '#F3E8FF' }]}
+                  onPress={() => router.push('/dashboard/camera')}
+                >
                   <Ionicons name="add" size={18} color="#7C3AED" />
                 </TouchableOpacity>
               </View>
@@ -1024,14 +1047,27 @@ const DashboardIndexScreen = () => {
                     <Text style={styles.detailedStatSubtitle}>Hidrasyon takibi</Text>
                   </View>
                 </View>
-                <TouchableOpacity style={[styles.detailedStatAction, { backgroundColor: '#EBF8FF' }]}>
-                  <Ionicons name="add" size={18} color="#3B82F6" />
-                </TouchableOpacity>
+                <View style={styles.waterControls}>
+                  {waterCount > 0 && (
+                    <TouchableOpacity
+                      style={[styles.waterButton, styles.waterButtonMinus]}
+                      onPress={() => setWaterCount(waterCount - 1)}
+                    >
+                      <Ionicons name="remove" size={16} color="#3B82F6" />
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity
+                    style={[styles.waterButton, styles.waterButtonPlus]}
+                    onPress={() => setWaterCount(waterCount + 1)}
+                  >
+                    <Ionicons name="add" size={18} color="#3B82F6" />
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <View style={styles.detailedStatProgress}>
                 <View style={styles.detailedStatNumbers}>
-                  <Text style={styles.detailedStatCurrent}>{dailyStats.water.glasses}</Text>
+                  <Text style={styles.detailedStatCurrent}>{waterCount}</Text>
                   <Text style={styles.detailedStatGoal}>/ {dailyStats.water.goal} bardak</Text>
                 </View>
                 <View style={styles.progressBar}>
@@ -1039,7 +1075,7 @@ const DashboardIndexScreen = () => {
                     style={[
                       styles.progressFill,
                       {
-                        width: `${(dailyStats.water.glasses / dailyStats.water.goal) * 100}%`,
+                        width: `${(waterCount / dailyStats.water.goal) * 100}%`,
                         backgroundColor: '#3B82F6'
                       }
                     ]}
@@ -1053,7 +1089,7 @@ const DashboardIndexScreen = () => {
           <View style={styles.recentMealsSection}>
             <View style={styles.recentMealsHeader}>
               <Text style={styles.recentMealsTitle}>Bugünün Yiyecekleri</Text>
-              <TouchableOpacity onPress={() => router.push('/dashboard/meals')}>
+              <TouchableOpacity onPress={() => router.push('/dashboard/meals-list')}>
                 <Text style={styles.seeAllButton}>Tümünü Gör</Text>
               </TouchableOpacity>
             </View>
