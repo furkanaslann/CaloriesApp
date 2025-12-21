@@ -3,22 +3,22 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { FIREBASE_CONFIG } from '@/constants/firebase';
+import {
+  Activity,
+  CalculatedValues,
+  Commitment,
+  Diet,
+  Goals,
+  Preferences,
+  UserContextType,
+  UserDocument,
+  UserProfile,
+  UserProgress,
+} from '@/types';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { FIREBASE_CONFIG } from '@/constants/firebase';
-import { initializeFirebaseEmulators } from '@/utils/firebase';
-import {
-  UserDocument,
-  UserContextType,
-  UserProfile,
-  Goals,
-  Activity,
-  Diet,
-  Preferences,
-  Commitment,
-  CalculatedValues
-} from '@/types';
 
 // Create context
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -41,11 +41,23 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     },
   };
 
+  const defaultProgress: UserProgress = {
+    currentWeight: 0,
+    startingWeight: 0,
+    goalWeight: 0,
+    weightLossTotal: 0,
+    weightLossToGoal: 0,
+    weeklyWeightChange: 0,
+    averageWeeklyLoss: 0,
+    timeOnApp: 0,
+    lastWeightUpdate: '',
+  };
+
   // Listen to auth state changes
   useEffect(() => {
     // Small delay to ensure Firebase emulators are initialized
     const initializeAuth = async () => {
-      await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
+      await new Promise(resolve => setTimeout(resolve, 100)); // Reduced from 500ms to 100ms
 
       // Check if Firebase is initialized before using auth
       try {
@@ -77,23 +89,41 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const loadUserData = async (userId: string) => {
     try {
       console.log('loadUserData: Loading data for user:', userId);
-      const userDoc = await firestore()
-        .collection(FIREBASE_CONFIG.collections.users)
-        .doc(userId)
-        .get();
 
-      if (userDoc.exists) {
+      // Add retry mechanism for emulator consistency
+      let retryCount = 0;
+      const maxRetries = 3;
+      let userDoc;
+
+      do {
+        userDoc = await firestore()
+          .collection(FIREBASE_CONFIG.collections.users)
+          .doc(userId)
+          .get();
+
+        if ((userDoc as any).exists) {
+          break;
+        }
+
+        if (retryCount < maxRetries - 1) {
+          console.log(`loadUserData: Retry ${retryCount + 1}/${maxRetries} - waiting 500ms`);
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        retryCount++;
+      } while (retryCount < maxRetries);
+
+      if ((userDoc as any).exists) {
         const rawData = userDoc.data();
         console.log('loadUserData: Raw data from Firestore:', rawData);
 
         // Safely handle the data with proper defaults
         const safeData: UserDocument = {
           uid: userId,
-          email: rawData?.email || null,
-          displayName: rawData?.displayName || null,
+          email: rawData?.email,
+          displayName: rawData?.displayName,
           isAnonymous: rawData?.isAnonymous !== false, // Default to true if not specified
           onboardingCompleted: rawData?.onboardingCompleted === true,
-          onboardingCompletedAt: rawData?.onboardingCompletedAt || null,
+          onboardingCompletedAt: rawData?.onboardingCompletedAt,
           profile: rawData?.profile || {},
           goals: rawData?.goals || {},
           activity: rawData?.activity || {},
@@ -101,11 +131,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           preferences: rawData?.preferences || {},
           commitment: rawData?.commitment || {},
           calculatedValues: rawData?.calculatedValues || defaultCalculatedValues,
-          progress: rawData?.progress || {},
-          createdAt: rawData?.createdAt || null,
-          updatedAt: rawData?.updatedAt || null,
-          lastUpdated: rawData?.lastUpdated || null,
-          version: rawData?.version || null,
+          progress: rawData?.progress || defaultProgress,
+          createdAt: rawData?.createdAt ?? firestore.FieldValue.serverTimestamp(),
+          updatedAt: rawData?.updatedAt ?? firestore.FieldValue.serverTimestamp(),
+          lastUpdated: rawData?.lastUpdated,
+          version: rawData?.version,
         };
 
         console.log('loadUserData: Safe data created, onboardingCompleted:', safeData.onboardingCompleted);
@@ -120,11 +150,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // On error, create a minimal safe user data object
       const fallbackData: UserDocument = {
         uid: userId,
-        email: null,
-        displayName: null,
+        email: undefined,
+        displayName: undefined,
         isAnonymous: true,
         onboardingCompleted: false,
-        onboardingCompletedAt: null,
+        onboardingCompletedAt: undefined,
         profile: {},
         goals: {},
         activity: {},
@@ -132,11 +162,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         preferences: {},
         commitment: {},
         calculatedValues: defaultCalculatedValues,
-        progress: {},
-        createdAt: null,
-        updatedAt: null,
-        lastUpdated: null,
-        version: null,
+        progress: defaultProgress,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+        lastUpdated: undefined,
+        version: undefined,
       };
       console.log('loadUserData: Using fallback data due to error');
       setUserData(fallbackData);
@@ -154,18 +184,18 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .doc(userId)
         .get();
 
-      if (existingDoc.exists) {
+      if ((existingDoc as any).exists) {
         console.log('createInitialUserDocument: Document already exists, loading it');
         const rawData = existingDoc.data();
 
         // Create safe data from existing document
         const safeData: UserDocument = {
           uid: userId,
-          email: rawData?.email || null,
-          displayName: rawData?.displayName || null,
+          email: rawData?.email,
+          displayName: rawData?.displayName,
           isAnonymous: rawData?.isAnonymous !== false,
           onboardingCompleted: rawData?.onboardingCompleted === true,
-          onboardingCompletedAt: rawData?.onboardingCompletedAt || null,
+          onboardingCompletedAt: rawData?.onboardingCompletedAt,
           profile: rawData?.profile || {},
           goals: rawData?.goals || {},
           activity: rawData?.activity || {},
@@ -173,11 +203,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           preferences: rawData?.preferences || {},
           commitment: rawData?.commitment || {},
           calculatedValues: rawData?.calculatedValues || defaultCalculatedValues,
-          progress: rawData?.progress || {},
-          createdAt: rawData?.createdAt || null,
-          updatedAt: rawData?.updatedAt || null,
-          lastUpdated: rawData?.lastUpdated || null,
-          version: rawData?.version || null,
+          progress: rawData?.progress || defaultProgress,
+          createdAt: rawData?.createdAt ?? firestore.FieldValue.serverTimestamp(),
+          updatedAt: rawData?.updatedAt ?? firestore.FieldValue.serverTimestamp(),
+          lastUpdated: rawData?.lastUpdated,
+          version: rawData?.version,
         };
 
         setUserData(safeData);
@@ -189,11 +219,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const currentUser = auth().currentUser;
       const initialData: UserDocument = {
         uid: userId,
-        email: currentUser?.email || null,
-        displayName: currentUser?.displayName || null,
+        email: currentUser?.email ?? undefined,
+        displayName: currentUser?.displayName ?? undefined,
         isAnonymous: currentUser?.isAnonymous !== false,
         onboardingCompleted: false,
-        onboardingCompletedAt: null,
+        onboardingCompletedAt: undefined,
         profile: {},
         goals: {},
         activity: {},
@@ -201,7 +231,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         preferences: {},
         commitment: {},
         calculatedValues: defaultCalculatedValues,
-        progress: {},
+        progress: defaultProgress,
         createdAt: firestore.FieldValue.serverTimestamp(),
         updatedAt: firestore.FieldValue.serverTimestamp(),
         lastUpdated: firestore.FieldValue.serverTimestamp(),
@@ -221,11 +251,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Even on error, set a minimal safe data object to prevent crashes
       const fallbackData: UserDocument = {
         uid: userId,
-        email: null,
-        displayName: null,
+        email: undefined,
+        displayName: undefined,
         isAnonymous: true,
         onboardingCompleted: false,
-        onboardingCompletedAt: null,
+        onboardingCompletedAt: undefined,
         profile: {},
         goals: {},
         activity: {},
@@ -233,11 +263,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         preferences: {},
         commitment: {},
         calculatedValues: defaultCalculatedValues,
-        progress: {},
-        createdAt: null,
-        updatedAt: null,
-        lastUpdated: null,
-        version: null,
+        progress: defaultProgress,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+        lastUpdated: undefined,
+        version: undefined,
       };
       setUserData(fallbackData);
       return fallbackData;
@@ -279,7 +309,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Use set with merge to create or update the document
       const updateData: any = {
         uid: user.uid,
-        isAnonymous: user.isAnonymous || true,
+        isAnonymous: user.isAnonymous ?? true,
         profile: { ...userData?.profile, ...data },
         updatedAt: firestore.FieldValue.serverTimestamp(),
       };
@@ -543,7 +573,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (hasSignificantChange) {
       console.log('Calculated values changed significantly, updating Firestore:', newCalculatedValues);
       try {
-        await firestore()
+        const db = firestore();
+        await db
           .collection(FIREBASE_CONFIG.collections.users)
           .doc(user.uid)
           .update({

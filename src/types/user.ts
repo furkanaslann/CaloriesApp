@@ -320,25 +320,25 @@ export interface UserDocument {
   calculatedValues: CalculatedValues;
 
   // Progress tracking (updated over time)
-  progress: UserProgress;
+  progress?: UserProgress;
 
   // Streak system
-  streaks: StreakData;
+  streaks?: StreakData;
 
   // Daily logs (keyed by date YYYY-MM-DD)
-  dailyLogs: { [date: string]: DailyLog };
+  dailyLogs?: { [date: string]: DailyLog };
 
   // Achievements unlocked
-  achievements: Achievement[];
+  achievements?: Achievement[];
 
   // User notifications
-  notifications: Notification[];
+  notifications?: Notification[];
 
   // Dashboard analytics
-  analytics: DashboardAnalytics;
+  analytics?: DashboardAnalytics;
 
   // App usage metadata
-  metadata: {
+  metadata?: {
     lastLoginAt: string;
     appVersion: string;
     deviceInfo?: string;
@@ -346,9 +346,13 @@ export interface UserDocument {
     locale: string;
   };
 
+  // Additional metadata
+  lastUpdated?: any; // Firestore Timestamp
+  version?: string;
+
   // Timestamps
-  createdAt: any; // Firestore Timestamp
-  updatedAt: any; // Firestore Timestamp
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
 }
 
 // User preferences for dashboard and notifications
@@ -373,12 +377,3 @@ export interface UserDashboardPreferences {
 }
 
 // Export for use in other files
-export type {
-  UserProfile,
-  Goals,
-  Activity,
-  Diet,
-  Preferences,
-  Commitment,
-  CalculatedValues
-};

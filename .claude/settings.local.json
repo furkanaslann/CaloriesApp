@@ -41,8 +41,6 @@
       "Bash(%PATH%)",
       "Bash(powershell:*)",
       "Bash(export JAVA_HOME:*)",
-      "Bash(export PATH=\"/c/Program Files/Microsoft/jdk-21.0.9.10-hotspot/bin:$PATH:*)",
-      "Bash(cmd /c \"set JAVA_HOME=C:\\Program Files\\Microsoft\\jdk-21.0.9.10-hotspot && cd android && gradlew.bat --stop\")",
       "Bash(npx expo run:android:*)",
       "WebSearch",
       "Bash(winget install:*)",

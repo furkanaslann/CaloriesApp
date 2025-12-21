@@ -694,3 +694,4 @@ export const updateOnboardingData = async (
 
 // Export auth and firestore instances for direct use
 export { auth, firestore };
+

@@ -80,27 +80,34 @@ export const useDashboard = (): UseDashboardReturn => {
       const today = new Date().toISOString().split('T')[0];
 
       // Fetch user document
-      const userDoc = await firestore()
+      const db = firestore();
+      const userDoc = await db
         .collection(FIREBASE_CONFIG.collections.users)
         .doc(user.uid)
         .get();
 
       const userDocument = userDoc.exists ? userDoc.data() as UserDocument : null;
 
-      // Fetch today's meals
-      const mealsSnapshot = await firestore()
+      // Fetch today's meals - geçici çözüm: orderBy kaldırıldı
+      const mealsSnapshot = await db
         .collection(FIREBASE_CONFIG.collections.users)
         .doc(user.uid)
         .collection('meals')
         .where('date', '==', today)
-        .orderBy('timestamp', 'desc')
         .get();
 
-      const recentMeals = mealsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        timestamp: doc.data().timestamp?.toDate(),
-      }));
+      const recentMeals = mealsSnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          timestamp: doc.data().timestamp?.toDate(),
+        }))
+        .sort((a, b) => {
+          // Client-side sıralama: timestamp'e göre azalan sırada
+          const timeA = a.timestamp ? a.timestamp.getTime() : 0;
+          const timeB = b.timestamp ? b.timestamp.getTime() : 0;
+          return timeB - timeA;
+        });
 
       // Calculate today's nutrition totals
       const totals = recentMeals.reduce((acc, meal) => ({
@@ -255,7 +262,8 @@ export const useDashboard = (): UseDashboardReturn => {
         date.setDate(date.getDate() - i);
         const dateStr = date.toISOString().split('T')[0];
 
-        const dayMeals = await firestore()
+        const db = firestore();
+        const dayMeals = await db
           .collection(FIREBASE_CONFIG.collections.users)
           .doc(userId)
           .collection('meals')
@@ -272,7 +280,8 @@ export const useDashboard = (): UseDashboardReturn => {
 
       while (true) {
         const dateStr = checkDate.toISOString().split('T')[0];
-        const dayMeals = await firestore()
+        const db = firestore();
+        const dayMeals = await db
           .collection(FIREBASE_CONFIG.collections.users)
           .doc(userId)
           .collection('meals')

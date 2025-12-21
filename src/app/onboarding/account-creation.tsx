@@ -4,9 +4,10 @@
  */
 
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { FIREBASE_CONFIG } from '@/constants/firebase';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { signIn, signUp, signInAnonymously } from '@/utils/firebase';
+import { signIn, signUp, signInAnonymously, firestore } from '@/utils/firebase';
 import {
   Alert,
   ScrollView,
@@ -104,7 +105,7 @@ const AccountCreationScreen = () => {
   };
 
   const { profile, goals, completeOnboarding, updateAccount } = useOnboarding();
-  const { completeOnboarding: completeUserOnboarding } = useUser();
+  const { completeOnboarding: completeUserOnboarding, user: currentUser } = useUser();
   // Firestore entegrasyonu artık onboarding context içinde otomatik yapılıyor
 
   const [accountData, setAccountData] = useState({
@@ -182,24 +183,24 @@ const AccountCreationScreen = () => {
     try {
       console.log('Starting account creation with email:', accountData.email);
 
-      // Create Firebase Auth user
+      // Handle Firebase Auth - create new account directly
       let firebaseUser;
-      try {
-        firebaseUser = await signUp(accountData.email, accountData.password);
-        console.log('Firebase user created successfully:', firebaseUser.uid);
-      } catch (authError: any) {
-        console.error('Firebase auth error:', authError);
 
-        // If user already exists, try to sign in
-        if (authError.message.includes('already exists') || authError.message.includes('email address is already in use')) {
+      try {
+        // Try to create new user first
+        firebaseUser = await signUp(accountData.email, accountData.password);
+        console.log('New Firebase user created successfully:', firebaseUser.uid);
+      } catch (signUpError: any) {
+        // If user already exists, sign them in
+        if (signUpError.code === 'auth/email-already-in-use') {
           try {
             firebaseUser = await signIn(accountData.email, accountData.password);
             console.log('Existing user signed in successfully:', firebaseUser.uid);
           } catch (signInError: any) {
-            throw new Error(`Authentication failed: ${signInError.message}`);
+            throw new Error(`Authentication failed: This email is already registered but the password is incorrect.`);
           }
         } else {
-          throw new Error(`Authentication failed: ${authError.message}`);
+          throw new Error(`Account creation failed: ${signUpError.message}`);
         }
       }
 
@@ -310,25 +311,52 @@ const AccountCreationScreen = () => {
         await saveOnboardingData(firebaseUser.uid, completeUserData);
         console.log('saveOnboardingData completed successfully with onboardingCompleted: true');
 
-        // Wait a moment for Firebase to sync
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Wait longer for Firebase to sync and read the data back
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Verify data was properly saved to Firestore
+        try {
+          console.log('🔍 Verifying onboarding data in Firestore...');
+          const verificationDoc = await firestore()
+            .collection(FIREBASE_CONFIG.collections.users)
+            .doc(firebaseUser.uid)
+            .get();
+
+          if (verificationDoc.exists) {
+            const savedData = verificationDoc.data();
+            if (savedData?.onboardingCompleted === true) {
+              console.log('✅ VERIFIED: Onboarding data successfully saved to Firestore');
+              console.log('📝 User profile saved:', savedData.profile?.name, savedData.profile?.lastName);
+              console.log('🎯 Goals saved:', savedData.goals?.primaryGoal);
+            } else {
+              console.warn('⚠️ WARNING: onboardingCompleted flag not found in saved data');
+            }
+          } else {
+            console.error('❌ ERROR: No document found after save operation');
+          }
+        } catch (verificationError) {
+          console.error('❌ ERROR verifying saved data:', verificationError);
+        }
 
       } catch (error) {
         console.error('Error in saveOnboardingData:', error);
         // Even if Firestore sync fails, continue with navigation
       }
 
-      console.log('About to navigate to main app...');
-      // Force navigation after a longer delay to ensure Firebase sync
+      console.log('About to navigate to dashboard...');
+      // Navigate to dashboard after Firebase data is confirmed saved
       setTimeout(() => {
-        console.log('Forcing navigation to main app...');
+        console.log('✅ Navigation to dashboard - onboarding completed successfully');
         router.replace('/dashboard');
-      }, 3000);
+      }, 2000); // Reduced to 2 seconds after data is confirmed saved
     } catch (error: any) {
       console.error('Error creating account:', error);
       Alert.alert('Hata', error.message || 'Hesap oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
-      setIsCreating(false);
+      // Set loading to false after all operations are complete
+      setTimeout(() => {
+        setIsCreating(false);
+      }, 3000); // 3 seconds total loading time
     }
   };
 
@@ -621,7 +649,11 @@ const AccountCreationScreen = () => {
       <View style={styles.footer}>
         <View style={styles.buttonContainer}>
           <Button
-            title={isCreating ? 'Hesap Oluşturuluyor...' : 'Hesabı Oluştur'}
+            title={
+              isCreating
+                ? 'Hesabınız Oluşturuluyor... 🔥'
+                : 'Hesabı Oluştur'
+            }
             onPress={handleCreateAccount}
             disabled={isCreating}
             fullWidth

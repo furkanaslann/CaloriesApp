@@ -5,11 +5,13 @@
  */
 
 import StreakCard from '@/components/dashboard/streak-card';
+import { FIREBASE_CONFIG } from '@/constants/firebase';
 import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
 import { useUser } from '@/context/user-context';
 import { useDashboard } from '@/hooks/use-dashboard';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import firestore from '@react-native-firebase/firestore';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -25,8 +27,6 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import firestore from '@react-native-firebase/firestore';
-import { FIREBASE_CONFIG } from '@/constants/firebase';
 
 const { width } = Dimensions.get('window');
 
@@ -76,85 +76,70 @@ const DashboardIndexScreen = () => {
   const [isChecking, setIsChecking] = useState(true);
   const [hasCheckedOnce, setHasCheckedOnce] = useState(false);
 
-  // Check onboarding status from Firebase (primary) and AsyncStorage (fallback)
+  // Dashboard access verification - check if user should be here
   useEffect(() => {
-    const checkOnboardingStatus = async () => {
+    const verifyDashboardAccess = async () => {
+      // Wait for user data to be available
+      if (userLoading) {
+        console.log('⏳ Dashboard: User data still loading...');
+        return;
+      }
+
+      // If user is not authenticated, redirect to onboarding
+      if (!user) {
+        console.log('❌ Dashboard: No authenticated user, redirecting to onboarding');
+        setTimeout(() => {
+          router.replace('/onboarding/welcome');
+        }, 1000);
+        return;
+      }
+
+      console.log('🔍 Dashboard: Verifying user access for:', user.uid);
+
+      // Check if user has completed onboarding
+      if (userData?.onboardingCompleted === true) {
+        console.log('✅ Dashboard: User has completed onboarding - access granted');
+        console.log('👋 Welcome back:', userData.profile?.name || 'User');
+        setIsLoading(false);
+        setHasCheckedOnce(true);
+        setIsChecking(false);
+        return;
+      }
+
+      // If userData is null or onboarding not completed, check Firestore directly
       try {
-        setIsChecking(true);
+        console.log('🔎 Dashboard: Checking Firestore for onboarding status...');
+        const directCheck = await firestore()
+          .collection(FIREBASE_CONFIG.collections.users)
+          .doc(user.uid)
+          .get();
 
-        // Wait for user data to load
-        if (userLoading) {
-          console.log('User data still loading, waiting...');
-          return;
-        }
-
-        console.log('Checking onboarding status...');
-        console.log('User data loaded:', !!userData);
-        console.log('Onboarding completed from Firebase:', isOnboardingCompleted);
-
-        // Primary check: Use Firebase user data
-        if (userData?.onboardingCompleted || isOnboardingCompleted) {
-          console.log('✅ Onboarding completed (Firebase), showing dashboard');
-          setIsLoading(false);
-          setHasCheckedOnce(true);
-          setIsChecking(false);
-          return;
-        }
-
-        // Fallback: Check AsyncStorage if Firebase doesn't have the flag
-        console.log('Firebase flag not set, checking AsyncStorage as fallback...');
-        const stored = await AsyncStorage.getItem('@caloritrack_onboarding');
-
-        if (stored) {
-          const data = JSON.parse(stored);
-          const isLocalCompleted = data.isCompleted || false;
-          console.log('Local onboarding completed:', isLocalCompleted);
-
-          if (isLocalCompleted) {
-            console.log('⚠️ Local flag set but Firebase not updated - showing dashboard');
+        if (directCheck.exists) {
+          const data = directCheck.data();
+          if (data?.onboardingCompleted === true) {
+            console.log('✅ Dashboard: Onboarding confirmed in Firestore - access granted');
+            console.log('👋 Welcome back:', data.profile?.name || 'User');
+            // Trigger user context refresh to sync the data
+            await refreshUserData();
             setIsLoading(false);
             setHasCheckedOnce(true);
             setIsChecking(false);
             return;
           }
-        } else {
-          console.log('No local onboarding data found');
         }
-
-        // If neither Firebase nor AsyncStorage shows completed onboarding
-        // Wait a bit more for Firebase to sync (especially for Emulator)
-        console.log('⏳ Waiting for Firebase to sync...');
-        setTimeout(async () => {
-          console.log('Retrying onboarding status check...');
-          await refreshUserData();
-
-          // Get fresh user data directly from Firestore
-          const freshUserData = await getUserData();
-
-          if (freshUserData?.onboardingCompleted) {
-            console.log('✅ Onboarding completed after delay, showing dashboard');
-            setIsLoading(false);
-            setHasCheckedOnce(true);
-            setIsChecking(false);
-          } else {
-            console.log('❌ Onboarding still not completed, redirecting to onboarding...');
-            router.replace('/onboarding/welcome');
-          }
-        }, 5000); // 5 seconds wait for Firebase sync
-
       } catch (error) {
-        console.error('Error checking onboarding status:', error);
-        // On error, redirect to onboarding to be safe
-        router.replace('/onboarding/welcome');
-        setIsChecking(false);
+        console.error('❌ Dashboard: Error checking onboarding status:', error);
       }
+
+      // If we reach here, onboarding is not completed
+      console.log('❌ Dashboard: Onboarding not completed - redirecting to onboarding');
+      setTimeout(() => {
+        router.replace('/onboarding/welcome');
+      }, 1000);
     };
 
-    // Only run check when user is loaded and haven't checked before
-    if (!userLoading && !hasCheckedOnce) {
-      checkOnboardingStatus();
-    }
-  }, [userLoading, hasCheckedOnce]); // Removed dependencies that cause re-runs
+    verifyDashboardAccess();
+  }, [userLoading, user]); // Depend on user state changes
 
   // Get user display name with fallback
   const getUserDisplayName = () => {
