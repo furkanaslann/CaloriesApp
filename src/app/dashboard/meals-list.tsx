@@ -4,11 +4,11 @@
  */
 
 import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
-import { useDashboard } from '@/hooks/use-dashboard';
 import { useUser } from '@/context/user-context';
+import { useDashboard } from '@/hooks/use-dashboard';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -18,6 +18,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TextStyle,
   TouchableOpacity,
   View,
@@ -63,6 +64,8 @@ const MealsListScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [showMealDetail, setShowMealDetail] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedMeal, setEditedMeal] = useState<Meal | null>(null);
 
   // Theme object
   const theme = {
@@ -94,6 +97,7 @@ const MealsListScreen = () => {
     },
     spacing: {
       ...SPACING,
+      xs: SPACING[1],
       sm: SPACING[2],
       md: SPACING[3],
       lg: SPACING[4],
@@ -268,7 +272,7 @@ const MealsListScreen = () => {
     // Modal styles for meal detail
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
       justifyContent: 'flex-end',
     },
     modalContent: {
@@ -353,7 +357,7 @@ const MealsListScreen = () => {
       color: theme.semanticColors.text.secondary,
       fontWeight: '500',
     },
-    healthScore: {
+    healthScoreText: {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: '#F0FDF4',
@@ -362,16 +366,10 @@ const MealsListScreen = () => {
       borderWidth: 1,
       borderColor: '#BBF7D0',
     },
-    healthScoreText: {
-      fontSize: 16,
-      fontWeight: '600' as TextStyle['fontWeight'],
-      color: '#166534',
-      marginLeft: theme.spacing.sm,
-    },
     healthTipsList: {
       gap: theme.spacing.sm,
     },
-    healthTipItem: {
+    healthTipText: {
       flexDirection: 'row',
       alignItems: 'flex-start',
       backgroundColor: '#FEF3C7',
@@ -379,13 +377,6 @@ const MealsListScreen = () => {
       borderRadius: theme.borderRadius.lg,
       borderWidth: 1,
       borderColor: '#FCD34D',
-    },
-    healthTipText: {
-      fontSize: 14,
-      color: '#92400E',
-      marginLeft: theme.spacing.sm,
-      flex: 1,
-      lineHeight: 20,
     },
 
     // Bottom Navigation - Modern style
@@ -425,6 +416,104 @@ const MealsListScreen = () => {
     },
     navLabelActive: {
       color: '#7C3AED',
+    },
+    // Edit mode styles
+    editButton: {
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.borderRadius.md,
+    },
+    saveButton: {
+      backgroundColor: theme.colors.success,
+      paddingHorizontal: theme.spacing.lg,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.borderRadius.md,
+    },
+    cancelButton: {
+      backgroundColor: theme.colors.danger,
+      paddingHorizontal: theme.spacing.lg,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.borderRadius.md,
+      marginRight: theme.spacing.sm,
+    },
+    actionButtonText: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    editableInput: {
+      backgroundColor: '#F8FAFC',
+      borderWidth: 1,
+      borderColor: theme.semanticColors.border.primary,
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.md,
+      fontSize: 16,
+      color: theme.semanticColors.text.primary,
+      minHeight: 44,
+    },
+    editableTextArea: {
+      backgroundColor: '#F8FAFC',
+      borderWidth: 1,
+      borderColor: theme.semanticColors.border.primary,
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.md,
+      fontSize: 14,
+      color: theme.semanticColors.text.primary,
+      minHeight: 80,
+      textAlignVertical: 'top',
+    },
+    editTagInput: {
+      backgroundColor: '#F8FAFC',
+      borderWidth: 1,
+      borderColor: theme.semanticColors.border.primary,
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.sm,
+      fontSize: 12,
+      color: theme.semanticColors.text.primary,
+      minHeight: 36,
+      flex: 1,
+    },
+    tagEditContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.sm,
+      marginBottom: theme.spacing.sm,
+    },
+    addTagButton: {
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.borderRadius.md,
+    },
+    addTagButtonText: {
+      color: '#FFFFFF',
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    removeTagButton: {
+      backgroundColor: theme.colors.danger,
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginLeft: theme.spacing.sm,
+    },
+    removeTagButtonText: {
+      color: '#FFFFFF',
+      fontSize: 12,
+      fontWeight: '700',
+    },
+    editTitleInput: {
+      backgroundColor: '#F8FAFC',
+      borderWidth: 1,
+      borderColor: theme.semanticColors.border.primary,
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.sm,
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.semanticColors.text.primary,
+      minHeight: 44,
     },
   });
 
@@ -489,7 +578,129 @@ const MealsListScreen = () => {
   const closeModal = () => {
     setShowMealDetail(false);
     setSelectedMeal(null);
+    setIsEditMode(false);
+    setEditedMeal(null);
   };
+
+  const startEdit = () => {
+    if (selectedMeal) {
+      setIsEditMode(true);
+      setEditedMeal({ ...selectedMeal });
+    }
+  };
+
+  const cancelEdit = () => {
+    setIsEditMode(false);
+    setEditedMeal(null);
+  };
+
+  const saveEdit = () => {
+    if (editedMeal) {
+      // Update the meals list with edited data
+      setMeals(prevMeals =>
+        prevMeals.map(meal =>
+          meal.id === editedMeal.id ? editedMeal : meal
+        )
+      );
+      setSelectedMeal(editedMeal);
+      setIsEditMode(false);
+      setEditedMeal(null);
+      // TODO: Save to Firebase/backend
+    }
+  };
+
+  const updateEditedMeal = (field: string, value: any) => {
+    if (editedMeal) {
+      setEditedMeal({ ...editedMeal, [field]: value });
+    }
+  };
+
+  const addTag = (tag: string) => {
+    if (editedMeal && tag.trim()) {
+      const currentTags = editedMeal.tags || [];
+      if (!currentTags.includes(tag.trim())) {
+        setEditedMeal({
+          ...editedMeal,
+          tags: [...currentTags, tag.trim()]
+        });
+      }
+    }
+  };
+
+  const removeTag = (index: number) => {
+    if (editedMeal && editedMeal.tags) {
+      setEditedMeal({
+        ...editedMeal,
+        tags: editedMeal.tags.filter((_, i) => i !== index)
+      });
+    }
+  };
+
+  const addIngredient = (ingredient: string) => {
+    if (editedMeal && ingredient.trim()) {
+      const currentIngredients = editedMeal.ingredients || [];
+      if (!currentIngredients.includes(ingredient.trim())) {
+        setEditedMeal({
+          ...editedMeal,
+          ingredients: [...currentIngredients, ingredient.trim()]
+        });
+      }
+    }
+  };
+
+  const removeIngredient = (index: number) => {
+    if (editedMeal && editedMeal.ingredients) {
+      setEditedMeal({
+        ...editedMeal,
+        ingredients: editedMeal.ingredients.filter((_, i) => i !== index)
+      });
+    }
+  };
+
+  const addHealthTip = (tip: string) => {
+    if (editedMeal && tip.trim()) {
+      const currentTips = editedMeal.healthTips || [];
+      setEditedMeal({
+        ...editedMeal,
+        healthTips: [...currentTips, tip.trim()]
+      });
+    }
+  };
+
+  const removeHealthTip = (index: number) => {
+    if (editedMeal && editedMeal.healthTips) {
+      setEditedMeal({
+        ...editedMeal,
+        healthTips: editedMeal.healthTips.filter((_, i) => i !== index)
+      });
+    }
+  };
+
+  const addAllergen = (allergen: string) => {
+    if (editedMeal && allergen.trim()) {
+      const currentAllergens = editedMeal.allergens || [];
+      if (!currentAllergens.includes(allergen.trim())) {
+        setEditedMeal({
+          ...editedMeal,
+          allergens: [...currentAllergens, allergen.trim()]
+        });
+      }
+    }
+  };
+
+  const removeAllergen = (index: number) => {
+    if (editedMeal && editedMeal.allergens) {
+      setEditedMeal({
+        ...editedMeal,
+        allergens: editedMeal.allergens.filter((_, i) => i !== index)
+      });
+    }
+  };
+
+  const [newTag, setNewTag] = useState('');
+  const [newIngredient, setNewIngredient] = useState('');
+  const [newHealthTip, setNewHealthTip] = useState('');
+  const [newAllergen, setNewAllergen] = useState('');
 
   const getMealIcon = (type: string) => {
     switch (type) {
@@ -522,11 +733,11 @@ const MealsListScreen = () => {
                 color="#64748B"
                 style={{ marginRight: 4 }}
               />
-              <Text>{item.type}</Text>
+              <Text style={{ fontSize: 12, color: theme.semanticColors.text.tertiary }}>{item.type}</Text>
             </View>
           </View>
         </View>
-        {item.confidence && (
+        {item.confidence !== undefined && item.confidence > 0 && (
           <View style={styles.confidenceBadge}>
             <Text style={styles.confidenceText}>{item.confidence}%</Text>
           </View>
@@ -572,129 +783,304 @@ const MealsListScreen = () => {
   const renderMealDetailModal = () => {
     if (!selectedMeal) return null;
 
+    const displayMeal = isEditMode ? editedMeal : selectedMeal;
+
     return (
       <Modal
         visible={showMealDetail}
         animationType="slide"
         presentationStyle="pageSheet"
+        transparent={true}
         onRequestClose={closeModal}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <TouchableOpacity style={styles.modalCloseButton} onPress={closeModal}>
-                <Ionicons name="close" size={18} color="#64748B" />
+              <TouchableOpacity style={styles.modalCloseButton} onPress={isEditMode ? cancelEdit : closeModal}>
+                <Ionicons name={isEditMode ? "close" : "close"} size={18} color="#64748B" />
               </TouchableOpacity>
-              <Text style={styles.modalTitle} numberOfLines={1}>
-                {selectedMeal.name}
-              </Text>
+              {isEditMode ? (
+                <TextInput
+                  style={styles.editTitleInput}
+                  value={editedMeal?.name || ''}
+                  onChangeText={(text) => updateEditedMeal('name', text)}
+                  placeholder="Yemek adı"
+                />
+              ) : (
+                <Text style={styles.modalTitle} numberOfLines={1}>
+                  {selectedMeal.name}
+                </Text>
+              )}
+              {isEditMode ? (
+                <View style={{ flexDirection: 'row' }}>
+                  <TouchableOpacity style={styles.cancelButton} onPress={cancelEdit}>
+                    <Text style={styles.actionButtonText}>İptal</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.saveButton} onPress={saveEdit}>
+                    <Text style={styles.actionButtonText}>Kaydet</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity style={styles.editButton} onPress={startEdit}>
+                  <Ionicons name="pencil" size={18} color={theme.colors.primary} />
+                </TouchableOpacity>
+              )}
             </View>
 
             <ScrollView style={styles.modalScrollContent} showsVerticalScrollIndicator={false}>
-              {/* Nutrition Overview */}
+              {/* Nutrition Overview - Not editable */}
               <View style={styles.detailSection}>
                 <Text style={styles.detailSectionTitle}>Besin Değerleri</Text>
                 <View style={styles.detailNutritionGrid}>
                   <View style={styles.detailNutritionCard}>
-                    <Text style={styles.detailNutritionValue}>{selectedMeal.calories}</Text>
+                    <Text style={styles.detailNutritionValue}>{displayMeal?.calories}</Text>
                     <Text style={styles.detailNutritionLabel}>Kalori</Text>
                   </View>
                   <View style={styles.detailNutritionCard}>
-                    <Text style={styles.detailNutritionValue}>{selectedMeal.protein}g</Text>
+                    <Text style={styles.detailNutritionValue}>{displayMeal?.protein}g</Text>
                     <Text style={styles.detailNutritionLabel}>Protein</Text>
                   </View>
                   <View style={styles.detailNutritionCard}>
-                    <Text style={styles.detailNutritionValue}>{selectedMeal.carbs}g</Text>
+                    <Text style={styles.detailNutritionValue}>{displayMeal?.carbs}g</Text>
                     <Text style={styles.detailNutritionLabel}>Karbonhidrat</Text>
                   </View>
                   <View style={styles.detailNutritionCard}>
-                    <Text style={styles.detailNutritionValue}>{selectedMeal.fat}g</Text>
+                    <Text style={styles.detailNutritionValue}>{displayMeal?.fat}g</Text>
                     <Text style={styles.detailNutritionLabel}>Yağ</Text>
                   </View>
-                  {selectedMeal.fiber && (
+                  {displayMeal?.fiber !== undefined && displayMeal.fiber > 0 && (
                     <View style={styles.detailNutritionCard}>
-                      <Text style={styles.detailNutritionValue}>{selectedMeal.fiber}g</Text>
+                      <Text style={styles.detailNutritionValue}>{displayMeal.fiber}g</Text>
                       <Text style={styles.detailNutritionLabel}>Lif</Text>
                     </View>
                   )}
-                  {selectedMeal.sugar && (
+                  {displayMeal?.sugar !== undefined && displayMeal.sugar > 0 && (
                     <View style={styles.detailNutritionCard}>
-                      <Text style={styles.detailNutritionValue}>{selectedMeal.sugar}g</Text>
+                      <Text style={styles.detailNutritionValue}>{displayMeal.sugar}g</Text>
                       <Text style={styles.detailNutritionLabel}>Şeker</Text>
                     </View>
                   )}
-                  {selectedMeal.sodium && (
+                  {displayMeal?.sodium !== undefined && displayMeal.sodium > 0 && (
                     <View style={styles.detailNutritionCard}>
-                      <Text style={styles.detailNutritionValue}>{selectedMeal.sodium}mg</Text>
+                      <Text style={styles.detailNutritionValue}>{displayMeal.sodium}mg</Text>
                       <Text style={styles.detailNutritionLabel}>Sodyum</Text>
                     </View>
                   )}
                 </View>
               </View>
 
-              {/* Health Score */}
-              {selectedMeal.healthScore && (
+              {/* Health Score - Editable */}
+              {displayMeal?.healthScore !== undefined && (
                 <View style={styles.detailSection}>
                   <Text style={styles.detailSectionTitle}>Sağlık Skoru</Text>
-                  <View style={styles.healthScore}>
-                    <Ionicons name="shield-checkmark" size={20} color="#166534" />
-                    <Text style={styles.healthScoreText}>
-                      {selectedMeal.healthScore}/10 - {selectedMeal.healthScore >= 8 ? 'Çok Sağlıklı' : selectedMeal.healthScore >= 6 ? 'Sağlıklı' : 'Dengeli'}
-                    </Text>
-                  </View>
+                  {isEditMode ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+                      <TextInput
+                        style={[styles.editableInput, { flex: 1 }]}
+                        value={editedMeal?.healthScore?.toString() || ''}
+                        onChangeText={(text) => updateEditedMeal('healthScore', parseInt(text) || 0)}
+                        keyboardType="numeric"
+                        placeholder="Skor (1-10)"
+                      />
+                      <Text style={{ fontSize: 14, color: '#64748B' }}>/10</Text>
+                    </View>
+                  ) : (
+                    <View style={styles.healthScoreText}>
+                      <Ionicons name="shield-checkmark" size={20} color="#166534" />
+                      <Text style={{ fontSize: 16, fontWeight: '600', color: '#166534' }}>
+                        {' '}{displayMeal?.healthScore || 0}/10 - {(displayMeal?.healthScore || 0) >= 8 ? 'Çok Sağlıklı' : ((displayMeal?.healthScore || 0) >= 6 ? 'Sağlıklı' : 'Dengeli')}
+                      </Text>
+                    </View>
+                  )}
                 </View>
               )}
 
-              {/* Tags */}
-              {selectedMeal.tags && selectedMeal.tags.length > 0 && (
+              {/* Tags - Editable */}
+              {(displayMeal?.tags || isEditMode) && (
                 <View style={styles.detailSection}>
                   <Text style={styles.detailSectionTitle}>Etiketler</Text>
-                  <View style={styles.tagContainer}>
-                    {selectedMeal.tags.map((tag, index) => (
-                      <View key={index} style={styles.tag}>
-                        <Text style={styles.tagText}>{tag}</Text>
+                  {isEditMode ? (
+                    <View>
+                      <View style={styles.tagContainer}>
+                        {(editedMeal?.tags || []).map((tag, index) => (
+                          <View key={index} style={[styles.tag, { flexDirection: 'row', alignItems: 'center' }]}>
+                            <Text style={styles.tagText}>{tag}</Text>
+                            <TouchableOpacity style={styles.removeTagButton} onPress={() => removeTag(index)}>
+                              <Text style={styles.removeTagButtonText}>×</Text>
+                            </TouchableOpacity>
+                          </View>
+                        ))}
                       </View>
-                    ))}
-                  </View>
+                      <View style={styles.tagEditContainer}>
+                        <TextInput
+                          style={styles.editTagInput}
+                          value={newTag}
+                          onChangeText={setNewTag}
+                          placeholder="Yeni etiket..."
+                          onSubmitEditing={() => { addTag(newTag); setNewTag(''); }}
+                        />
+                        <TouchableOpacity style={styles.addTagButton} onPress={() => { addTag(newTag); setNewTag(''); }}>
+                          <Text style={styles.addTagButtonText}>+</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ) : (
+                    displayMeal?.tags && displayMeal.tags.length > 0 ? (
+                      <View style={styles.tagContainer}>
+                        {displayMeal.tags.map((tag, index) => (
+                          <View key={index} style={styles.tag}>
+                            <Text style={styles.tagText}>{tag}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    ) : null
+                  )}
                 </View>
               )}
 
-              {/* Ingredients */}
-              {selectedMeal.ingredients && selectedMeal.ingredients.length > 0 && (
+              {/* Ingredients - Editable */}
+              {(displayMeal?.ingredients || isEditMode) && (
                 <View style={styles.detailSection}>
                   <Text style={styles.detailSectionTitle}>İçindekiler</Text>
-                  {selectedMeal.ingredients.map((ingredient, index) => (
-                    <Text key={index} style={{ fontSize: 14, color: '#64748B', marginBottom: 4 }}>
-                      • {ingredient}
-                    </Text>
-                  ))}
+                  {isEditMode ? (
+                    <View>
+                      {(editedMeal?.ingredients || []).map((ingredient, index) => (
+                        <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: theme.spacing.sm }}>
+                          <Text style={{ fontSize: 14, color: '#64748B', flex: 1 }}>• {ingredient}</Text>
+                          <TouchableOpacity style={styles.removeTagButton} onPress={() => removeIngredient(index)}>
+                            <Text style={styles.removeTagButtonText}>×</Text>
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                      <View style={styles.tagEditContainer}>
+                        <TextInput
+                          style={styles.editTagInput}
+                          value={newIngredient}
+                          onChangeText={setNewIngredient}
+                          placeholder="Yeni malzeme..."
+                          onSubmitEditing={() => { addIngredient(newIngredient); setNewIngredient(''); }}
+                        />
+                        <TouchableOpacity style={styles.addTagButton} onPress={() => { addIngredient(newIngredient); setNewIngredient(''); }}>
+                          <Text style={styles.addTagButtonText}>+</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ) : (
+                    displayMeal?.ingredients && displayMeal.ingredients.length > 0 ? (
+                      displayMeal.ingredients.map((ingredient, index) => (
+                        <Text key={index} style={{ fontSize: 14, color: '#64748B', marginBottom: 4 }}>
+                          • {ingredient}
+                        </Text>
+                      ))
+                    ) : null
+                  )}
                 </View>
               )}
 
-              {/* Health Tips */}
-              {selectedMeal.healthTips && selectedMeal.healthTips.length > 0 && (
+              {/* Health Tips - Editable */}
+              {(displayMeal?.healthTips || isEditMode) && (
                 <View style={styles.detailSection}>
                   <Text style={styles.detailSectionTitle}>Sağlık İpuçları</Text>
-                  <View style={styles.healthTipsList}>
-                    {selectedMeal.healthTips.map((tip, index) => (
-                      <View key={index} style={styles.healthTipItem}>
-                        <Ionicons name="bulb" size={16} color="#F59E0B" />
-                        <Text style={styles.healthTipText}>{tip}</Text>
+                  {isEditMode ? (
+                    <View>
+                      {(editedMeal?.healthTips || []).map((tip, index) => (
+                        <View key={index} style={[styles.healthTipText, { flexDirection: 'row', alignItems: 'flex-start' }]}>
+                          <Ionicons name="bulb" size={16} color="#F59E0B" />
+                          <Text style={{ fontSize: 14, color: '#92400E', lineHeight: 20, marginLeft: 8, flex: 1 }}>
+                            {tip}
+                          </Text>
+                          <TouchableOpacity style={styles.removeTagButton} onPress={() => removeHealthTip(index)}>
+                            <Text style={styles.removeTagButtonText}>×</Text>
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                      <View style={{ flexDirection: 'row', gap: theme.spacing.sm, marginTop: theme.spacing.sm }}>
+                        <TextInput
+                          style={[styles.editableTextArea, { flex: 1 }]}
+                          value={newHealthTip}
+                          onChangeText={setNewHealthTip}
+                          placeholder="Yeni ipucu..."
+                          multiline
+                        />
+                        <TouchableOpacity style={[styles.addTagButton, { height: 44, alignSelf: 'center' }]} onPress={() => { addHealthTip(newHealthTip); setNewHealthTip(''); }}>
+                          <Text style={styles.addTagButtonText}>+</Text>
+                        </TouchableOpacity>
                       </View>
-                    ))}
-                  </View>
+                    </View>
+                  ) : (
+                    displayMeal?.healthTips && displayMeal.healthTips.length > 0 ? (
+                      <View style={styles.healthTipsList}>
+                        {displayMeal.healthTips.map((tip, index) => (
+                          <View key={index} style={styles.healthTipText}>
+                            <Ionicons name="bulb" size={16} color="#F59E0B" />
+                            <Text style={{ fontSize: 14, color: '#92400E', lineHeight: 20, marginLeft: 8, flex: 1 }}>
+                              {tip}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    ) : null
+                  )}
                 </View>
               )}
 
-              {/* Allergens */}
-              {selectedMeal.allergens && selectedMeal.allergens.length > 0 && (
+              {/* Allergens - Editable */}
+              {(displayMeal?.allergens || isEditMode) && (
                 <View style={styles.detailSection}>
                   <Text style={styles.detailSectionTitle}>Alerjen Uyarısı</Text>
-                  <View style={{ backgroundColor: '#FEF2F2', padding: theme.spacing.md, borderRadius: theme.borderRadius.lg, borderWidth: 1, borderColor: '#FECACA' }}>
-                    <Text style={{ color: '#991B1B', fontSize: 14, fontWeight: '500' }}>
-                      ⚠️ İçerdiği alerjenler: {selectedMeal.allergens.join(', ')}
-                    </Text>
-                  </View>
+                  {isEditMode ? (
+                    <View>
+                      <View style={{ backgroundColor: '#FEF2F2', padding: theme.spacing.md, borderRadius: theme.borderRadius.lg, borderWidth: 1, borderColor: '#FECACA', flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.sm }}>
+                        {(editedMeal?.allergens || []).map((allergen, index) => (
+                          <View key={index} style={{ backgroundColor: '#FCA5A5', paddingHorizontal: theme.spacing.sm, paddingVertical: 4, borderRadius: theme.borderRadius.sm, flexDirection: 'row', alignItems: 'center' }}>
+                            <Text style={{ color: '#991B1B', fontSize: 12 }}>{allergen}</Text>
+                            <TouchableOpacity style={[styles.removeTagButton, { marginLeft: 4, width: 16, height: 16, borderRadius: 8 }]} onPress={() => removeAllergen(index)}>
+                              <Text style={[styles.removeTagButtonText, { fontSize: 10 }]}>×</Text>
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+                      </View>
+                      <View style={styles.tagEditContainer}>
+                        <TextInput
+                          style={styles.editTagInput}
+                          value={newAllergen}
+                          onChangeText={setNewAllergen}
+                          placeholder="Yeni alerjen..."
+                          onSubmitEditing={() => { addAllergen(newAllergen); setNewAllergen(''); }}
+                        />
+                        <TouchableOpacity style={styles.addTagButton} onPress={() => { addAllergen(newAllergen); setNewAllergen(''); }}>
+                          <Text style={styles.addTagButtonText}>+</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ) : (
+                    displayMeal?.allergens && displayMeal.allergens.length > 0 ? (
+                      <View style={{ backgroundColor: '#FEF2F2', padding: theme.spacing.md, borderRadius: theme.borderRadius.lg, borderWidth: 1, borderColor: '#FECACA' }}>
+                        <Text style={{ color: '#991B1B', fontSize: 14, fontWeight: '500' }}>
+                          ⚠️ İçerdiği alerjenler: {displayMeal.allergens.join(', ')}
+                        </Text>
+                      </View>
+                    ) : null
+                  )}
+                </View>
+              )}
+
+              {/* Portion - Editable */}
+              {(displayMeal?.portion || isEditMode) && (
+                <View style={styles.detailSection}>
+                  <Text style={styles.detailSectionTitle}>Porsiyon</Text>
+                  {isEditMode ? (
+                    <TextInput
+                      style={styles.editableInput}
+                      value={editedMeal?.portion || ''}
+                      onChangeText={(text) => updateEditedMeal('portion', text)}
+                      placeholder="Örn: 1 porsiyon, 100g"
+                    />
+                  ) : (
+                    displayMeal?.portion && (
+                      <Text style={{ fontSize: 14, color: '#64748B' }}>{displayMeal.portion}</Text>
+                    )
+                  )}
                 </View>
               )}
             </ScrollView>
