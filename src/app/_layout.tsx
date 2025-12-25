@@ -5,11 +5,13 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, LogBox, StyleSheet, Text, View } from 'react-native';
 import 'react-native-reanimated';
 
+import { FIREBASE_CONFIG } from '@/constants/firebase';
 import { OnboardingProvider } from '@/context/onboarding-context';
 import { ThemeProvider as CustomThemeProvider } from '@/context/theme-context';
 import { UserProvider, useUser } from '@/context/user-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { initializeFirebaseEmulators } from '@/utils/firebase';
+import firestore from '@react-native-firebase/firestore';
 
 export const unstable_settings = {
   anchor: 'dashboard',
@@ -77,7 +79,7 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
   const colorScheme = useColorScheme();
   const { isLoading, user, createAnonymousUser, userData } = useUser();
   const router = useRouter();
-  const [isRouting, setIsRouting] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Initialize user and check onboarding status - determine initial routing
   useEffect(() => {
@@ -106,8 +108,8 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
           console.log('✅ App: User context confirms onboarding completed');
           shouldShowDashboard = true;
         }
-        // Secondary check: Direct Firestore verification
-        else {
+        // Secondary check: Direct Firestore verification (only if userData is null or loading)
+        else if (!userData || !hasInitialized) {
           try {
             console.log('🔎 App: Checking Firestore directly for onboarding status...');
             const doc = await firestore()
@@ -115,30 +117,41 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
               .doc(user.uid)
               .get();
 
-            if (doc.exists && doc.data()?.onboardingCompleted === true) {
-              console.log('✅ App: Firestore confirms onboarding completed');
-              shouldShowDashboard = true;
+            if ((doc as any).exists) {
+              const data = doc.data();
+              if (data?.onboardingCompleted === true) {
+                console.log('✅ App: Firestore confirms onboarding completed');
+                shouldShowDashboard = true;
+              } else {
+                console.log('❌ App: Onboarding not completed in Firestore');
+              }
             } else {
-              console.log('❌ App: No onboarding record found in Firestore');
+              console.log('❌ App: No user document found in Firestore');
             }
           } catch (error) {
             console.warn('⚠️ App: Error checking Firestore:', error);
           }
         }
 
-        // Route based on onboarding status
-        if (shouldShowDashboard) {
-          console.log('🎯 App: ROUTING TO DASHBOARD - user has completed onboarding');
-          router.replace('/dashboard');
-        } else {
-          console.log('🎯 App: ROUTING TO ONBOARDING - user needs to complete onboarding');
-          router.replace('/onboarding/welcome');
+        // Route based on onboarding status - only if not already initialized
+        if (!hasInitialized) {
+          if (shouldShowDashboard) {
+            console.log('🎯 App: ROUTING TO DASHBOARD - user has completed onboarding');
+            router.replace('/dashboard');
+          } else {
+            console.log('🎯 App: ROUTING TO ONBOARDING - user needs to complete onboarding');
+            router.replace('/onboarding/welcome');
+          }
+          setHasInitialized(true);
         }
 
       } catch (error) {
         console.error('❌ App: Error during initialization:', error);
         // Safe fallback to onboarding
-        router.replace('/onboarding/welcome');
+        if (!hasInitialized) {
+          router.replace('/onboarding/welcome');
+          setHasInitialized(true);
+        }
       }
     };
 
@@ -146,7 +159,7 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
     if (isLoading === false && user !== null) {
       initializeApp();
     }
-  }, [isLoading, user]); // Removed userData dependency to prevent multiple runs
+  }, [isLoading, user, userData]); // Added userData back to react to changes
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -171,9 +184,29 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [firebaseReady, setFirebaseReady] = useState(false);
 
-  // Initialize Firebase Emulators immediately on app start (before UserProvider)
-  initializeFirebaseEmulators();
+  // Initialize Firebase Emulators before rendering providers
+  useEffect(() => {
+    const initializeFirebase = async () => {
+      await initializeFirebaseEmulators();
+      setFirebaseReady(true);
+    };
+    
+    initializeFirebase();
+  }, []);
+
+  // Wait for Firebase to be ready before rendering providers
+  if (!firebaseReady) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
+        <ActivityIndicator size="large" color="#7C3AED" />
+        <Text style={{ marginTop: 16, fontSize: 16, color: '#64748B' }}>
+          Firebase Başlatılıyor...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <CustomThemeProvider defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}>

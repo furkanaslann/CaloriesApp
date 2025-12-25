@@ -32,7 +32,7 @@ const EMULATOR_CONFIG = {
 // We'll initialize emulators in a separate function that can be called after Firebase is ready
 let emulatorsInitialized = false;
 
-export const initializeFirebaseEmulators = () => {
+export const initializeFirebaseEmulators = async () => {
   if (IS_DEV && !emulatorsInitialized) {
     try {
       console.log('🔥 Initializing Firebase Emulators...');
@@ -41,6 +41,15 @@ export const initializeFirebaseEmulators = () => {
       const authUrl = `http://${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.auth}`;
       console.log('Connecting to Auth Emulator at:', authUrl);
       auth().useEmulator(authUrl);
+
+      // Note: Authentication state is persisted automatically by React Native Firebase.
+      // To clear all users and start fresh, use: firebase emulators:start --clear-data
+      // Or manually sign out users if needed:
+      // const currentUser = auth().currentUser;
+      // if (currentUser) {
+      //   await auth().signOut();
+      //   console.log('🔓 Development: Signed out existing user for clean session');
+      // }
 
       // Connect to Firestore Emulator
       console.log('Connecting to Firestore Emulator at:', `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.firestore}`);

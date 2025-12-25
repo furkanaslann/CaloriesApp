@@ -55,27 +55,25 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Listen to auth state changes
   useEffect(() => {
-    // Small delay to ensure Firebase emulators are initialized
-    const initializeAuth = async () => {
-      await new Promise(resolve => setTimeout(resolve, 100)); // Reduced from 500ms to 100ms
+    let unsubscribe: (() => void) | undefined;
 
-      // Check if Firebase is initialized before using auth
+    const initializeAuth = async () => {
+      // Firebase emulators are now initialized before this component mounts
+      // So we don't need a delay anymore
       try {
-        const unsubscribe = auth().onAuthStateChanged(async (firebaseUser) => {
+        unsubscribe = auth().onAuthStateChanged(async (firebaseUser) => {
           console.log('Auth state changed. User:', firebaseUser?.uid);
           setUser(firebaseUser);
 
-        if (firebaseUser) {
-          // Load user data from Firestore
-          await loadUserData(firebaseUser.uid);
-        } else {
-          setUserData(null);
-        }
+          if (firebaseUser) {
+            // Load user data from Firestore
+            await loadUserData(firebaseUser.uid);
+          } else {
+            setUserData(null);
+          }
 
           setIsLoading(false);
         });
-
-        return unsubscribe;
       } catch (error) {
         console.error('Firebase initialization error:', error);
         setIsLoading(false);
@@ -83,6 +81,13 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     initializeAuth();
+
+    // Cleanup subscription on unmount
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   // Load user data from Firestore

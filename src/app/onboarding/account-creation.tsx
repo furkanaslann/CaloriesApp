@@ -3,11 +3,11 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import { FIREBASE_CONFIG } from '@/constants/firebase';
+import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
+import { firestore, signIn, signUp } from '@/utils/firebase';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { signIn, signUp, signInAnonymously, firestore } from '@/utils/firebase';
 import {
   Alert,
   ScrollView,
@@ -20,7 +20,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import { useOnboarding } from '../../context/onboarding-context';
-import { useOnboardingSync } from '../../hooks/use-onboarding-sync';
 import { useUser } from '../../context/user-context';
 
 const AccountCreationScreen = () => {
@@ -105,7 +104,7 @@ const AccountCreationScreen = () => {
   };
 
   const { profile, goals, completeOnboarding, updateAccount } = useOnboarding();
-  const { completeOnboarding: completeUserOnboarding, user: currentUser } = useUser();
+  const { completeOnboarding: completeUserOnboarding, user: currentUser, refreshUserData } = useUser();
   // Firestore entegrasyonu artık onboarding context içinde otomatik yapılıyor
 
   const [accountData, setAccountData] = useState({
@@ -344,19 +343,29 @@ const AccountCreationScreen = () => {
       }
 
       console.log('About to navigate to dashboard...');
-      // Navigate to dashboard after Firebase data is confirmed saved
-      setTimeout(() => {
-        console.log('✅ Navigation to dashboard - onboarding completed successfully');
-        router.replace('/dashboard');
-      }, 2000); // Reduced to 2 seconds after data is confirmed saved
+      
+      // Refresh user context to load the newly saved data
+      try {
+        console.log('🔄 Refreshing user context with new data...');
+        await refreshUserData();
+        console.log('✅ User context refreshed successfully');
+      } catch (refreshError) {
+        console.warn('⚠️ Warning: Could not refresh user context:', refreshError);
+      }
+      
+      // Small delay to ensure context is fully updated and state propagated
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Navigate to dashboard after Firebase data is confirmed saved and context refreshed
+      console.log('✅ Navigation to dashboard - onboarding completed successfully');
+      router.replace('/dashboard');
+      
+      // Turn off loading state after navigation
+      setIsCreating(false);
     } catch (error: any) {
       console.error('Error creating account:', error);
       Alert.alert('Hata', error.message || 'Hesap oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
-    } finally {
-      // Set loading to false after all operations are complete
-      setTimeout(() => {
-        setIsCreating(false);
-      }, 3000); // 3 seconds total loading time
+      setIsCreating(false);
     }
   };
 
