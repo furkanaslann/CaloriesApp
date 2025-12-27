@@ -10,7 +10,7 @@ import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants
 import { useUser } from '@/context/user-context';
 import { useDashboard } from '@/hooks/use-dashboard';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -50,7 +50,7 @@ const DashboardIndexScreen = () => {
         .doc(user.uid)
         .get();
 
-      if (doc.exists) {
+      if (doc.exists()) {
         return doc.data();
       }
       return null;
@@ -115,7 +115,7 @@ const DashboardIndexScreen = () => {
           .doc(user.uid)
           .get();
 
-        if (directCheck.exists) {
+        if (directCheck.exists()) {
           const data = directCheck.data();
           if (data?.onboardingCompleted === true) {
             console.log('✅ Dashboard: Onboarding confirmed in Firestore - access granted');
@@ -127,6 +127,20 @@ const DashboardIndexScreen = () => {
             setIsChecking(false);
             return;
           }
+        } else {
+          // No Firestore document found - user data was cleared
+          console.log('❌ Dashboard: No Firestore document found for user');
+          console.log('🔄 Dashboard: Logging out user to reset onboarding flow');
+          
+          try {
+            await auth().signOut();
+            console.log('✅ Dashboard: User logged out - redirecting to onboarding');
+          } catch (logoutError) {
+            console.error('❌ Dashboard: Error during logout:', logoutError);
+          }
+          
+          router.replace('/onboarding/welcome');
+          return;
         }
       } catch (error) {
         console.error('❌ Dashboard: Error checking onboarding status:', error);

@@ -146,9 +146,21 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.log('loadUserData: Safe data created, onboardingCompleted:', safeData.onboardingCompleted);
         setUserData(safeData);
       } else {
-        console.log('loadUserData: No document exists, creating initial document');
-        // Create initial user document if it doesn't exist
-        await createInitialUserDocument(userId);
+        console.log('⚠️ loadUserData: No Firestore document found for authenticated user');
+        console.log('🔄 loadUserData: Logging out user to reset onboarding flow');
+        
+        // Important: If Auth user exists but no Firestore document,
+        // it means the user data was cleared/deleted in emulator
+        // So we should logout and start fresh
+        try {
+          await auth().signOut();
+          setUserData(null);
+          console.log('✅ loadUserData: User logged out successfully - will redirect to onboarding');
+        } catch (logoutError) {
+          console.error('❌ loadUserData: Error during logout:', logoutError);
+          // Even on error, clear local state to trigger onboarding
+          setUserData(null);
+        }
       }
     } catch (error) {
       console.error('Error loading user data:', error);

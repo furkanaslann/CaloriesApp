@@ -8,16 +8,27 @@ import React from 'react';
 import {
   Dimensions,
   FlatList,
+  ListRenderItem,
   StyleSheet,
   Text,
   TextStyle,
-  View,
   TouchableOpacity,
-  Image
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
+
+interface CommunityPost {
+  id: string;
+  author: string;
+  avatar: string;
+  time: string;
+  content: string;
+  likes: number;
+  comments: number;
+  achievement: boolean;
+}
 
 const CommunityDashboardScreen = () => {
   // Create theme object that matches expected structure
@@ -61,7 +72,7 @@ const CommunityDashboardScreen = () => {
   };
 
   // Community posts data
-  const communityPosts = [
+  const communityPosts: CommunityPost[] = [
     {
       id: '1',
       author: 'Ayşe K.',
@@ -215,7 +226,7 @@ const CommunityDashboardScreen = () => {
     },
   });
 
-  const renderPost = ({ item }) => (
+  const renderPost: ListRenderItem<CommunityPost> = ({ item }) => (
     <View style={styles.postCard}>
       <View style={styles.postHeader}>
         <View style={styles.avatar}>

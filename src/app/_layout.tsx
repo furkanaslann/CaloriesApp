@@ -11,6 +11,7 @@ import { ThemeProvider as CustomThemeProvider } from '@/context/theme-context';
 import { UserProvider, useUser } from '@/context/user-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { initializeFirebaseEmulators } from '@/utils/firebase';
+import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
 export const unstable_settings = {
@@ -127,6 +128,17 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
               }
             } else {
               console.log('❌ App: No user document found in Firestore');
+              console.log('🔄 App: Logging out user as Firestore has no data');
+              
+              // If Auth user exists but no Firestore document,
+              // logout the user so they can start fresh with onboarding
+              try {
+                await auth().signOut();
+                console.log('✅ App: User logged out - will create new anonymous user');
+                return; // Exit early, auth state change will trigger re-init
+              } catch (logoutError) {
+                console.error('❌ App: Error during logout:', logoutError);
+              }
             }
           } catch (error) {
             console.warn('⚠️ App: Error checking Firestore:', error);
@@ -175,6 +187,7 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
           name="loading"
           options={{ headerShown: false, presentation: 'modal' }}
         />
+        <Stack.Screen name="recipes" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
 
