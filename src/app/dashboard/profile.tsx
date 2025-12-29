@@ -860,7 +860,7 @@ const ProfileDashboardScreen = () => {
           <Ionicons name="camera-outline" size={24} color="#94A3B8" style={styles.navIcon} />
           <Text style={styles.navLabel}>Kamera</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/meals')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/recipes')}>
           <Ionicons name="restaurant-outline" size={24} color="#94A3B8" style={styles.navIcon} />
           <Text style={styles.navLabel}>Tarifler</Text>
         </TouchableOpacity>

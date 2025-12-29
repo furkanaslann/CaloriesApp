@@ -1,693 +1,880 @@
 /**
- * CaloriTrack - Recipes Gallery Screen
+ * CaloriTrack - Recipes Screen
  * Minimal. Cool. Aesthetic.
- * Figma Design: https://www.figma.com/design/V4OjFZYz1hhZdeWSgZyYtu/Calories-Pages?node-id=41-2
+ * Figma Design: https://www.figma.com/design/V4OjFZYz1hhZdeWSgZyYtu/Calories-Pages?node-id=47-9
  */
 
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Dimensions,
-  FlatList,
   Image,
+  ImageBackground,
   Modal,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
-  View
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-// Full screen card size based on Figma
-const CARD_WIDTH = width;
-const CARD_HEIGHT = height;
-
-// Recipe data with new Figma images
-const recipesData = [
+// Recipe data
+const breakfastRecipes = [
   {
     id: '1',
-    name: 'Grillen Tavuk Salata',
-    description: 'Yüksek proteinli, düşük kalorili',
-    image: 'https://www.figma.com/api/mcp/asset/e07f73e1-480d-4fca-aa88-c05e7882c19c',
-    calories: 285,
-    time: '25 dk',
-    rating: 4.8,
-    category: 'Salata',
-    difficulty: 'Kolay',
-    servings: 2,
+    name: 'Raw Vegan Key Lime Mousse',
+    time: '18 min',
+    calories: '233 Cal',
+    image: 'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=400&h=300&fit=crop',
   },
   {
     id: '2',
-    name: 'Yulaf Ezmesi',
-    description: 'Enerjik başlangıç için',
-    image: 'https://www.figma.com/api/mcp/asset/f8e76563-3619-46fe-a616-98b64db5b68c',
-    calories: 220,
-    time: '10 dk',
-    rating: 4.6,
-    category: 'Kahvaltı',
-    difficulty: 'Çok Kolay',
-    servings: 1,
+    name: 'Avocado Toast',
+    time: '10 min',
+    calories: '320 Cal',
+    image: 'https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=400&h=300&fit=crop',
   },
   {
     id: '3',
-    name: 'Protein Smoothie',
-    description: 'Antrenman sonrası için',
-    image: 'https://www.figma.com/api/mcp/asset/9bf11826-aeb8-4590-95c5-9431548cb1db',
-    calories: 180,
-    time: '5 dk',
-    rating: 4.9,
-    category: 'İçecek',
-    difficulty: 'Çok Kolay',
-    servings: 1,
-  },
-  {
-    id: '4',
-    name: 'Sütlü Tatlı',
-    description: 'Düşük kalorili alternatif',
-    image: 'https://www.figma.com/api/mcp/asset/59454786-16ae-4656-a53d-f54f342a90de',
-    calories: 150,
-    time: '20 dk',
-    rating: 4.5,
-    category: 'Tatlı',
-    difficulty: 'Orta',
-    servings: 4,
-  },
-  {
-    id: '5',
-    name: 'Akdeniz Salata',
-    description: 'Taze sebzelerle',
-    image: 'https://www.figma.com/api/mcp/asset/8fac0685-dd78-42b9-aea1-2520497a320c',
-    calories: 195,
-    time: '15 dk',
-    rating: 4.8,
-    category: 'Salata',
-    difficulty: 'Kolay',
-    servings: 2,
-  },
-  {
-    id: '6',
-    name: 'Açai Bowl',
-    description: 'Antioksidan zengini',
-    image: 'https://www.figma.com/api/mcp/asset/f33b5c1b-6fb6-400a-8d67-abd467422bfa',
-    calories: 320,
-    time: '8 dk',
-    rating: 4.7,
-    category: 'Kahvaltı',
-    difficulty: 'Kolay',
-    servings: 1,
-  },
-  {
-    id: '7',
-    name: 'Avokado Tost',
-    description: 'Sağlıklı yağ kaynağı',
-    image: 'https://www.figma.com/api/mcp/asset/ca1d6c5b-0aef-4b85-ae5a-03917a07166e',
-    calories: 340,
-    time: '12 dk',
-    rating: 4.7,
-    category: 'Kahvaltı',
-    difficulty: 'Kolay',
-    servings: 1,
-  },
-  {
-    id: '8',
-    name: 'Quinoa Bowl',
-    description: 'Bitkisel protein',
-    image: 'https://www.figma.com/api/mcp/asset/7a0a79f8-a6a6-4ebe-a192-09ac8ceff0ad',
-    calories: 290,
-    time: '18 dk',
-    rating: 4.6,
-    category: 'Ana Yemek',
-    difficulty: 'Orta',
-    servings: 2,
-  },
-  {
-    id: '9',
-    name: 'Somon Grill',
-    description: 'Omega-3 zengini',
-    image: 'https://www.figma.com/api/mcp/asset/e94820dd-8f78-416e-a9a4-881d47bc084f',
-    calories: 380,
-    time: '30 dk',
-    rating: 4.9,
-    category: 'Ana Yemek',
-    difficulty: 'Orta',
-    servings: 2,
-  },
-  {
-    id: '10',
-    name: 'Meyve Salata',
-    description: 'Taze ve ferahlatıcı',
-    image: 'https://www.figma.com/api/mcp/asset/0c030c87-d29d-472d-9fe9-7ce3787ecb68',
-    calories: 165,
-    time: '10 dk',
-    rating: 4.7,
-    category: 'Tatlı',
-    difficulty: 'Çok Kolay',
-    servings: 2,
+    name: 'Berry Smoothie Bowl',
+    time: '8 min',
+    calories: '185 Cal',
+    image: 'https://images.unsplash.com/photo-1577805947697-89e18249d767?w=400&h=300&fit=crop',
   },
 ];
 
-const categories = ['Tümü', 'Kahvaltı', 'Salata', 'Ana Yemek', 'İçecek', 'Tatlı'];
+const lunchRecipes = [
+  {
+    id: '4',
+    name: 'Quinoa Salad Bowl',
+    time: '25 min',
+    calories: '410 Cal',
+    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop',
+  },
+  {
+    id: '5',
+    name: 'Grilled Chicken Wrap',
+    time: '20 min',
+    calories: '380 Cal',
+    image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=400&h=300&fit=crop',
+  },
+  {
+    id: '6',
+    name: 'Mediterranean Salad',
+    time: '15 min',
+    calories: '295 Cal',
+    image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&h=300&fit=crop',
+  },
+];
 
-const RecipesGalleryScreen = () => {
-  const [searchModalVisible, setSearchModalVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Tümü');
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [currentIndex, setCurrentIndex] = useState(0);
+const RecipesScreen = () => {
+  const router = useRouter();
+  const [searchText, setSearchText] = useState('');
+  const [showMoreDietInfo, setShowMoreDietInfo] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
 
-  const filteredRecipes = recipesData.filter((recipe) => {
-    const matchesSearch = recipe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         recipe.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'Tümü' || recipe.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Filter states
+  const [selectedMealType, setSelectedMealType] = useState<string>('all');
+  const [selectedDiet, setSelectedDiet] = useState<string[]>([]);
+  const [selectedCalories, setSelectedCalories] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>('');
 
-  const toggleFavorite = (recipeId: string) => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(recipeId)) {
-      newFavorites.delete(recipeId);
+  // Filter options
+  const mealTypes = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Snack'];
+  const diets = ['Gluten-Free', 'Keto', 'Low-Carb', 'High-Protein', 'Dairy-Free'];
+  const calorieRanges = ['0-200 Cal', '200-400 Cal', '400-600 Cal', '600+ Cal'];
+  const timeRanges = ['0-15 min', '15-30 min', '30-60 min', '60+ min'];
+
+  const toggleDiet = (diet: string) => {
+    if (selectedDiet.includes(diet)) {
+      setSelectedDiet(selectedDiet.filter(d => d !== diet));
     } else {
-      newFavorites.add(recipeId);
+      setSelectedDiet([...selectedDiet, diet]);
     }
-    setFavorites(newFavorites);
   };
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#000000',
-    },
-    // Full screen cards
-    cardContainer: {
-      width: CARD_WIDTH,
-      height: CARD_HEIGHT,
-    },
-    cardImage: {
-      width: '100%',
-      height: '100%',
-    },
-    // Overlay gradient
-    gradientOverlay: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      top: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    },
-    gradientBottom: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      bottom: 0,
-      height: 300,
-      backgroundColor: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
-    },
-    // Top Header
-    topHeader: {
-      position: 'absolute',
-      top: 60,
-      left: 0,
-      right: 0,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 24,
-    },
-    headerTitle: {
-      fontSize: 36,
-      fontWeight: '700',
-      color: '#FFFFFF',
-      letterSpacing: -1,
-    },
-    headerButtons: {
-      flexDirection: 'row',
-      gap: 12,
-    },
-    headerButton: {
-      width: 52,
-      height: 52,
-      borderRadius: 26,
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      backdropFilter: 'blur(20px)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.3)',
-    },
-    // Content Overlay
-    contentOverlay: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      bottom: 0,
-      paddingBottom: 100,
-      paddingHorizontal: 32,
-    },
-    categoryBadge: {
-      alignSelf: 'flex-start',
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 24,
-      backgroundColor: 'rgba(124, 58, 237, 0.9)',
-      marginBottom: 16,
-    },
-    categoryBadgeText: {
-      fontSize: 14,
-      fontWeight: '700',
-      color: '#FFFFFF',
-      letterSpacing: 0.5,
-    },
-    recipeTitle: {
-      fontSize: 42,
-      fontWeight: '700',
-      color: '#FFFFFF',
-      marginBottom: 12,
-      lineHeight: 48,
-      letterSpacing: -1,
-      textShadow: '0 2px 10px rgba(0,0,0,0.3)',
-    },
-    recipeDescription: {
-      fontSize: 18,
-      color: 'rgba(255, 255, 255, 0.9)',
-      marginBottom: 24,
-      lineHeight: 26,
-    },
-    // Meta info
-    metaRow: {
-      flexDirection: 'row',
-      gap: 24,
-    },
-    metaItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    metaText: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: '#FFFFFF',
-    },
-    ratingBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 16,
-      backgroundColor: 'rgba(255, 255, 255, 0.25)',
-      backdropFilter: 'blur(10px)',
-    },
-    ratingText: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: '#FFFFFF',
-    },
-    // Action buttons
-    actionButtons: {
-      position: 'absolute',
-      bottom: 40,
-      left: 24,
-      right: 24,
-      flexDirection: 'row',
-      gap: 16,
-    },
-    primaryButton: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 12,
-      backgroundColor: '#7C3AED',
-      borderRadius: 20,
-      paddingVertical: 20,
-      shadowColor: '#7C3AED',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.4,
-      shadowRadius: 20,
-      elevation: 10,
-    },
-    primaryButtonText: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: '#FFFFFF',
-      letterSpacing: 0.5,
-    },
-    secondaryButton: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      backdropFilter: 'blur(20px)',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.3)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    // Page indicator
-    pageIndicator: {
-      position: 'absolute',
-      bottom: 120,
-      left: 0,
-      right: 0,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      gap: 8,
-    },
-    pageDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    },
-    pageDotActive: {
-      width: 24,
       backgroundColor: '#FFFFFF',
     },
-    // Search Modal
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.7)',
-      justifyContent: 'flex-end',
+    // Header
+    header: {
+      backgroundColor: '#E6F3FF',
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 16,
     },
-    modalContent: {
-      backgroundColor: '#1E293B',
-      borderTopLeftRadius: 32,
-      borderTopRightRadius: 32,
-      paddingHorizontal: 28,
-      paddingTop: 36,
-      paddingBottom: 48,
-    },
-    modalHeader: {
+    headerTop: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 28,
+      marginBottom: 16,
     },
-    modalTitle: {
-      fontSize: 28,
+    headerLogo: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: '#333333',
+    },
+    headerTitle: {
+      fontSize: 24,
       fontWeight: '700',
-      color: '#FFFFFF',
+      color: '#333333',
+      flex: 1,
+      textAlign: 'center',
     },
-    searchInputContainer: {
+    headerIcon: {
+      width: 24,
+      height: 24,
+    },
+    // Tab Navigation
+    tabNav: {
+      flexDirection: 'row',
+      marginBottom: 16,
+    },
+    tabItem: {
+      marginRight: 24,
+    },
+    tabText: {
+      fontSize: 16,
+      fontWeight: '400',
+      color: '#666666',
+    },
+    tabTextActive: {
+      fontWeight: '700',
+      color: '#007AFF',
+    },
+    tabWithCheck: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: '#334155',
-      borderRadius: 20,
-      paddingHorizontal: 20,
-      paddingVertical: 16,
-      marginBottom: 24,
+      gap: 4,
+    },
+    checkIcon: {
+      width: 16,
+      height: 16,
+    },
+    // Search Bar
+    searchBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#FFFFFF',
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    searchIcon: {
+      width: 20,
+      height: 20,
+      marginRight: 12,
     },
     searchInput: {
       flex: 1,
-      fontSize: 18,
-      color: '#FFFFFF',
-      marginLeft: 12,
-    },
-    clearButton: {
       fontSize: 16,
-      fontWeight: '600',
-      color: '#7C3AED',
+      color: '#333333',
     },
-    recentSearchesTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: '#94A3B8',
-      marginBottom: 20,
+    filterIcon: {
+      width: 20,
+      height: 20,
     },
-    recentSearchItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: '#334155',
+    // Main Content
+    scrollContent: {
+      paddingBottom: 100,
     },
-    recentSearchText: {
-      fontSize: 16,
-      color: '#E2E8F0',
-      marginLeft: 12,
+    // Featured Banner
+    featuredBanner: {
+      marginHorizontal: 16,
+      marginTop: 16,
+      height: 180,
+      borderRadius: 16,
+      overflow: 'hidden',
     },
-    // Categories horizontal list
-    categoriesContainer: {
+    bannerImage: {
+      width: '100%',
+      height: '100%',
+    },
+    bannerOverlay: {
       position: 'absolute',
-      top: 130,
+      top: 0,
       left: 0,
       right: 0,
-    },
-    categoryScroll: {
-      paddingHorizontal: 24,
-    },
-    categoryChip: {
-      paddingHorizontal: 20,
-      paddingVertical: 12,
-      borderRadius: 28,
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-      backdropFilter: 'blur(10px)',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-      marginRight: 12,
-    },
-    categoryChipActive: {
-      backgroundColor: '#7C3AED',
-      borderColor: '#7C3AED',
-    },
-    categoryChipText: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: '#FFFFFF',
-    },
-    emptyState: {
-      flex: 1,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.35)',
       justifyContent: 'center',
       alignItems: 'center',
-      paddingHorizontal: 40,
     },
-    emptyStateText: {
-      fontSize: 18,
-      color: '#94A3B8',
+    bannerContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    wreathIcon: {
+      width: 32,
+      height: 32,
+    },
+    bannerTitle: {
+      fontSize: 28,
+      fontWeight: '700',
+      color: '#FFFFFF',
+      textShadowColor: 'rgba(0, 0, 0, 0.3)',
+      textShadowOffset: { width: 0, height: 2 },
+      textShadowRadius: 4,
+    },
+    bannerSubtitle: {
+      fontSize: 14,
+      color: '#FFFFFF',
+      marginTop: 4,
       textAlign: 'center',
-      marginTop: 20,
+    },
+    // Diet Info Section
+    dietInfoSection: {
+      paddingHorizontal: 16,
+      marginTop: 24,
+    },
+    dietInfoTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: '#333333',
+      marginBottom: 8,
+    },
+    dietInfoDescription: {
+      fontSize: 14,
+      color: '#666666',
+      lineHeight: 20,
+      marginBottom: 8,
+    },
+    moreButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    moreText: {
+      fontSize: 14,
+      color: '#007AFF',
+    },
+    moreIcon: {
+      width: 16,
+      height: 16,
+    },
+    // Meal Category Section
+    mealSection: {
+      marginTop: 24,
+    },
+    mealSectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      marginBottom: 12,
+    },
+    mealSectionTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: '#333333',
+    },
+    mealMoreLink: {
+      fontSize: 14,
+      color: '#007AFF',
+    },
+    // Recipe Cards Row
+    recipeCardsRow: {
+      flexDirection: 'row',
+      paddingHorizontal: 16,
+      gap: 12,
+    },
+    // Recipe Card
+    recipeCard: {
+      width: (width - 64) / 3,
+      backgroundColor: '#FFFFFF',
+      borderRadius: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+      overflow: 'hidden',
+    },
+    cardImageContainer: {
+      position: 'relative',
+    },
+    cardImage: {
+      width: '100%',
+      height: 90,
+      backgroundColor: '#F5F5F5',
+    },
+    favoriteButton: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      width: 24,
+      height: 24,
+    },
+    cardContent: {
+      padding: 10,
+    },
+    cardMeta: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 6,
+    },
+    cardTime: {
+      fontSize: 11,
+      color: '#999999',
+    },
+    cardCalories: {
+      fontSize: 11,
+      color: '#999999',
+    },
+    cardTitle: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: '#333333',
+      lineHeight: 16,
+    },
+    // Bottom Navigation
+    bottomNav: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 70,
+      backgroundColor: '#FFFFFF',
+      borderTopWidth: 1,
+      borderTopColor: '#E5E5E5',
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      paddingBottom: 10,
+      paddingHorizontal: 20,
+    },
+    navItem: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      flex: 1,
+    },
+    navIcon: {
+      marginBottom: 4,
+    },
+    navLabel: {
+      fontSize: 12,
+      color: '#999999',
+      fontWeight: '500',
+    },
+    navLabelActive: {
+      color: '#007AFF',
+    },
+    // Camera Button
+    cameraButton: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: '#007AFF',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: -20,
+      shadowColor: '#007AFF',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 5,
+    },
+    cameraIcon: {
+      width: 24,
+      height: 24,
+    },
+    // Filter Modal
+    filterModalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'flex-end',
+    },
+    filterModalContent: {
+      backgroundColor: '#FFFFFF',
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      paddingBottom: 34,
+      maxHeight: '80%',
+    },
+    filterModalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 24,
+      paddingTop: 20,
+      paddingBottom: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: '#F1F5F9',
+    },
+    filterModalTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: '#1E293B',
+    },
+    filterModalClose: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: '#F1F5F9',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    filterModalScroll: {
+      paddingHorizontal: 24,
+      paddingTop: 20,
+    },
+    // Filter Section
+    filterSection: {
+      marginBottom: 24,
+    },
+    filterSectionTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#1E293B',
+      marginBottom: 12,
+    },
+    // Filter Tags - Horizontal Scroll
+    filterTagsScroll: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    filterTag: {
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 20,
+      backgroundColor: '#F8FAFC',
+      borderWidth: 1,
+      borderColor: '#E2E8F0',
+    },
+    filterTagSelected: {
+      backgroundColor: '#007AFF',
+      borderColor: '#007AFF',
+    },
+    filterTagText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: '#64748B',
+    },
+    filterTagTextSelected: {
+      color: '#FFFFFF',
+    },
+    // Checkbox Items
+    checkboxItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      backgroundColor: '#F8FAFC',
+      borderRadius: 12,
+      marginBottom: 8,
+    },
+    checkboxItemLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    checkboxDot: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: '#CBD5E1',
+    },
+    checkboxDotSelected: {
+      backgroundColor: '#007AFF',
+      borderColor: '#007AFF',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    checkboxDotInner: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: '#FFFFFF',
+    },
+    checkboxText: {
+      fontSize: 15,
+      color: '#1E293B',
+    },
+    // Radio Items
+    radioItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      backgroundColor: '#F8FAFC',
+      borderRadius: 12,
+      marginBottom: 8,
+    },
+    radioCircle: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: '#CBD5E1',
+    },
+    radioCircleSelected: {
+      backgroundColor: '#007AFF',
+      borderColor: '#007AFF',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    radioCircleInner: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: '#FFFFFF',
+    },
+    // Apply Button
+    applyButtonContainer: {
+      paddingHorizontal: 24,
+      paddingTop: 16,
+      paddingBottom: 16,
+      borderTopWidth: 1,
+      borderTopColor: '#F1F5F9',
+    },
+    applyButton: {
+      backgroundColor: '#007AFF',
+      borderRadius: 12,
+      paddingVertical: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    applyButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#FFFFFF',
     },
   });
 
-  const renderCard = ({ item, index }: { item: typeof recipesData[0]; index: number }) => {
-    const isFavorite = favorites.has(item.id);
-
-    return (
-      <View style={styles.cardContainer}>
-        <Image
-          source={{ uri: item.image }}
-          style={styles.cardImage}
-        />
-
-        <View style={styles.gradientOverlay} />
-        <View style={styles.gradientBottom} />
-
-        {/* Top Header */}
-        <View style={styles.topHeader}>
-          <Text style={styles.headerTitle}>Tarifler</Text>
-          <View style={styles.headerButtons}>
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={() => setSearchModalVisible(true)}
-            >
-              <Ionicons name="search-outline" size={26} color="#FFFFFF" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.headerButton, isFavorite && { backgroundColor: 'rgba(239, 68, 68, 0.4)' }]}
-              onPress={() => toggleFavorite(item.id)}
-            >
-              <Ionicons
-                name={isFavorite ? 'heart' : 'heart-outline'}
-                size={26}
-                color={isFavorite ? '#EF4444' : '#FFFFFF'}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Categories */}
-        <View style={styles.categoriesContainer}>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={categories}
-            renderItem={({ item: cat }) => {
-              const isActive = selectedCategory === cat;
-              return (
-                <TouchableOpacity
-                  style={[styles.categoryChip, isActive && styles.categoryChipActive]}
-                  onPress={() => setSelectedCategory(cat)}
-                >
-                  <Text style={styles.categoryChipText}>{cat}</Text>
-                </TouchableOpacity>
-              );
-            }}
-            keyExtractor={(item) => item}
-            contentContainerStyle={styles.categoryScroll}
-          />
-        </View>
-
-        {/* Content Overlay */}
-        <View style={styles.contentOverlay}>
-          <View style={styles.categoryBadge}>
-            <Text style={styles.categoryBadgeText}>{item.category}</Text>
-          </View>
-
-          <Text style={styles.recipeTitle}>{item.name}</Text>
-          <Text style={styles.recipeDescription}>{item.description}</Text>
-
-          <View style={styles.metaRow}>
-            <View style={styles.metaItem}>
-              <Ionicons name="time-outline" size={22} color="#FFFFFF" />
-              <Text style={styles.metaText}>{item.time}</Text>
-            </View>
-
-            <View style={styles.metaItem}>
-              <Ionicons name="people-outline" size={22} color="#FFFFFF" />
-              <Text style={styles.metaText}>{item.servings} kişilik</Text>
-            </View>
-
-            <View style={styles.ratingBadge}>
-              <Ionicons name="star" size={20} color="#FBBF24" />
-              <Text style={styles.ratingText}>{item.rating}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Action Buttons */}
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={() => router.push({ pathname: '/recipes/[id]', params: { id: item.id } })}
-          >
-            <Ionicons name="restaurant-outline" size={24} color="#FFFFFF" />
-            <Text style={styles.primaryButtonText}>Tarife Git</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => toggleFavorite(item.id)}
-          >
-            <Ionicons
-              name={isFavorite ? 'heart' : 'heart-outline'}
-              size={28}
-              color={isFavorite ? '#EF4444' : '#FFFFFF'}
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* Page Indicator */}
-        <View style={styles.pageIndicator}>
-          {filteredRecipes.map((_, idx) => (
-            <View
-              key={idx}
-              style={[
-                styles.pageDot,
-                idx === index % filteredRecipes.length && styles.pageDotActive,
-              ]}
-            />
-          ))}
-        </View>
+  const renderRecipeCard = (recipe: typeof breakfastRecipes[0]) => (
+    <TouchableOpacity
+      key={recipe.id}
+      style={styles.recipeCard}
+      onPress={() => router.push(`/dashboard/food-detail?id=${recipe.id}` as any)}
+      activeOpacity={0.9}
+    >
+      <View style={styles.cardImageContainer}>
+        <Image source={{ uri: recipe.image }} style={styles.cardImage} />
+        <TouchableOpacity style={styles.favoriteButton}>
+          <Ionicons name="star-outline" size={16} color="#FFD700" />
+        </TouchableOpacity>
       </View>
-    );
-  };
+      <View style={styles.cardContent}>
+        <View style={styles.cardMeta}>
+          <Text style={styles.cardTime}>{recipe.time}</Text>
+          <Text style={styles.cardCalories}>{recipe.calories}</Text>
+        </View>
+        <Text style={styles.cardTitle} numberOfLines={2}>{recipe.name}</Text>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+      <StatusBar barStyle="dark-content" backgroundColor="#E6F3FF" />
 
-      {filteredRecipes.length > 0 ? (
-        <FlatList
-          data={filteredRecipes}
-          renderItem={renderCard}
-          keyExtractor={(item) => item.id}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          snapToInterval={CARD_WIDTH}
-          decelerationRate="fast"
-          onViewableItemsChanged={({ viewableItems }) => {
-            if (viewableItems[0]) {
-              setCurrentIndex(viewableItems[0].index || 0);
-            }
-          }}
-          viewabilityConfig={{
-            itemVisiblePercentThreshold: 50,
-          }}
-        />
-      ) : (
-        <View style={styles.emptyState}>
-          <Ionicons name="search-outline" size={80} color="#475569" />
-          <Text style={styles.emptyStateText}>
-            Arama kriterlerinize uygun tarif bulunamadı.
-          </Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <Text style={styles.headerTitle}>Recipes</Text>
+          <TouchableOpacity style={styles.headerIcon}>
+            <Ionicons name="star" size={24} color="#007AFF" />
+          </TouchableOpacity>
         </View>
-      )}
 
-      {/* Search Modal */}
+        {/* Tab Navigation */}
+        <View style={styles.tabNav}>
+          <TouchableOpacity style={styles.tabItem}>
+            <Text style={styles.tabTextActive}>Recipes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tabItem}>
+            <View style={styles.tabWithCheck}>
+              <Ionicons name="checkmark-circle" size={16} color="#007AFF" />
+              <Text style={styles.tabText}>Added to Favorites</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Search Bar */}
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={20} color="#999999" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search for recipes"
+            placeholderTextColor="#999999"
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+          <TouchableOpacity style={styles.filterIcon} onPress={() => setShowFilterModal(true)}>
+            <Ionicons name="options-outline" size={20} color="#999999" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Main Content */}
+      <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Featured Banner */}
+        <View style={styles.featuredBanner}>
+          <ImageBackground
+            source={{ uri: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&h=400&fit=crop' }}
+            style={styles.bannerImage}
+          >
+            <View style={styles.bannerOverlay}>
+              <View style={styles.bannerContent}>
+                <Ionicons name="leaf" size={28} color="#FFFFFF" style={styles.wreathIcon} />
+                <View>
+                  <Text style={styles.bannerTitle}>Gluten-Free</Text>
+                  <Text style={styles.bannerSubtitle}>Weekly Selected</Text>
+                </View>
+                <Ionicons name="leaf" size={28} color="#FFFFFF" style={styles.wreathIcon} />
+              </View>
+            </View>
+          </ImageBackground>
+        </View>
+
+        {/* Diet Info Section */}
+        <View style={styles.dietInfoSection}>
+          <Text style={styles.dietInfoTitle}>Gluten-free & Losing Weight</Text>
+          <Text style={styles.dietInfoDescription}>
+            {showMoreDietInfo
+              ? 'This gluten-free diet includes fruits, vegetables, meat, dairy, and grains like rice and quinoa. It can aid in weight loss by reducing processed foods and focusing on whole, natural ingredients. Many people report increased energy and improved digestion.'
+              : 'This gluten-free diet includes fruits, vegetables, meat, dairy, and grains like rice and quinoa. It can aid...'}
+          </Text>
+          <TouchableOpacity
+            style={styles.moreButton}
+            onPress={() => setShowMoreDietInfo(!showMoreDietInfo)}
+          >
+            <Text style={styles.moreText}>{showMoreDietInfo ? 'Less' : 'More'}</Text>
+            <Ionicons
+              name={showMoreDietInfo ? 'chevron-up' : 'chevron-down'}
+              size={16}
+              color="#007AFF"
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Breakfast Section */}
+        <View style={styles.mealSection}>
+          <View style={styles.mealSectionHeader}>
+            <Text style={styles.mealSectionTitle}>Breakfast</Text>
+            <TouchableOpacity>
+              <Text style={styles.mealMoreLink}>More</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.recipeCardsRow}
+          >
+            {breakfastRecipes.map(renderRecipeCard)}
+          </ScrollView>
+        </View>
+
+        {/* Lunch Section */}
+        <View style={styles.mealSection}>
+          <View style={styles.mealSectionHeader}>
+            <Text style={styles.mealSectionTitle}>Lunch</Text>
+            <TouchableOpacity>
+              <Text style={styles.mealMoreLink}>More</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.recipeCardsRow}
+          >
+            {lunchRecipes.map(renderRecipeCard)}
+          </ScrollView>
+        </View>
+      </ScrollView>
+
+      {/* Bottom Navigation */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push('/dashboard')}
+        >
+          <Ionicons name="stats-chart-outline" size={24} color="#999999" style={styles.navIcon} />
+          <Text style={styles.navLabel}>Tracker</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push('/dashboard')}
+        >
+          <Ionicons name="calendar-outline" size={24} color="#999999" style={styles.navIcon} />
+          <Text style={styles.navLabel}>Plans</Text>
+        </TouchableOpacity>
+
+        {/* Camera Button */}
+        <TouchableOpacity
+          style={styles.cameraButton}
+          onPress={() => router.push('/dashboard/camera')}
+        >
+          <Ionicons name="camera" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.navItem}>
+          <Ionicons name="restaurant" size={24} color="#007AFF" style={styles.navIcon} />
+          <Text style={[styles.navLabel, styles.navLabelActive]}>Recipes</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push('/dashboard/profile')}
+        >
+          <Ionicons name="person-outline" size={24} color="#999999" style={styles.navIcon} />
+          <Text style={styles.navLabel}>Me</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Filter Modal */}
       <Modal
-        visible={searchModalVisible}
-        transparent
+        visible={showFilterModal}
+        transparent={true}
         animationType="slide"
-        onRequestClose={() => setSearchModalVisible(false)}
+        onRequestClose={() => setShowFilterModal(false)}
       >
-        <TouchableWithoutFeedback onPress={() => setSearchModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback>
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Tarif Ara</Text>
-                  <TouchableOpacity onPress={() => setSearchModalVisible(false)}>
-                    <Ionicons name="close" size={32} color="#94A3B8" />
-                  </TouchableOpacity>
-                </View>
+        <View style={styles.filterModalOverlay}>
+          <View style={styles.filterModalContent}>
+            {/* Header */}
+            <View style={styles.filterModalHeader}>
+              <Text style={styles.filterModalTitle}>Filters</Text>
+              <TouchableOpacity
+                style={styles.filterModalClose}
+                onPress={() => setShowFilterModal(false)}
+              >
+                <Ionicons name="close" size={18} color="#64748B" />
+              </TouchableOpacity>
+            </View>
 
-                <View style={styles.searchInputContainer}>
-                  <Ionicons name="search-outline" size={24} color="#64748B" />
-                  <TextInput
-                    style={styles.searchInput}
-                    placeholder="Tarif adı veya malzeme ara..."
-                    placeholderTextColor="#64748B"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    autoFocus
-                  />
-                  {searchQuery.length > 0 && (
-                    <TouchableOpacity onPress={() => setSearchQuery('')}>
-                      <Text style={styles.clearButton}>Temizle</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-
-                {searchQuery.length === 0 && (
-                  <>
-                    <Text style={styles.recentSearchesTitle}>Son Aramalar</Text>
-                    {['Tavuk', 'Protein', 'Salata', 'Kahvaltı'].map((term, index) => (
+            {/* Content */}
+            <ScrollView style={styles.filterModalScroll} showsVerticalScrollIndicator={false}>
+              {/* Meal Type */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterSectionTitle}>Meal Type</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={styles.filterTagsScroll}>
+                    {mealTypes.map((type) => (
                       <TouchableOpacity
-                        key={index}
-                        style={styles.recentSearchItem}
-                        onPress={() => setSearchQuery(term)}
+                        key={type}
+                        style={[
+                          styles.filterTag,
+                          selectedMealType === type.toLowerCase() && styles.filterTagSelected,
+                        ]}
+                        onPress={() => setSelectedMealType(type.toLowerCase())}
                       >
-                        <Ionicons name="time-outline" size={22} color="#64748B" />
-                        <Text style={styles.recentSearchText}>{term}</Text>
+                        <Text
+                          style={[
+                            styles.filterTagText,
+                            selectedMealType === type.toLowerCase() && styles.filterTagTextSelected,
+                          ]}
+                        >
+                          {type}
+                        </Text>
                       </TouchableOpacity>
                     ))}
-                  </>
-                )}
+                  </View>
+                </ScrollView>
               </View>
-            </TouchableWithoutFeedback>
+
+              {/* Diet - Checkboxes */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterSectionTitle}>Diet</Text>
+                {diets.map((diet) => (
+                  <TouchableOpacity
+                    key={diet}
+                    style={styles.checkboxItem}
+                    onPress={() => toggleDiet(diet)}
+                  >
+                    <View style={styles.checkboxItemLeft}>
+                      <View
+                        style={[
+                          styles.checkboxDot,
+                          selectedDiet.includes(diet) && styles.checkboxDotSelected,
+                        ]}
+                      >
+                        {selectedDiet.includes(diet) && (
+                          <View style={styles.checkboxDotInner} />
+                        )}
+                      </View>
+                      <Text style={styles.checkboxText}>{diet}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Calories - Radio */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterSectionTitle}>Calories</Text>
+                {calorieRanges.map((range) => (
+                  <TouchableOpacity
+                    key={range}
+                    style={styles.radioItem}
+                    onPress={() => setSelectedCalories(range)}
+                  >
+                    <Text style={styles.checkboxText}>{range}</Text>
+                    <View
+                      style={[
+                        styles.radioCircle,
+                        selectedCalories === range && styles.radioCircleSelected,
+                      ]}
+                    >
+                      {selectedCalories === range && <View style={styles.radioCircleInner} />}
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Time - Radio */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterSectionTitle}>Time</Text>
+                {timeRanges.map((range) => (
+                  <TouchableOpacity
+                    key={range}
+                    style={styles.radioItem}
+                    onPress={() => setSelectedTime(range)}
+                  >
+                    <Text style={styles.checkboxText}>{range}</Text>
+                    <View
+                      style={[
+                        styles.radioCircle,
+                        selectedTime === range && styles.radioCircleSelected,
+                      ]}
+                    >
+                      {selectedTime === range && <View style={styles.radioCircleInner} />}
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+
+            {/* Apply Button */}
+            <View style={styles.applyButtonContainer}>
+              <TouchableOpacity
+                style={styles.applyButton}
+                onPress={() => setShowFilterModal(false)}
+              >
+                <Text style={styles.applyButtonText}>Apply Filters</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </TouchableWithoutFeedback>
+        </View>
       </Modal>
     </SafeAreaView>
   );
 };
 
-export default RecipesGalleryScreen;
+export default RecipesScreen;
