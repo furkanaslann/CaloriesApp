@@ -106,6 +106,46 @@ export const signIn = async (email: string, password: string) => {
 };
 
 /**
+ * Convert anonymous user to permanent account with email and password
+ * This preserves the user ID and all associated data
+ */
+export const linkAnonymousToEmailPassword = async (email: string, password: string) => {
+  try {
+    const currentUser = auth().currentUser;
+    
+    if (!currentUser) {
+      throw new Error('No authenticated user found');
+    }
+
+    if (!currentUser.isAnonymous) {
+      console.log('User is already a permanent account, signing in instead');
+      return await signIn(email, password);
+    }
+
+    console.log('🔗 Linking anonymous user to email/password:', currentUser.uid);
+    
+    // Create email/password credential
+    const credential = auth.EmailAuthProvider.credential(email, password);
+    
+    // Link the credential to the anonymous user
+    const userCredential = await currentUser.linkWithCredential(credential);
+    
+    console.log('✅ Successfully linked anonymous user to email/password');
+    return userCredential.user;
+  } catch (error: any) {
+    console.error('❌ Error linking anonymous user:', error);
+    
+    // If the email is already in use, sign in instead
+    if (error.code === 'auth/email-already-in-use') {
+      console.log('Email already in use, signing in instead');
+      return await signIn(email, password);
+    }
+    
+    throw new Error(error.message);
+  }
+};
+
+/**
  * Sign out the current user
  */
 export const signOut = async () => {

@@ -5,7 +5,7 @@
 
 import { FIREBASE_CONFIG } from '@/constants/firebase';
 import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
-import { firestore, signIn, signUp } from '@/utils/firebase';
+import { firestore } from '@/utils/firebase';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -182,25 +182,21 @@ const AccountCreationScreen = () => {
     try {
       console.log('Starting account creation with email:', accountData.email);
 
-      // Handle Firebase Auth - create new account directly
+      // Handle Firebase Auth - link anonymous user to email/password
+      // This preserves the user ID and all associated data
       let firebaseUser;
 
       try {
-        // Try to create new user first
-        firebaseUser = await signUp(accountData.email, accountData.password);
-        console.log('New Firebase user created successfully:', firebaseUser.uid);
-      } catch (signUpError: any) {
-        // If user already exists, sign them in
-        if (signUpError.code === 'auth/email-already-in-use') {
-          try {
-            firebaseUser = await signIn(accountData.email, accountData.password);
-            console.log('Existing user signed in successfully:', firebaseUser.uid);
-          } catch (signInError: any) {
-            throw new Error(`Authentication failed: This email is already registered but the password is incorrect.`);
-          }
-        } else {
-          throw new Error(`Account creation failed: ${signUpError.message}`);
-        }
+        // Import linkAnonymousToEmailPassword
+        const { linkAnonymousToEmailPassword } = await import('@/utils/firebase');
+        
+        // Link the current anonymous user to email/password
+        // This will keep the same user ID instead of creating a new one
+        firebaseUser = await linkAnonymousToEmailPassword(accountData.email, accountData.password);
+        console.log('✅ Anonymous user linked to email/password successfully:', firebaseUser.uid);
+      } catch (linkError: any) {
+        console.error('❌ Error linking anonymous user:', linkError);
+        throw new Error(`Account creation failed: ${linkError.message}`);
       }
 
       // Update account data in onboarding context

@@ -11,7 +11,6 @@ import { ThemeProvider as CustomThemeProvider } from '@/context/theme-context';
 import { UserProvider, useUser } from '@/context/user-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { initializeFirebaseEmulators } from '@/utils/firebase';
-import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
 export const unstable_settings = {
@@ -100,26 +99,38 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
         }
 
         console.log('🚀 App: User authenticated - checking onboarding status:', user.uid);
+        console.log('📊 App: userData state:', { 
+          exists: !!userData, 
+          onboardingCompleted: userData?.onboardingCompleted,
+          hasInitialized 
+        });
 
-        // Check if user has completed onboarding - with multiple checks for reliability
+        // Check if user has completed onboarding
         let shouldShowDashboard = false;
 
-        // Primary check: User context data
+        // Primary check: User context data (this should be reliable once loaded)
         if (userData?.onboardingCompleted === true) {
           console.log('✅ App: User context confirms onboarding completed');
           shouldShowDashboard = true;
         }
-        // Secondary check: Direct Firestore verification (only if userData is null or loading)
-        else if (!userData || !hasInitialized) {
+        // If userData doesn't show onboarding completed, do a direct Firestore check as fallback
+        // This helps with emulator timing issues
+        else if (!shouldShowDashboard && !hasInitialized) {
           try {
-            console.log('🔎 App: Checking Firestore directly for onboarding status...');
+            console.log('🔎 App: Doing direct Firestore check for onboarding status...');
             const doc = await firestore()
               .collection(FIREBASE_CONFIG.collections.users)
               .doc(user.uid)
               .get();
 
-            if ((doc as any).exists) {
+            if (doc.exists()) {
               const data = doc.data();
+              console.log('📄 App: Firestore data:', { 
+                onboardingCompleted: data?.onboardingCompleted,
+                hasProfile: !!data?.profile,
+                hasGoals: !!data?.goals 
+              });
+              
               if (data?.onboardingCompleted === true) {
                 console.log('✅ App: Firestore confirms onboarding completed');
                 shouldShowDashboard = true;
@@ -127,18 +138,7 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
                 console.log('❌ App: Onboarding not completed in Firestore');
               }
             } else {
-              console.log('❌ App: No user document found in Firestore');
-              console.log('🔄 App: Logging out user as Firestore has no data');
-              
-              // If Auth user exists but no Firestore document,
-              // logout the user so they can start fresh with onboarding
-              try {
-                await auth().signOut();
-                console.log('✅ App: User logged out - will create new anonymous user');
-                return; // Exit early, auth state change will trigger re-init
-              } catch (logoutError) {
-                console.error('❌ App: Error during logout:', logoutError);
-              }
+              console.log('⚠️ App: No user document found in Firestore yet - routing to onboarding');
             }
           } catch (error) {
             console.warn('⚠️ App: Error checking Firestore:', error);
@@ -167,11 +167,12 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
       }
     };
 
-    // Only run once when loading is complete and user is available
-    if (isLoading === false && user !== null) {
+    // Run when loading is complete and we haven't initialized yet
+    // This will create anonymous user if needed or route based on existing user
+    if (isLoading === false && !hasInitialized) {
       initializeApp();
     }
-  }, [isLoading, user, userData]); // Added userData back to react to changes
+  }, [isLoading, user, userData, hasInitialized]); // Added hasInitialized to dependencies
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

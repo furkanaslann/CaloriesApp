@@ -121,6 +121,52 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const rawData = userDoc.data();
         console.log('loadUserData: Raw data from Firestore:', rawData);
 
+        // If document exists but data is undefined/empty
+        if (!rawData || Object.keys(rawData).length === 0) {
+          console.log('⚠️ loadUserData: Document exists but has no data');
+          
+          // Check if this is an anonymous user (they might be in onboarding flow)
+          const currentUser = auth().currentUser;
+          if (currentUser && !currentUser.isAnonymous) {
+            // Permanent account with no data - logout and reset
+            console.log('🔄 loadUserData: Permanent account with no data - logging out');
+            try {
+              await auth().signOut();
+              setUserData(null);
+              console.log('✅ loadUserData: User logged out successfully');
+            } catch (logoutError) {
+              console.error('❌ loadUserData: Error during logout:', logoutError);
+              setUserData(null);
+            }
+            return;
+          } else {
+            // Anonymous user - create minimal data structure for onboarding
+            console.log('⚠️ loadUserData: Anonymous user with no data - creating minimal structure');
+            const minimalData: UserDocument = {
+              uid: userId,
+              email: undefined,
+              displayName: undefined,
+              isAnonymous: true,
+              onboardingCompleted: false,
+              onboardingCompletedAt: undefined,
+              profile: {},
+              goals: {},
+              activity: {},
+              diet: {},
+              preferences: {},
+              commitment: {},
+              calculatedValues: defaultCalculatedValues,
+              progress: defaultProgress,
+              createdAt: firestore.FieldValue.serverTimestamp(),
+              updatedAt: firestore.FieldValue.serverTimestamp(),
+              lastUpdated: undefined,
+              version: undefined,
+            };
+            setUserData(minimalData);
+            return;
+          }
+        }
+
         // Safely handle the data with proper defaults
         const safeData: UserDocument = {
           uid: userId,
@@ -147,19 +193,44 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUserData(safeData);
       } else {
         console.log('⚠️ loadUserData: No Firestore document found for authenticated user');
-        console.log('🔄 loadUserData: Logging out user to reset onboarding flow');
         
-        // Important: If Auth user exists but no Firestore document,
-        // it means the user data was cleared/deleted in emulator
-        // So we should logout and start fresh
-        try {
-          await auth().signOut();
-          setUserData(null);
-          console.log('✅ loadUserData: User logged out successfully - will redirect to onboarding');
-        } catch (logoutError) {
-          console.error('❌ loadUserData: Error during logout:', logoutError);
-          // Even on error, clear local state to trigger onboarding
-          setUserData(null);
+        // Check if this is an anonymous user (they might be in onboarding flow)
+        const currentUser = auth().currentUser;
+        if (currentUser && !currentUser.isAnonymous) {
+          // Permanent account with no document - logout and reset
+          console.log('🔄 loadUserData: Permanent account with no document - logging out');
+          try {
+            await auth().signOut();
+            setUserData(null);
+            console.log('✅ loadUserData: User logged out successfully');
+          } catch (logoutError) {
+            console.error('❌ loadUserData: Error during logout:', logoutError);
+            setUserData(null);
+          }
+        } else {
+          // Anonymous user - create minimal data structure for onboarding
+          console.log('⚠️ loadUserData: Anonymous user with no document - creating minimal structure');
+          const minimalData: UserDocument = {
+            uid: userId,
+            email: undefined,
+            displayName: undefined,
+            isAnonymous: true,
+            onboardingCompleted: false,
+            onboardingCompletedAt: undefined,
+            profile: {},
+            goals: {},
+            activity: {},
+            diet: {},
+            preferences: {},
+            commitment: {},
+            calculatedValues: defaultCalculatedValues,
+            progress: defaultProgress,
+            createdAt: firestore.FieldValue.serverTimestamp(),
+            updatedAt: firestore.FieldValue.serverTimestamp(),
+            lastUpdated: undefined,
+            version: undefined,
+          };
+          setUserData(minimalData);
         }
       }
     } catch (error) {

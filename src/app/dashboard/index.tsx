@@ -10,7 +10,6 @@ import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants
 import { useUser } from '@/context/user-context';
 import { useDashboard } from '@/hooks/use-dashboard';
 import { Ionicons } from '@expo/vector-icons';
-import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -77,7 +76,7 @@ const DashboardIndexScreen = () => {
   const [isChecking, setIsChecking] = useState(true);
   const [hasCheckedOnce, setHasCheckedOnce] = useState(false);
 
-  // Dashboard access verification - check if user should be here
+  // Dashboard access verification - simplified (routing is handled by _layout.tsx)
   useEffect(() => {
     const verifyDashboardAccess = async () => {
       // Wait for user data to be available
@@ -86,12 +85,9 @@ const DashboardIndexScreen = () => {
         return;
       }
 
-      // If user is not authenticated, redirect to onboarding
+      // _layout.tsx handles routing, so we just wait for user to be authenticated
       if (!user) {
-        console.log('❌ Dashboard: No authenticated user, redirecting to onboarding');
-        setTimeout(() => {
-          router.replace('/onboarding/welcome');
-        }, 1000);
+        console.log('⏳ Dashboard: Waiting for user authentication...');
         return;
       }
 
@@ -107,54 +103,21 @@ const DashboardIndexScreen = () => {
         return;
       }
 
-      // If userData is null or onboarding not completed, check Firestore directly
-      try {
-        console.log('🔎 Dashboard: Checking Firestore for onboarding status...');
-        const directCheck = await firestore()
-          .collection(FIREBASE_CONFIG.collections.users)
-          .doc(user.uid)
-          .get();
-
-        if (directCheck.exists()) {
-          const data = directCheck.data();
-          if (data?.onboardingCompleted === true) {
-            console.log('✅ Dashboard: Onboarding confirmed in Firestore - access granted');
-            console.log('👋 Welcome back:', data.profile?.name || 'User');
-            // Trigger user context refresh to sync the data
-            await refreshUserData();
-            setIsLoading(false);
-            setHasCheckedOnce(true);
-            setIsChecking(false);
-            return;
-          }
-        } else {
-          // No Firestore document found - user data was cleared
-          console.log('❌ Dashboard: No Firestore document found for user');
-          console.log('🔄 Dashboard: Logging out user to reset onboarding flow');
-          
-          try {
-            await auth().signOut();
-            console.log('✅ Dashboard: User logged out - redirecting to onboarding');
-          } catch (logoutError) {
-            console.error('❌ Dashboard: Error during logout:', logoutError);
-          }
-          
-          router.replace('/onboarding/welcome');
-          return;
-        }
-      } catch (error) {
-        console.error('❌ Dashboard: Error checking onboarding status:', error);
+      // If userData hasn't loaded yet, wait a bit more
+      if (!userData) {
+        console.log('⏳ Dashboard: Waiting for userData to load...');
+        return;
       }
 
-      // If we reach here, onboarding is not completed
-      console.log('❌ Dashboard: Onboarding not completed - redirecting to onboarding');
-      setTimeout(() => {
-        router.replace('/onboarding/welcome');
-      }, 1000);
+      // If we reach here, user is authenticated but onboarding not completed
+      // _layout.tsx will handle the redirect
+      console.log('⚠️ Dashboard: Onboarding not completed, _layout will handle redirect');
+      setIsLoading(false);
+      setIsChecking(false);
     };
 
     verifyDashboardAccess();
-  }, [userLoading, user]); // Depend on user state changes
+  }, [userLoading, user, userData]); // Added userData to dependencies
 
   // Get user display name with fallback
   const getUserDisplayName = () => {
