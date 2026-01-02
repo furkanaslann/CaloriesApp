@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "caloriesApp",
-    "slug": "caloriesApp",
+    "slug": "calories-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -84,6 +84,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "77d07513-1da9-4fff-81fb-acdfbb140066"
+      }
+    },
+    "owner": "furkanaslann"
   }
 }

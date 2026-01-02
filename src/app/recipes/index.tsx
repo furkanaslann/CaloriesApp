@@ -85,6 +85,15 @@ const RecipesScreen = () => {
   const [selectedCalories, setSelectedCalories] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
 
+  // Active filters state
+  const [activeFilters, setActiveFilters] = useState({
+    mealType: 'all',
+    diet: [] as string[],
+    calories: '',
+    time: '',
+    search: '',
+  });
+
   // Filter options
   const mealTypes = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Snack'];
   const diets = ['Gluten-Free', 'Keto', 'Low-Carb', 'High-Protein', 'Dairy-Free'];
@@ -98,6 +107,62 @@ const RecipesScreen = () => {
       setSelectedDiet([...selectedDiet, diet]);
     }
   };
+
+  // Apply filters function
+  const applyFilters = () => {
+    setActiveFilters({
+      mealType: selectedMealType,
+      diet: selectedDiet,
+      calories: selectedCalories,
+      time: selectedTime,
+      search: searchText,
+    });
+    setShowFilterModal(false);
+  };
+
+  // Handle search submit
+  const handleSearchSubmit = () => {
+    setActiveFilters(prev => ({ ...prev, search: searchText }));
+  };
+
+  // Filter recipes based on active filters
+  const filterRecipes = (recipes: typeof breakfastRecipes) => {
+    return recipes.filter(recipe => {
+      // Search filter
+      if (activeFilters.search && !recipe.name.toLowerCase().includes(activeFilters.search.toLowerCase())) {
+        return false;
+      }
+
+      // Meal type filter
+      if (activeFilters.mealType !== 'all') {
+        // This would need mealType property in recipe data
+        // For now, skip this filter
+      }
+
+      // Calories filter
+      if (activeFilters.calories) {
+        const calNum = parseInt(recipe.calories);
+        if (activeFilters.calories === '0-200 Cal' && calNum > 200) return false;
+        if (activeFilters.calories === '200-400 Cal' && (calNum < 200 || calNum > 400)) return false;
+        if (activeFilters.calories === '400-600 Cal' && (calNum < 400 || calNum > 600)) return false;
+        if (activeFilters.calories === '600+ Cal' && calNum < 600) return false;
+      }
+
+      // Time filter
+      if (activeFilters.time) {
+        const timeNum = parseInt(recipe.time);
+        if (activeFilters.time === '0-15 min' && timeNum > 15) return false;
+        if (activeFilters.time === '15-30 min' && (timeNum < 15 || timeNum > 30)) return false;
+        if (activeFilters.time === '30-60 min' && (timeNum < 30 || timeNum > 60)) return false;
+        if (activeFilters.time === '60+ min' && timeNum < 60) return false;
+      }
+
+      return true;
+    });
+  };
+
+  const filteredBreakfastRecipes = filterRecipes(breakfastRecipes);
+  const filteredLunchRecipes = filterRecipes(lunchRecipes);
 
   const styles = StyleSheet.create({
     container: {
@@ -347,50 +412,37 @@ const RecipesScreen = () => {
       bottom: 0,
       left: 0,
       right: 0,
-      height: 70,
+      height: 90,
       backgroundColor: '#FFFFFF',
       borderTopWidth: 1,
-      borderTopColor: '#E5E5E5',
+      borderTopColor: '#E2E8F0',
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
-      paddingBottom: 10,
-      paddingHorizontal: 20,
+      paddingBottom: 30,
+      paddingHorizontal: 24,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      elevation: 5,
     },
     navItem: {
       alignItems: 'center',
       justifyContent: 'center',
       flex: 1,
+      paddingVertical: 8,
     },
     navIcon: {
       marginBottom: 4,
     },
     navLabel: {
       fontSize: 12,
-      color: '#999999',
+      color: '#94A3B8',
       fontWeight: '500',
     },
     navLabelActive: {
-      color: '#007AFF',
-    },
-    // Camera Button
-    cameraButton: {
-      width: 56,
-      height: 56,
-      borderRadius: 28,
-      backgroundColor: '#007AFF',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: -20,
-      shadowColor: '#007AFF',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 5,
-    },
-    cameraIcon: {
-      width: 24,
-      height: 24,
+      color: '#7C3AED',
     },
     // Filter Modal
     filterModalOverlay: {
@@ -562,7 +614,7 @@ const RecipesScreen = () => {
     <TouchableOpacity
       key={recipe.id}
       style={styles.recipeCard}
-      onPress={() => router.push(`/dashboard/food-detail?id=${recipe.id}` as any)}
+      onPress={() => router.push(`/recipes/${recipe.id}` as any)}
       activeOpacity={0.9}
     >
       <View style={styles.cardImageContainer}>
@@ -616,6 +668,8 @@ const RecipesScreen = () => {
             placeholderTextColor="#999999"
             value={searchText}
             onChangeText={setSearchText}
+            onSubmitEditing={handleSearchSubmit}
+            returnKeyType="search"
           />
           <TouchableOpacity style={styles.filterIcon} onPress={() => setShowFilterModal(true)}>
             <Ionicons name="options-outline" size={20} color="#999999" />
@@ -678,7 +732,13 @@ const RecipesScreen = () => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.recipeCardsRow}
           >
-            {breakfastRecipes.map(renderRecipeCard)}
+            {filteredBreakfastRecipes.length > 0 ? (
+              filteredBreakfastRecipes.map(renderRecipeCard)
+            ) : (
+              <View style={{ paddingHorizontal: 16, paddingVertical: 20 }}>
+                <Text style={{ fontSize: 14, color: '#64748B' }}>No recipes found</Text>
+              </View>
+            )}
           </ScrollView>
         </View>
 
@@ -695,48 +755,34 @@ const RecipesScreen = () => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.recipeCardsRow}
           >
-            {lunchRecipes.map(renderRecipeCard)}
+            {filteredLunchRecipes.length > 0 ? (
+              filteredLunchRecipes.map(renderRecipeCard)
+            ) : (
+              <View style={{ paddingHorizontal: 16, paddingVertical: 20 }}>
+                <Text style={{ fontSize: 14, color: '#64748B' }}>No recipes found</Text>
+              </View>
+            )}
           </ScrollView>
         </View>
       </ScrollView>
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => router.push('/dashboard')}
-        >
-          <Ionicons name="stats-chart-outline" size={24} color="#999999" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Tracker</Text>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard')}>
+          <Ionicons name="home" size={24} color="#94A3B8" style={styles.navIcon} />
+          <Text style={styles.navLabel}>Ana Sayfa</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => router.push('/dashboard')}
-        >
-          <Ionicons name="calendar-outline" size={24} color="#999999" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Plans</Text>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/camera')}>
+          <Ionicons name="camera-outline" size={24} color="#94A3B8" style={styles.navIcon} />
+          <Text style={styles.navLabel}>Kamera</Text>
         </TouchableOpacity>
-
-        {/* Camera Button */}
-        <TouchableOpacity
-          style={styles.cameraButton}
-          onPress={() => router.push('/dashboard/camera')}
-        >
-          <Ionicons name="camera" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-
         <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="restaurant" size={24} color="#007AFF" style={styles.navIcon} />
-          <Text style={[styles.navLabel, styles.navLabelActive]}>Recipes</Text>
+          <Ionicons name="restaurant-outline" size={24} color="#7C3AED" style={styles.navIcon} />
+          <Text style={[styles.navLabel, styles.navLabelActive]}>Tarifler</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => router.push('/dashboard/profile')}
-        >
-          <Ionicons name="person-outline" size={24} color="#999999" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Me</Text>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/profile')}>
+          <Ionicons name="person-outline" size={24} color="#94A3B8" style={styles.navIcon} />
+          <Text style={styles.navLabel}>Profil</Text>
         </TouchableOpacity>
       </View>
 
@@ -865,7 +911,7 @@ const RecipesScreen = () => {
             <View style={styles.applyButtonContainer}>
               <TouchableOpacity
                 style={styles.applyButton}
-                onPress={() => setShowFilterModal(false)}
+                onPress={applyFilters}
               >
                 <Text style={styles.applyButtonText}>Apply Filters</Text>
               </TouchableOpacity>
