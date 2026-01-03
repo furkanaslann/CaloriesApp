@@ -14,7 +14,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera to take photos of food for calorie tracking.",
-        "NSMicrophoneUsageDescription": "This app uses the microphone for camera features."
+        "NSMicrophoneUsageDescription": "This app uses the microphone for camera features.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -77,6 +78,9 @@
           "ios": {
             "useFrameworks": "static",
             "buildReactNativeFromSource": true
+          },
+          "android": {
+            "minSdkVersion": 24
           }
         }
       ]

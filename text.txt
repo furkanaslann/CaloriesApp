@@ -1,0 +1,52 @@
+# CalorieTrack Paywall Metinleri
+
+## Ana Başlık
+Premium Özelliklere Eriş
+
+## Alt Başlık
+Gelişmiş araçlarla hedeflerine daha hızlı ulaş
+
+## Özellik Listesi
+
+### Detaylı besin analizi
+Makro ve mikro besin değerlerini görüntüle
+
+### Sınırsız yemek loglama
+Günlük yemek kaydı sınırı olmadan takip
+
+### Kişiselleştirilmiş öneriler
+Hedeflerine özel yemek ve aktivite önerileri
+
+### Yemek tarifi erişimi
+Binlerce sağlıklı tarif ve öneri
+
+### Su takibi
+Günlük su tüketimini kolayca takip et
+
+### Aktivite takibi
+Egzersiz ve aktivite kayıtlarını tut
+
+### Reklamsız deneyim
+Kesintisiz, tam odaklı kullanım
+
+## Abonelik Seçenekleri
+
+### Yıllık Paket (Önerilen)
+Yıllık
+%40 İndirim
+Yıllık sadece $69.99
+
+### Aylık Paket
+Aylık
+Aylık sadece $9.99
+
+## Buton Metinleri
+
+### Ana Buton
+Devam Et
+
+### İndirim Vurgusu
+Veya %40 tasarruf et
+
+### Alt Kısım Butonu
+Satın almayı geri yükle

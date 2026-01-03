@@ -7,6 +7,7 @@ import 'react-native-reanimated';
 
 import { FIREBASE_CONFIG } from '@/constants/firebase';
 import { OnboardingProvider } from '@/context/onboarding-context';
+import { RevenueCatProvider } from '@/context/revenuecat-context';
 import { ThemeProvider as CustomThemeProvider } from '@/context/theme-context';
 import { UserProvider, useUser } from '@/context/user-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -80,6 +81,7 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
   const { isLoading, user, createAnonymousUser, userData } = useUser();
   const router = useRouter();
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [hasShownPaywall, setHasShownPaywall] = useState(false);
 
   // Initialize user and check onboarding status - determine initial routing
   useEffect(() => {
@@ -138,7 +140,7 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
                 console.log('❌ App: Onboarding not completed in Firestore');
               }
             } else {
-              console.log('⚠️ App: No user document found in Firestore yet - routing to onboarding');
+              console.log('⚠️ App: No user document found in Firestore yet - routing to paywall');
             }
           } catch (error) {
             console.warn('⚠️ App: Error checking Firestore:', error);
@@ -151,17 +153,19 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
             console.log('🎯 App: ROUTING TO DASHBOARD - user has completed onboarding');
             router.replace('/dashboard');
           } else {
-            console.log('🎯 App: ROUTING TO ONBOARDING - user needs to complete onboarding');
-            router.replace('/onboarding/welcome');
+            // Show paywall before onboarding for new users
+            console.log('🎯 App: ROUTING TO PAYWALL - new user flow');
+            router.replace('/paywall');
+            setHasShownPaywall(true);
           }
           setHasInitialized(true);
         }
 
       } catch (error) {
         console.error('❌ App: Error during initialization:', error);
-        // Safe fallback to onboarding
+        // Safe fallback to paywall
         if (!hasInitialized) {
-          router.replace('/onboarding/welcome');
+          router.replace('/paywall');
           setHasInitialized(true);
         }
       }
@@ -177,6 +181,7 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
+        <Stack.Screen name="paywall" options={{ headerShown: false }} />
         <Stack.Screen name="dashboard" options={{ headerShown: false }} />
         <Stack.Screen
           name="onboarding"
@@ -225,9 +230,11 @@ export default function RootLayout() {
   return (
     <CustomThemeProvider defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}>
       <UserProvider>
-        <OnboardingProvider>
-          <RootLayoutNav />
-        </OnboardingProvider>
+        <RevenueCatProvider>
+          <OnboardingProvider>
+            <RootLayoutNav />
+          </OnboardingProvider>
+        </RevenueCatProvider>
       </UserProvider>
     </CustomThemeProvider>
   );
