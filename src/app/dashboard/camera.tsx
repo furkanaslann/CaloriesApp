@@ -3,6 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -214,6 +215,17 @@ const CameraDashboardScreen = () => {
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.lg,
     },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.spacing.lg,
+    },
+    seeAllButton: {
+      fontSize: 14,
+      fontWeight: '500' as TextStyle['fontWeight'],
+      color: theme.colors.primary,
+    },
     cameraButton: {
       backgroundColor: theme.colors.primary,
       borderRadius: theme.borderRadius.xl,
@@ -372,45 +384,6 @@ const CameraDashboardScreen = () => {
       fontSize: 20,
       fontWeight: '700' as TextStyle['fontWeight'],
       color: theme.colors.primary,
-    },
-
-    // Bottom Navigation - Modern style
-    bottomNav: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 90,
-      backgroundColor: '#FFFFFF',
-      borderTopWidth: 1,
-      borderTopColor: '#E2E8F0',
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-      paddingBottom: 30,
-      paddingHorizontal: 24,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: -2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      elevation: 5,
-    },
-    navItem: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      flex: 1,
-      paddingVertical: 8,
-    },
-    navIcon: {
-      marginBottom: 4,
-    },
-    navLabel: {
-      fontSize: 12,
-      color: '#94A3B8',
-      fontWeight: '500',
-    },
-    navLabelActive: {
-      color: '#7C3AED',
     },
 
     // Permission styles
@@ -791,31 +764,19 @@ const CameraDashboardScreen = () => {
 
           {/* Recent Analysis History */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Son Analizler</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Son Analizler</Text>
+              <TouchableOpacity onPress={() => router.push('/dashboard/meals-list')}>
+                <Text style={styles.seeAllButton}>Tümünü Gör</Text>
+              </TouchableOpacity>
+            </View>
             {foodHistory.map((item) => renderFoodItem({ item }))}
           </View>
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation - Modern style */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard')}>
-          <Ionicons name="home-outline" size={24} color="#94A3B8" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Ana Sayfa</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="camera" size={24} color="#7C3AED" style={styles.navIcon} />
-          <Text style={[styles.navLabel, styles.navLabelActive]}>Kamera</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/recipes')}>
-          <Ionicons name="restaurant-outline" size={24} color="#94A3B8" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Tarifler</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/profile')}>
-          <Ionicons name="person-outline" size={24} color="#94A3B8" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Profil</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Bottom Navigation */}
+      <BottomNavigation activeRoute="/dashboard/camera" />
 
       {/* Gemini AI Analyzer Modal */}
       <Modal

@@ -3,6 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
 import React from 'react';
 import {
@@ -279,6 +280,9 @@ const CommunityDashboardScreen = () => {
       <TouchableOpacity style={styles.floatingButton}>
         <Text style={styles.floatingButtonText}>+</Text>
       </TouchableOpacity>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation activeRoute="/dashboard/community" />
     </SafeAreaView>
   );
 };

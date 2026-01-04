@@ -3,6 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import React, { useEffect, useState } from 'react';
 import {
@@ -434,6 +435,9 @@ const ProgressDashboardScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation activeRoute="/dashboard/progress" />
     </SafeAreaView>
   );
 };

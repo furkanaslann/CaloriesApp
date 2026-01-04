@@ -167,7 +167,7 @@ const GeminiAnalyzer: React.FC<GeminiAnalyzerProps> = ({
 
           <View style={styles.cameraControls}>
             <TouchableOpacity
-              style={styles.cameraButton}
+              style={styles.cameraButtonStyle}
               onPress={takePicture}
             >
               <View style={styles.captureButton} />

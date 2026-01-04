@@ -18,7 +18,7 @@ import { FIREBASE_CONFIG } from '@/constants/firebase';
 // Firebase Emulator Configuration for Development
 const IS_DEV = __DEV__;
 const EMULATOR_CONFIG = {
-  host: '127.0.0.1', // For Android emulator
+  host: '10.0.2.2', // Android emulator needs 10.0.2.2 to reach host machine
   ports: {
     auth: 9099,
     firestore: 8080,
@@ -266,7 +266,7 @@ export const onUserProfileChanged = (userId: string, callback: (profile: any) =>
     .doc(userId)
     .onSnapshot(
       (doc) => {
-        if (doc.exists) {
+        if (doc.exists()) {
           callback({ id: doc.id, ...doc.data() });
         } else {
           callback(null);

@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Dimensions,
+  FlatList,
   Image,
   ImageBackground,
   Modal,
@@ -78,6 +79,22 @@ const RecipesScreen = () => {
   const [searchText, setSearchText] = useState('');
   const [showMoreDietInfo, setShowMoreDietInfo] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  // Search history state
+  const [searchHistory, setSearchHistory] = useState<string[]>([
+    'Avocado Toast',
+    'Quinoa Salad',
+    'Smoothie Bowl',
+  ]);
+  const popularSearches = [
+    'Chicken',
+    'Salad',
+    'Pasta',
+    'Soup',
+    'Vegan',
+    'Keto',
+  ];
 
   // Filter states
   const [selectedMealType, setSelectedMealType] = useState<string>('all');
@@ -122,7 +139,44 @@ const RecipesScreen = () => {
 
   // Handle search submit
   const handleSearchSubmit = () => {
+    if (searchText.trim()) {
+      // Add to search history if not already exists
+      setSearchHistory(prev => {
+        const filtered = prev.filter(item => item.toLowerCase() !== searchText.toLowerCase());
+        return [searchText, ...filtered].slice(0, 5);
+      });
+    }
     setActiveFilters(prev => ({ ...prev, search: searchText }));
+    setIsSearchFocused(false);
+  };
+
+  // Handle search text change - filter on every keystroke
+  const handleSearchChange = (text: string) => {
+    setSearchText(text);
+    setActiveFilters(prev => ({ ...prev, search: text }));
+  };
+
+  // Handle search focus
+  const handleSearchFocus = () => {
+    setIsSearchFocused(true);
+  };
+
+  // Handle search history item press
+  const handleSearchHistoryPress = (term: string) => {
+    setSearchText(term);
+    setActiveFilters(prev => ({ ...prev, search: term }));
+    setIsSearchFocused(false);
+  };
+
+  // Clear search history
+  const clearSearchHistory = () => {
+    setSearchHistory([]);
+  };
+
+  // Clear current search
+  const clearSearch = () => {
+    setSearchText('');
+    setActiveFilters(prev => ({ ...prev, search: '' }));
   };
 
   // Filter recipes based on active filters
@@ -163,6 +217,17 @@ const RecipesScreen = () => {
 
   const filteredBreakfastRecipes = filterRecipes(breakfastRecipes);
   const filteredLunchRecipes = filterRecipes(lunchRecipes);
+
+  // Combine all recipes for filter results
+  const allRecipes = [...breakfastRecipes, ...lunchRecipes];
+  const filteredRecipes = filterRecipes(allRecipes);
+
+  // Check if user is searching or filtering
+  const hasActiveFilters = activeFilters.search ||
+                          activeFilters.mealType !== 'all' ||
+                          activeFilters.calories ||
+                          activeFilters.time ||
+                          activeFilters.diet.length > 0;
 
   const styles = StyleSheet.create({
     container: {
@@ -359,52 +424,221 @@ const RecipesScreen = () => {
     },
     // Recipe Card
     recipeCard: {
-      width: (width - 64) / 3,
+      width: (width - 48) / 2,
       backgroundColor: '#FFFFFF',
-      borderRadius: 12,
+      borderRadius: 16,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
-      shadowRadius: 4,
+      shadowRadius: 8,
       elevation: 3,
       overflow: 'hidden',
+      marginBottom: 16,
     },
     cardImageContainer: {
       position: 'relative',
     },
     cardImage: {
       width: '100%',
-      height: 90,
+      height: 140,
       backgroundColor: '#F5F5F5',
     },
     favoriteButton: {
       position: 'absolute',
-      top: 8,
-      right: 8,
-      width: 24,
-      height: 24,
+      top: 10,
+      right: 10,
+      width: 32,
+      height: 32,
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      borderRadius: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
     },
     cardContent: {
-      padding: 10,
+      padding: 14,
     },
     cardMeta: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginBottom: 6,
+      marginBottom: 8,
     },
     cardTime: {
-      fontSize: 11,
-      color: '#999999',
+      fontSize: 12,
+      color: '#64748B',
+      fontWeight: '500',
     },
     cardCalories: {
-      fontSize: 11,
-      color: '#999999',
+      fontSize: 12,
+      color: '#64748B',
+      fontWeight: '500',
     },
     cardTitle: {
-      fontSize: 13,
+      fontSize: 15,
       fontWeight: '600',
-      color: '#333333',
-      lineHeight: 16,
+      color: '#1E293B',
+      lineHeight: 20,
+    },
+    // Grid Results Container
+    resultsGrid: {
+      paddingHorizontal: 16,
+      paddingTop: 16,
+    },
+    resultsEmpty: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 40,
+      paddingVertical: 60,
+    },
+    resultsEmptyIcon: {
+      fontSize: 48,
+      marginBottom: 16,
+    },
+    resultsEmptyTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: '#1E293B',
+      marginBottom: 8,
+    },
+    resultsEmptyText: {
+      fontSize: 14,
+      color: '#64748B',
+      textAlign: 'center',
+      lineHeight: 20,
+    },
+    resultsTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: '#1E293B',
+      paddingHorizontal: 16,
+      paddingTop: 20,
+      paddingBottom: 12,
+    },
+    // Search Focus Overlay
+    searchOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(255, 255, 255, 0.98)',
+      zIndex: 100,
+    },
+    searchOverlayContent: {
+      flex: 1,
+      paddingTop: 16,
+    },
+    searchHistorySection: {
+      paddingHorizontal: 16,
+      marginBottom: 24,
+    },
+    searchHistoryHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    searchHistoryTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#1E293B',
+    },
+    clearHistoryButton: {
+      fontSize: 14,
+      color: '#7C3AED',
+      fontWeight: '500',
+    },
+    searchHistoryItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      backgroundColor: '#F8FAFC',
+      borderRadius: 12,
+      marginBottom: 8,
+    },
+    searchHistoryIcon: {
+      marginRight: 12,
+    },
+    searchHistoryText: {
+      fontSize: 15,
+      color: '#1E293B',
+      flex: 1,
+    },
+    removeHistoryItem: {
+      padding: 4,
+    },
+    popularSearchesSection: {
+      paddingHorizontal: 16,
+      marginBottom: 24,
+    },
+    popularSearchTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#1E293B',
+      marginBottom: 16,
+    },
+    popularSearchTags: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    popularSearchTag: {
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      backgroundColor: '#F1F5F9',
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: '#E2E8F0',
+    },
+    popularSearchTagText: {
+      fontSize: 14,
+      color: '#475569',
+      fontWeight: '500',
+    },
+    searchOverlayHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: '#E2E8F0',
+      marginBottom: 16,
+    },
+    searchOverlayBackButton: {
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 8,
+    },
+    searchOverlayInputContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#F1F5F9',
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    searchOverlayInput: {
+      flex: 1,
+      fontSize: 16,
+      color: '#1E293B',
+    },
+    searchOverlayClearButton: {
+      padding: 4,
+    },
+    noHistoryText: {
+      fontSize: 14,
+      color: '#94A3B8',
+      textAlign: 'center',
+      paddingVertical: 24,
     },
     // Bottom Navigation
     bottomNav: {
@@ -619,8 +853,14 @@ const RecipesScreen = () => {
     >
       <View style={styles.cardImageContainer}>
         <Image source={{ uri: recipe.image }} style={styles.cardImage} />
-        <TouchableOpacity style={styles.favoriteButton}>
-          <Ionicons name="star-outline" size={16} color="#FFD700" />
+        <TouchableOpacity
+          style={styles.favoriteButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            // TODO: Toggle favorite
+          }}
+        >
+          <Ionicons name="star-outline" size={18} color="#FFD700" />
         </TouchableOpacity>
       </View>
       <View style={styles.cardContent}>
@@ -631,6 +871,118 @@ const RecipesScreen = () => {
         <Text style={styles.cardTitle} numberOfLines={2}>{recipe.name}</Text>
       </View>
     </TouchableOpacity>
+  );
+
+  const renderEmptyState = () => (
+    <View style={styles.resultsEmpty}>
+      <Text style={styles.resultsEmptyIcon}>🍽️</Text>
+      <Text style={styles.resultsEmptyTitle}>No Recipes Found</Text>
+      <Text style={styles.resultsEmptyText}>
+        Try adjusting your filters or search terms to find recipes.
+      </Text>
+    </View>
+  );
+
+  // Render search focus overlay
+  const renderSearchOverlay = () => (
+    <Modal
+      visible={isSearchFocused}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setIsSearchFocused(false)}
+    >
+      <SafeAreaView style={styles.searchOverlay} edges={['top']}>
+        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+
+        {/* Search Overlay Header */}
+        <View style={styles.searchOverlayHeader}>
+          <TouchableOpacity
+            style={styles.searchOverlayBackButton}
+            onPress={() => setIsSearchFocused(false)}
+          >
+            <Ionicons name="chevron-down" size={24} color="#1E293B" />
+          </TouchableOpacity>
+          <View style={styles.searchOverlayInputContainer}>
+            <Ionicons name="search" size={20} color="#94A3B8" style={{ marginRight: 12 }} />
+            <TextInput
+              style={styles.searchOverlayInput}
+              placeholder="Search for recipes"
+              placeholderTextColor="#94A3B8"
+              value={searchText}
+              onChangeText={handleSearchChange}
+              onSubmitEditing={handleSearchSubmit}
+              autoFocus={true}
+              returnKeyType="search"
+            />
+            {searchText.length > 0 && (
+              <TouchableOpacity style={styles.searchOverlayClearButton} onPress={clearSearch}>
+                <Ionicons name="close-circle" size={18} color="#94A3B8" />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* Search History & Popular Searches */}
+        <ScrollView
+          style={styles.searchOverlayContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Recent Searches */}
+          {searchHistory.length > 0 && (
+            <View style={styles.searchHistorySection}>
+              <View style={styles.searchHistoryHeader}>
+                <Text style={styles.searchHistoryTitle}>Recent Searches</Text>
+                <TouchableOpacity onPress={clearSearchHistory}>
+                  <Text style={styles.clearHistoryButton}>Clear All</Text>
+                </TouchableOpacity>
+              </View>
+              {searchHistory.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.searchHistoryItem}
+                  onPress={() => handleSearchHistoryPress(item)}
+                >
+                  <Ionicons name="time-outline" size={18} color="#94A3B8" style={styles.searchHistoryIcon} />
+                  <Text style={styles.searchHistoryText}>{item}</Text>
+                  <TouchableOpacity
+                    style={styles.removeHistoryItem}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      setSearchHistory(prev => prev.filter((_, i) => i !== index));
+                    }}
+                  >
+                    <Ionicons name="close" size={16} color="#CBD5E1" />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {searchHistory.length === 0 && (
+            <View style={styles.searchHistorySection}>
+              <Text style={styles.searchHistoryTitle}>Recent Searches</Text>
+              <Text style={styles.noHistoryText}>No recent searches</Text>
+            </View>
+          )}
+
+          {/* Popular Searches */}
+          <View style={styles.popularSearchesSection}>
+            <Text style={styles.popularSearchTitle}>Popular Searches</Text>
+            <View style={styles.popularSearchTags}>
+              {popularSearches.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.popularSearchTag}
+                  onPress={() => handleSearchHistoryPress(item)}
+                >
+                  <Text style={styles.popularSearchTagText}>{item}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
   );
 
   return (
@@ -667,10 +1019,16 @@ const RecipesScreen = () => {
             placeholder="Search for recipes"
             placeholderTextColor="#999999"
             value={searchText}
-            onChangeText={setSearchText}
+            onChangeText={handleSearchChange}
+            onFocus={handleSearchFocus}
             onSubmitEditing={handleSearchSubmit}
             returnKeyType="search"
           />
+          {searchText.length > 0 && (
+            <TouchableOpacity style={{ padding: 4 }} onPress={clearSearch}>
+              <Ionicons name="close-circle" size={18} color="#999999" />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity style={styles.filterIcon} onPress={() => setShowFilterModal(true)}>
             <Ionicons name="options-outline" size={20} color="#999999" />
           </TouchableOpacity>
@@ -678,93 +1036,116 @@ const RecipesScreen = () => {
       </View>
 
       {/* Main Content */}
-      <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Featured Banner */}
-        <View style={styles.featuredBanner}>
-          <ImageBackground
-            source={{ uri: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&h=400&fit=crop' }}
-            style={styles.bannerImage}
-          >
-            <View style={styles.bannerOverlay}>
-              <View style={styles.bannerContent}>
-                <Ionicons name="leaf" size={28} color="#FFFFFF" style={styles.wreathIcon} />
-                <View>
-                  <Text style={styles.bannerTitle}>Gluten-Free</Text>
-                  <Text style={styles.bannerSubtitle}>Weekly Selected</Text>
-                </View>
-                <Ionicons name="leaf" size={28} color="#FFFFFF" style={styles.wreathIcon} />
-              </View>
-            </View>
-          </ImageBackground>
-        </View>
-
-        {/* Diet Info Section */}
-        <View style={styles.dietInfoSection}>
-          <Text style={styles.dietInfoTitle}>Gluten-free & Losing Weight</Text>
-          <Text style={styles.dietInfoDescription}>
-            {showMoreDietInfo
-              ? 'This gluten-free diet includes fruits, vegetables, meat, dairy, and grains like rice and quinoa. It can aid in weight loss by reducing processed foods and focusing on whole, natural ingredients. Many people report increased energy and improved digestion.'
-              : 'This gluten-free diet includes fruits, vegetables, meat, dairy, and grains like rice and quinoa. It can aid...'}
+      {hasActiveFilters ? (
+        // Filtered Results - Grid Layout
+        <View style={{ flex: 1 }}>
+          <Text style={styles.resultsTitle}>
+            {filteredRecipes.length} {filteredRecipes.length === 1 ? 'Recipe' : 'Recipes'} Found
           </Text>
-          <TouchableOpacity
-            style={styles.moreButton}
-            onPress={() => setShowMoreDietInfo(!showMoreDietInfo)}
-          >
-            <Text style={styles.moreText}>{showMoreDietInfo ? 'Less' : 'More'}</Text>
-            <Ionicons
-              name={showMoreDietInfo ? 'chevron-up' : 'chevron-down'}
-              size={16}
-              color="#007AFF"
+          {filteredRecipes.length > 0 ? (
+            <FlatList
+              data={filteredRecipes}
+              renderItem={({ item }) => renderRecipeCard(item)}
+              keyExtractor={(item) => item.id}
+              numColumns={2}
+              columnWrapperStyle={{ gap: 12 }}
+              contentContainerStyle={styles.resultsGrid}
+              showsVerticalScrollIndicator={false}
             />
-          </TouchableOpacity>
+          ) : (
+            renderEmptyState()
+          )}
         </View>
+      ) : (
+        // Default Layout - Featured Banner + Meal Sections
+        <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          {/* Featured Banner */}
+          <View style={styles.featuredBanner}>
+            <ImageBackground
+              source={{ uri: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&h=400&fit=crop' }}
+              style={styles.bannerImage}
+            >
+              <View style={styles.bannerOverlay}>
+                <View style={styles.bannerContent}>
+                  <Ionicons name="leaf" size={28} color="#FFFFFF" style={styles.wreathIcon} />
+                  <View>
+                    <Text style={styles.bannerTitle}>Gluten-Free</Text>
+                    <Text style={styles.bannerSubtitle}>Weekly Selected</Text>
+                  </View>
+                  <Ionicons name="leaf" size={28} color="#FFFFFF" style={styles.wreathIcon} />
+                </View>
+              </View>
+            </ImageBackground>
+          </View>
 
-        {/* Breakfast Section */}
-        <View style={styles.mealSection}>
-          <View style={styles.mealSectionHeader}>
-            <Text style={styles.mealSectionTitle}>Breakfast</Text>
-            <TouchableOpacity>
-              <Text style={styles.mealMoreLink}>More</Text>
+          {/* Diet Info Section */}
+          <View style={styles.dietInfoSection}>
+            <Text style={styles.dietInfoTitle}>Gluten-free & Losing Weight</Text>
+            <Text style={styles.dietInfoDescription}>
+              {showMoreDietInfo
+                ? 'This gluten-free diet includes fruits, vegetables, meat, dairy, and grains like rice and quinoa. It can aid in weight loss by reducing processed foods and focusing on whole, natural ingredients. Many people report increased energy and improved digestion.'
+                : 'This gluten-free diet includes fruits, vegetables, meat, dairy, and grains like rice and quinoa. It can aid...'}
+            </Text>
+            <TouchableOpacity
+              style={styles.moreButton}
+              onPress={() => setShowMoreDietInfo(!showMoreDietInfo)}
+            >
+              <Text style={styles.moreText}>{showMoreDietInfo ? 'Less' : 'More'}</Text>
+              <Ionicons
+                name={showMoreDietInfo ? 'chevron-up' : 'chevron-down'}
+                size={16}
+                color="#007AFF"
+              />
             </TouchableOpacity>
           </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.recipeCardsRow}
-          >
-            {filteredBreakfastRecipes.length > 0 ? (
-              filteredBreakfastRecipes.map(renderRecipeCard)
-            ) : (
-              <View style={{ paddingHorizontal: 16, paddingVertical: 20 }}>
-                <Text style={{ fontSize: 14, color: '#64748B' }}>No recipes found</Text>
-              </View>
-            )}
-          </ScrollView>
-        </View>
 
-        {/* Lunch Section */}
-        <View style={styles.mealSection}>
-          <View style={styles.mealSectionHeader}>
-            <Text style={styles.mealSectionTitle}>Lunch</Text>
-            <TouchableOpacity>
-              <Text style={styles.mealMoreLink}>More</Text>
-            </TouchableOpacity>
+          {/* Breakfast Section */}
+          <View style={styles.mealSection}>
+            <View style={styles.mealSectionHeader}>
+              <Text style={styles.mealSectionTitle}>Breakfast</Text>
+              <TouchableOpacity>
+                <Text style={styles.mealMoreLink}>More</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.recipeCardsRow}
+            >
+              {filteredBreakfastRecipes.length > 0 ? (
+                filteredBreakfastRecipes.map(renderRecipeCard)
+              ) : (
+                <View style={{ paddingHorizontal: 16, paddingVertical: 20 }}>
+                  <Text style={{ fontSize: 14, color: '#64748B' }}>No recipes found</Text>
+                </View>
+              )}
+            </ScrollView>
           </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.recipeCardsRow}
-          >
-            {filteredLunchRecipes.length > 0 ? (
-              filteredLunchRecipes.map(renderRecipeCard)
-            ) : (
-              <View style={{ paddingHorizontal: 16, paddingVertical: 20 }}>
-                <Text style={{ fontSize: 14, color: '#64748B' }}>No recipes found</Text>
-              </View>
-            )}
-          </ScrollView>
-        </View>
-      </ScrollView>
+
+          {/* Lunch Section */}
+          <View style={styles.mealSection}>
+            <View style={styles.mealSectionHeader}>
+              <Text style={styles.mealSectionTitle}>Lunch</Text>
+              <TouchableOpacity>
+                <Text style={styles.mealMoreLink}>More</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.recipeCardsRow}
+            >
+              {filteredLunchRecipes.length > 0 ? (
+                filteredLunchRecipes.map(renderRecipeCard)
+              ) : (
+                <View style={{ paddingHorizontal: 16, paddingVertical: 20 }}>
+                  <Text style={{ fontSize: 14, color: '#64748B' }}>No recipes found</Text>
+                </View>
+              )}
+            </ScrollView>
+          </View>
+        </ScrollView>
+      )}
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
@@ -919,6 +1300,9 @@ const RecipesScreen = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Search Focus Overlay */}
+      {renderSearchOverlay()}
     </SafeAreaView>
   );
 };

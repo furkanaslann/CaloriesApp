@@ -3,6 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import React, { useState } from 'react';
 import {
@@ -479,6 +480,9 @@ const PlanDashboardScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation activeRoute="/dashboard/plan" />
     </SafeAreaView>
   );
 };
