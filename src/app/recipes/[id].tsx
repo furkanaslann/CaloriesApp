@@ -19,7 +19,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Circle, Rect } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
 
@@ -880,6 +880,81 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
   },
+  // Time Picker Modal
+  timePickerOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  timePickerContainer: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 34,
+  },
+  timePickerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  timeOptionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  timeOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  timeOptionSelected: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  timeOptionText: {
+    fontSize: 14,
+    color: '#1E293B',
+    fontWeight: '500',
+  },
+  timeOptionTextSelected: {
+    color: '#FFFFFF',
+  },
+  // Meal Picker Modal
+  mealPickerContainer: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 34,
+  },
+  mealOption: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  mealOptionText: {
+    fontSize: 16,
+    color: '#1E293B',
+    textAlign: 'center',
+  },
+  mealOptionSelected: {
+    color: '#007AFF',
+    fontWeight: '600',
+  },
 });
 
 const NutritionCircle = ({ grams, percent, color, size = 80 }: { grams: number; percent: number; color: string; size?: number }) => {
@@ -936,8 +1011,11 @@ const RecipeDetailScreen = () => {
   const [showNutritionDetails, setShowNutritionDetails] = useState(false);
   const [showLogModal, setShowLogModal] = useState(false);
   const [modalServings, setModalServings] = useState(1);
-  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const [selectedDayIndices, setSelectedDayIndices] = useState<number[]>([0]);
   const [showNutritionFacts, setShowNutritionFacts] = useState(false);
+  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showMealPicker, setShowMealPicker] = useState(false);
 
   const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
 
@@ -959,15 +1037,16 @@ const RecipeDetailScreen = () => {
     setTimeout(() => setShowLoggedBanner(false), 2000);
   };
 
-  // Get calendar days (next 7 days starting from today)
+  // Get calendar days (past 7 days including today)
   const getCalendarDays = () => {
     const days = [];
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const today = new Date();
 
-    for (let i = 0; i < 7; i++) {
+    // Show past 7 days (6 days ago + today)
+    for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
-      date.setDate(today.getDate() + i);
+      date.setDate(today.getDate() - i);
       days.push({
         name: dayNames[date.getDay()],
         number: date.getDate(),
@@ -978,6 +1057,18 @@ const RecipeDetailScreen = () => {
   };
 
   const calendarDays = getCalendarDays();
+
+  const toggleDaySelection = (index: number) => {
+    setSelectedDayIndices((prev) => {
+      if (prev.includes(index)) {
+        // Don't allow deselecting if it's the only selected day
+        if (prev.length === 1) return prev;
+        return prev.filter((i) => i !== index);
+      } else {
+        return [...prev, index];
+      }
+    });
+  };
 
   if (!recipe) {
     return (
@@ -1279,7 +1370,7 @@ const RecipeDetailScreen = () => {
               <View style={styles.inputRow}>
                 <Text style={styles.inputLabel}>Serving Size</Text>
                 <View style={styles.inputValueContainer}>
-                  <Text style={styles.inputValue}>1 serving</Text>
+                  <Text style={styles.inputValue}>{modalServings} serving{modalServings > 1 ? 's' : ''}</Text>
                 </View>
               </View>
 
@@ -1298,22 +1389,24 @@ const RecipeDetailScreen = () => {
               </View>
 
               {/* Time */}
-              <View style={styles.inputRow}>
+              <TouchableOpacity style={styles.inputRow} onPress={() => setShowTimePicker(true)}>
                 <Text style={styles.inputLabel}>Time</Text>
                 <View style={styles.inputValueContainer}>
-                  <Text style={styles.inputValue}>
-                    {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                  <Text style={[styles.inputValue, { color: '#007AFF' }]}>
+                    {selectedTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                   </Text>
+                  <Ionicons name="chevron-forward" size={16} color="#64748B" style={{ marginLeft: 8 }} />
                 </View>
-              </View>
+              </TouchableOpacity>
 
               {/* Meal Type */}
-              <View style={styles.inputRow}>
+              <TouchableOpacity style={styles.inputRow} onPress={() => setShowMealPicker(true)}>
                 <Text style={styles.inputLabel}>Meal</Text>
                 <View style={styles.inputValueContainer}>
                   <Text style={[styles.inputValue, { color: '#007AFF' }]}>{selectedMealType}</Text>
+                  <Ionicons name="chevron-forward" size={16} color="#64748B" style={{ marginLeft: 8 }} />
                 </View>
-              </View>
+              </TouchableOpacity>
 
               {/* Add to Multiple Days */}
               <View style={styles.multipleDaysSection}>
@@ -1325,14 +1418,14 @@ const RecipeDetailScreen = () => {
                         key={index}
                         style={[
                           styles.calendarDay,
-                          selectedDayIndex === index && styles.calendarDaySelected,
+                          selectedDayIndices.includes(index) && styles.calendarDaySelected,
                         ]}
-                        onPress={() => setSelectedDayIndex(index)}
+                        onPress={() => toggleDaySelection(index)}
                       >
                         <Text
                           style={[
                             styles.calendarDayName,
-                            selectedDayIndex === index && styles.calendarDayNameSelected,
+                            selectedDayIndices.includes(index) && styles.calendarDayNameSelected,
                           ]}
                         >
                           {day.name}
@@ -1340,7 +1433,7 @@ const RecipeDetailScreen = () => {
                         <Text
                           style={[
                             styles.calendarDayNumber,
-                            selectedDayIndex === index && styles.calendarDayNumberSelected,
+                            selectedDayIndices.includes(index) && styles.calendarDayNumberSelected,
                           ]}
                         >
                           {day.number}
@@ -1359,7 +1452,7 @@ const RecipeDetailScreen = () => {
                 {/* Circular Nutrition Badge */}
                 <NutritionCircle
                   grams={recipe.calories * modalServings}
-                  percent={Math.round((recipe.calories * modalServings / 2000) * 100)}
+                  percent={Math.min(100, Math.round((recipe.calories * modalServings / 2000) * 100))}
                   color="#7C3AED"
                   size={120}
                 />
@@ -1405,7 +1498,7 @@ const RecipeDetailScreen = () => {
                     />
                   </View>
                   <Text style={[styles.progressLabel, { textAlign: 'right', marginTop: 4 }]}>
-                    {Math.round((recipe.calories * modalServings / 2000) * 100)}%
+                    {Math.min(100, Math.round((recipe.calories * modalServings / 2000) * 100))}%
                   </Text>
                 </View>
 
@@ -1537,6 +1630,84 @@ const RecipeDetailScreen = () => {
                 <Text style={styles.reportLink}>Report Food</Text>
               </Text>
             </View>
+
+            {/* Time Picker Modal */}
+            {showTimePicker && (
+              <View style={styles.timePickerOverlay}>
+                <View style={styles.timePickerContainer}>
+                  <Text style={styles.timePickerTitle}>Select Time</Text>
+                  <View style={styles.timeOptionsGrid}>
+                    {[
+                      new Date().setHours(7, 0, 0, 0),
+                      new Date().setHours(8, 0, 0, 0),
+                      new Date().setHours(9, 0, 0, 0),
+                      new Date().setHours(12, 0, 0, 0),
+                      new Date().setHours(13, 0, 0, 0),
+                      new Date().setHours(14, 0, 0, 0),
+                      new Date().setHours(18, 0, 0, 0),
+                      new Date().setHours(19, 0, 0, 0),
+                      new Date().setHours(20, 0, 0, 0),
+                    ].map((timestamp, index) => {
+                      const timeDate = new Date(timestamp);
+                      const isSelected = timeDate.getHours() === selectedTime.getHours() && timeDate.getMinutes() === selectedTime.getMinutes();
+                      return (
+                        <TouchableOpacity
+                          key={index}
+                          style={[styles.timeOption, isSelected && styles.timeOptionSelected]}
+                          onPress={() => {
+                            setSelectedTime(timeDate);
+                            setShowTimePicker(false);
+                          }}
+                        >
+                          <Text
+                            style={[styles.timeOptionText, isSelected && styles.timeOptionTextSelected]}
+                          >
+                            {timeDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                  <TouchableOpacity
+                    style={{ marginTop: 16, paddingVertical: 12, alignItems: 'center' }}
+                    onPress={() => setShowTimePicker(false)}
+                  >
+                    <Text style={{ fontSize: 16, color: '#64748B' }}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {/* Meal Picker Modal */}
+            {showMealPicker && (
+              <View style={styles.timePickerOverlay}>
+                <View style={styles.mealPickerContainer}>
+                  <Text style={styles.timePickerTitle}>Select Meal</Text>
+                  {mealTypes.map((meal) => (
+                    <TouchableOpacity
+                      key={meal}
+                      style={styles.mealOption}
+                      onPress={() => {
+                        setSelectedMealType(meal);
+                        setShowMealPicker(false);
+                      }}
+                    >
+                      <Text
+                        style={[styles.mealOptionText, selectedMealType === meal && styles.mealOptionSelected]}
+                      >
+                        {meal}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity
+                    style={{ marginTop: 8, paddingVertical: 12, alignItems: 'center' }}
+                    onPress={() => setShowMealPicker(false)}
+                  >
+                    <Text style={{ fontSize: 16, color: '#64748B' }}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
           </View>
         </View>
       </Modal>

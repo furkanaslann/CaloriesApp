@@ -30,11 +30,27 @@ import { Camera } from 'expo-camera';
 
 const { width } = Dimensions.get('window');
 
+// Feature Flags
+const ENABLE_STORAGE_UPLOAD = false; // Storage upload açık/kapalı
+
+// Food history item type
+interface FoodHistoryItem {
+  id: string;
+  foodName: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  time: string;
+  date: string;
+  confidence: number;
+}
+
 const CameraDashboardScreen = () => {
   const router = useRouter();
   const { addMeal, getRecentMeals } = useDashboard();
   const { user } = useUser();
-  const [foodHistory, setFoodHistory] = useState([]);
+  const [foodHistory, setFoodHistory] = useState<FoodHistoryItem[]>([]);
   const [showGeminiAnalyzer, setShowGeminiAnalyzer] = useState(false);
 
   // İzin durumları
@@ -139,12 +155,7 @@ const CameraDashboardScreen = () => {
     await checkPermissions();
   };
 
-  // Load recent meals on mount or when dependencies change
-  useEffect(() => {
-    loadRecentMeals();
-    checkPermissions(); // İzinleri kontrol et
-  }, [getRecentMeals, loadRecentMeals]);
-
+  // Load recent meals function - MUST be declared before useEffect
   const loadRecentMeals = useCallback(async () => {
     try {
       const meals = await getRecentMeals(10);
@@ -165,6 +176,12 @@ const CameraDashboardScreen = () => {
       console.error('Error loading recent meals:', error);
     }
   }, [getRecentMeals]);
+
+  // Load recent meals on mount
+  useEffect(() => {
+    loadRecentMeals();
+    checkPermissions(); // İzinleri kontrol et
+  }, [loadRecentMeals]);
 
   // Quick food suggestions
   const quickFoods = [
@@ -439,10 +456,9 @@ const CameraDashboardScreen = () => {
     try {
       setIsAnalyzing(true);
 
-      // TODO: Storage upload devre dışı - Auth emulator ve Production Storage uyuşmazlığı
-      // Fotoğrafı Storage'a yükle
+      // Fotoğrafı Storage'a yükle (feature flag ile kontrol edilir)
       let imageUrl = '';
-      if (false && imageUri && user?.uid) {  // Geçici olarak devre dışı
+      if (ENABLE_STORAGE_UPLOAD && imageUri && user?.uid) {
         try {
           console.log('Uploading image for user:', user.uid);
           console.log('Image URI:', imageUri);
@@ -458,22 +474,32 @@ const CameraDashboardScreen = () => {
         }
       }
 
+      // Determine meal type based on time
+      const hour = new Date().getHours();
+      let mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+      if (hour >= 5 && hour < 11) mealType = 'breakfast';
+      else if (hour >= 11 && hour < 15) mealType = 'lunch';
+      else if (hour >= 17 && hour < 22) mealType = 'dinner';
+      else mealType = 'snack';
+
       // Create meal object from AI analysis
       const analyzedMeal = {
         name: result.food_name,
         calories: result.calories,
         time: new Date().toTimeString().slice(0, 5),
-        type: 'Öğle Yemeği' as const,
+        type: mealType,
         nutrition: {
           protein: result.protein,
           carbohydrates: result.carbs,
           fats: result.fat
         },
-        confidence: Math.round(result.confidence_score * 100),
-        ingredients: result.ingredients,
-        health_tips: result.health_tips,
-        imageUrl: imageUrl, // Storage URL'ini kullan
-        imageBase64: imageData // Base64'i de sakla (fallback için)
+        portion: {
+          amount: 1,
+          unit: 'portion'
+        },
+        method: 'camera' as const,
+        photo: imageUrl || undefined, // Storage URL'ini kullan
+        confidence: Math.round(result.confidence_score * 100)
       };
 
       // Add meal to Firestore via dashboard service
@@ -533,7 +559,7 @@ const CameraDashboardScreen = () => {
 
       // Öneriler
       if (result.suggestions && result.suggestions.length > 0) {
-        const suggestionMap = {
+        const suggestionMap: Record<string, string> = {
           'add_vegetables': 'Daha fazla sebze ekleyin',
           'reduce_salt': 'Tuz miktarını azaltın',
           'choose_lean_protein': 'Yağsız protein tercih edin',
@@ -634,7 +660,7 @@ const CameraDashboardScreen = () => {
     return tags;
   };
 
-  const renderFoodItem = ({ item }) => (
+  const renderFoodItem = ({ item }: { item: FoodHistoryItem }) => (
     <View key={item.id} style={styles.historyCard}>
       <View style={styles.historyHeader}>
         <View style={styles.foodInfo}>
