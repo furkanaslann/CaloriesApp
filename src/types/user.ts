@@ -137,6 +137,7 @@ export interface StreakDay {
 
 // Daily Activity Logging
 export interface DailyLog {
+  id: string;
   date: string; // YYYY-MM-DD format
   calories: {
     consumed: number;
@@ -147,6 +148,7 @@ export interface DailyLog {
     protein: { current: number; goal: number };
     carbs: { current: number; goal: number };
     fats: { current: number; goal: number };
+    fiber: { current: number; goal: number };
   };
   water: {
     glasses: number;
@@ -165,6 +167,8 @@ export interface DailyLog {
   };
   notes?: string;
   completed: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface MealLog {

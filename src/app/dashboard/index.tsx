@@ -41,6 +41,15 @@ const DashboardIndexScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [waterCount, setWaterCount] = useState(0); // Su sayacı için state
 
+  // Hızlı ekle yiyecekleri
+  const quickFoods = [
+    { name: 'Elma', emoji: '🍎', calories: 52, protein: 0.3, carbs: 14, fats: 0.2 },
+    { name: 'Salata', emoji: '🥗', calories: 30, protein: 2, carbs: 5, fats: 0.5 },
+    { name: 'Tavuk', emoji: '🍗', calories: 165, protein: 31, carbs: 0, fats: 3.6 },
+    { name: 'Yoğurt', emoji: '🥛', calories: 100, protein: 10, carbs: 3, fats: 5 },
+    { name: 'Muz', emoji: '🍌', calories: 89, protein: 1.1, carbs: 23, fats: 0.3 },
+  ];
+
   // Function to get fresh user data directly from Firestore
   const getUserData = async () => {
     if (!user) return null;
@@ -72,6 +81,7 @@ const DashboardIndexScreen = () => {
     refreshDashboard,
     clearError,
     formatDateForDisplay,
+    addMeal,
   } = useDashboard();
 
   const [isChecking, setIsChecking] = useState(true);
@@ -136,6 +146,57 @@ const DashboardIndexScreen = () => {
 
   const userName = getUserDisplayName();
   const userInitial = userName.charAt(0).toUpperCase();
+
+  // Hızlı ekleme fonksiyonu
+  const quickAddMeal = async (food: typeof quickFoods[0]) => {
+    if (!user) return;
+
+    try {
+      const hour = new Date().getHours();
+      let mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+      if (hour >= 5 && hour < 11) mealType = 'breakfast';
+      else if (hour >= 11 && hour < 15) mealType = 'lunch';
+      else if (hour >= 17 && hour < 22) mealType = 'dinner';
+      else mealType = 'snack';
+
+      const mealTypeMap = {
+        breakfast: 'Kahvaltı',
+        lunch: 'Öğle Yemeği',
+        dinner: 'Akşam Yemeği',
+        snack: 'Atıştırmalık',
+      };
+
+      await addMeal({
+        name: food.name,
+        calories: food.calories,
+        nutrition: {
+          protein: food.protein,
+          carbohydrates: food.carbs,
+          fats: food.fats,
+          fiber: 0,
+          sugar: 0,
+          sodium: 0,
+        },
+        portion: {
+          amount: 1,
+          unit: 'porsiyon',
+        },
+        type: mealTypeMap[mealType],
+        time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+        date: new Date().toISOString().split('T')[0],
+        method: 'quick_add',
+        confidence: 100,
+        tags: ['Hızlı Ekle'],
+        ingredients: [],
+        healthTips: [],
+      });
+
+      Alert.alert('✅ Başarılı', `${food.name} (${food.calories} kcal) eklendi!`);
+    } catch (error) {
+      console.error('Quick add error:', error);
+      Alert.alert('❌ Hata', 'Yemek eklenirken bir hata oluştu');
+    }
+  };
 
   // Create theme object that matches expected structure
   const theme = {
@@ -1080,10 +1141,14 @@ const DashboardIndexScreen = () => {
             <Text style={styles.sectionTitle}>Hızlı Ekle</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.quickAddContainer}>
-                {['🍎 Elma', '🥗 Salata', '🍗 Tavuk', '🥛 Yoğurt', '🍌 Muz'].map((food, index) => (
-                  <TouchableOpacity key={index} style={styles.quickAddItem}>
-                    <Text style={styles.quickAddEmoji}>{food.split(' ')[0]}</Text>
-                    <Text style={styles.quickAddName}>{food.split(' ')[1]}</Text>
+                {quickFoods.map((food, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.quickAddItem}
+                    onPress={() => quickAddMeal(food)}
+                  >
+                    <Text style={styles.quickAddEmoji}>{food.emoji}</Text>
+                    <Text style={styles.quickAddName}>{food.name}</Text>
                   </TouchableOpacity>
                 ))}
               </View>

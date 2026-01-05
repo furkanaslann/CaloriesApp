@@ -10,7 +10,7 @@ import { useUser } from '@/context/user-context';
 import { Ionicons } from '@expo/vector-icons';
 import firestore from '@react-native-firebase/firestore';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -60,6 +60,8 @@ const FoodDetailScreen = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [newIngredient, setNewIngredient] = useState('');
+  const tagInputRef = useRef<TextInput>(null);
+  const ingredientInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     try {
@@ -82,6 +84,7 @@ const FoodDetailScreen = () => {
     if (newTag.trim() && !editedTags.includes(newTag.trim())) {
       setEditedTags([...editedTags, newTag.trim()]);
       setNewTag('');
+      tagInputRef.current?.blur();
     }
   };
 
@@ -93,6 +96,7 @@ const FoodDetailScreen = () => {
     if (newIngredient.trim() && !editedIngredients.includes(newIngredient.trim())) {
       setEditedIngredients([...editedIngredients, newIngredient.trim()]);
       setNewIngredient('');
+      ingredientInputRef.current?.blur();
     }
   };
 
@@ -280,6 +284,7 @@ const FoodDetailScreen = () => {
             <Text style={styles.sectionTitle}>Etiketler</Text>
             <View style={styles.tagInputContainer}>
               <TextInput
+                ref={tagInputRef}
                 style={styles.tagInput}
                 value={newTag}
                 onChangeText={setNewTag}
@@ -310,6 +315,7 @@ const FoodDetailScreen = () => {
             <Text style={styles.sectionTitle}>İçerikler</Text>
             <View style={styles.ingredientInputContainer}>
               <TextInput
+                ref={ingredientInputRef}
                 style={styles.ingredientInput}
                 value={newIngredient}
                 onChangeText={setNewIngredient}

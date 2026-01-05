@@ -185,11 +185,65 @@ const CameraDashboardScreen = () => {
 
   // Quick food suggestions
   const quickFoods = [
-    { name: 'Elma', calories: 52, icon: '🍎' },
-    { name: 'Yoğurt', calories: 100, icon: '🥄' },
-    { name: 'Badem', calories: 160, icon: '🌰' },
-    { name: 'Muz', calories: 89, icon: '🍌' },
+    { name: 'Elma', calories: 52, protein: 0.3, carbs: 14, fats: 0.2, icon: '🍎' },
+    { name: 'Yoğurt', calories: 100, protein: 10, carbs: 3, fats: 5, icon: '🥄' },
+    { name: 'Badem', calories: 160, protein: 6, carbs: 6, fats: 14, icon: '🌰' },
+    { name: 'Muz', calories: 89, protein: 1.1, carbs: 23, fats: 0.3, icon: '🍌' },
   ];
+
+  // Hızlı ekleme fonksiyonu
+  const quickAddMeal = async (food: typeof quickFoods[0]) => {
+    if (!user) return;
+
+    try {
+      const hour = new Date().getHours();
+      let mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+      if (hour >= 5 && hour < 11) mealType = 'breakfast';
+      else if (hour >= 11 && hour < 15) mealType = 'lunch';
+      else if (hour >= 17 && hour < 22) mealType = 'dinner';
+      else mealType = 'snack';
+
+      const mealTypeMap = {
+        breakfast: 'Kahvaltı',
+        lunch: 'Öğle Yemeği',
+        dinner: 'Akşam Yemeği',
+        snack: 'Atıştırmalık',
+      };
+
+      await addMeal({
+        name: food.name,
+        calories: food.calories,
+        nutrition: {
+          protein: food.protein,
+          carbohydrates: food.carbs,
+          fats: food.fats,
+          fiber: 0,
+          sugar: 0,
+          sodium: 0,
+        },
+        portion: {
+          amount: 1,
+          unit: 'porsiyon',
+        },
+        type: mealTypeMap[mealType],
+        time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+        date: new Date().toISOString().split('T')[0],
+        method: 'quick_add',
+        confidence: 100,
+        tags: ['Hızlı Ekle'],
+        ingredients: [],
+        healthTips: [],
+      });
+
+      // Reload recent meals
+      await loadRecentMeals();
+
+      Alert.alert('✅ Başarılı', `${food.name} (${food.calories} kcal) eklendi!`);
+    } catch (error) {
+      console.error('Quick add error:', error);
+      Alert.alert('❌ Hata', 'Yemek eklenirken bir hata oluştu');
+    }
+  };
 
   // Dynamic styles using updated theme
   const styles = StyleSheet.create({
@@ -456,6 +510,37 @@ const CameraDashboardScreen = () => {
     try {
       setIsAnalyzing(true);
 
+      // Analiz başarısızlık kontrolü
+      const isAnalysisFailed =
+        !result.food_name ||
+        result.food_name === 'Analiz Edilemedi' ||
+        result.food_name === 'Unable to analyze' ||
+        result.food_name.includes('edilemedi') ||
+        result.food_name.includes('Unable') ||
+        (result.confidence_score && result.confidence_score < 0.3) ||
+        !result.calories || result.calories === 0;
+
+      if (isAnalysisFailed) {
+        setIsAnalyzing(false);
+        setShowGeminiAnalyzer(false);
+
+        // Kullanıcıya alert göster
+        Alert.alert(
+          '⚠️ Yemek Analizinde Sorun Oluştu',
+          'Yemek analizi sırasında bir sorun oluştu. Lütfen daha sonra tekrar deneyiniz veya manuel olarak giriş yapınız.',
+          [
+            {
+              text: 'Tamam',
+              onPress: () => {
+                // Dashboard'a geri dön
+                router.push('/dashboard');
+              }
+            }
+          ]
+        );
+        return;
+      }
+
       // Fotoğrafı Storage'a yükle (feature flag ile kontrol edilir)
       let imageUrl = '';
       if (ENABLE_STORAGE_UPLOAD && imageUri && user?.uid) {
@@ -482,24 +567,48 @@ const CameraDashboardScreen = () => {
       else if (hour >= 17 && hour < 22) mealType = 'dinner';
       else mealType = 'snack';
 
-      // Create meal object from AI analysis
+      // Get current date and time
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const currentTime = now.toTimeString().slice(0, 5);
+
+      // Generate tags from AI analysis
+      const generatedTags = generateTags(result);
+
+      // Create meal object from AI analysis with all detailed fields
       const analyzedMeal = {
-        name: result.food_name,
-        calories: result.calories,
-        time: new Date().toTimeString().slice(0, 5),
+        name: result.food_name || 'Bilinmeyen Yiyecek',
+        calories: result.calories || 0,
+        date: today,
+        time: currentTime,
         type: mealType,
         nutrition: {
-          protein: result.protein,
-          carbohydrates: result.carbs,
-          fats: result.fat
+          protein: result.protein || 0,
+          carbohydrates: result.carbs || 0,
+          fats: result.fat || 0,
+          fiber: result.fiber || 0,
+          sugar: result.sugar || 0,
+          sodium: result.sodium || 0,
         },
         portion: {
           amount: 1,
           unit: 'portion'
         },
         method: 'camera' as const,
-        photo: imageUrl || undefined, // Storage URL'ini kullan
-        confidence: Math.round(result.confidence_score * 100)
+        confidence: Math.round(result.confidence_score * 100) || 0,
+        // Add detailed fields from AI analysis
+        ingredients: result.ingredients || [],
+        healthTips: result.health_tips || [],
+        tags: generatedTags,
+        healthScore: result.health_score || 0,
+        allergens: result.allergens || [],
+        processingLevel: result.processing_level,
+        vitamins: result.vitamins || {},
+        suggestions: result.suggestions || [],
+        // photo alanlarını ekle - imageUrl, imageBase64 veya imageUri
+        ...(imageUrl && { photo: imageUrl, imageUrl: imageUrl }),
+        ...(imageBase64 && { imageBase64: imageBase64 }),
+        ...(imageUri && !imageUrl && { imageUri: imageUri }),
       };
 
       // Add meal to Firestore via dashboard service
@@ -779,7 +888,11 @@ const CameraDashboardScreen = () => {
             <Text style={styles.sectionTitle}>Hızlı Ekle</Text>
             <View style={styles.quickAddGrid}>
               {quickFoods.map((food, index) => (
-                <TouchableOpacity key={index} style={styles.quickAddItem}>
+                <TouchableOpacity
+                  key={index}
+                  style={styles.quickAddItem}
+                  onPress={() => quickAddMeal(food)}
+                >
                   <Text style={styles.quickAddIcon}>{food.icon}</Text>
                   <Text style={styles.quickAddName}>{food.name}</Text>
                   <Text style={styles.quickAddCalories}>{food.calories} kcal</Text>

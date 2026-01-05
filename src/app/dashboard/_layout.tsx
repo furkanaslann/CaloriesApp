@@ -19,6 +19,7 @@ const DashboardLayout = () => {
       <Stack.Screen name="recipes" options={{ title: 'Tarifler', headerShown: false }} />
       <Stack.Screen name="meals-list" options={{ title: 'Yemekler Listesi', headerShown: false }} />
       <Stack.Screen name="getting-started" options={{ title: 'Başlangıç', headerShown: false }} />
+      <Stack.Screen name="food-detail" options={{ title: 'Yemek Detayı', headerShown: false }} />
     </Stack>
   );
 };

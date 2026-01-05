@@ -5,6 +5,8 @@
 
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
@@ -23,6 +25,8 @@ import { useDashboard } from '@/hooks/use-dashboard';
 const { width } = Dimensions.get('window');
 
 const ProgressDashboardScreen = () => {
+  const router = useRouter();
+
   // Use dashboard hook for data management
   const {
     dashboardData,
@@ -139,9 +143,21 @@ const ProgressDashboardScreen = () => {
       paddingBottom: theme.spacing['2xl'],
     },
     header: {
+      flexDirection: 'row',
+      alignItems: 'center',
       paddingHorizontal: theme.spacing['2xl'],
       paddingTop: theme.spacing['4xl'],
       paddingBottom: theme.spacing['2xl'],
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: theme.spacing.md,
+    },
+    headerTitle: {
+      flex: 1,
     },
     title: {
       fontSize: theme.textStyles.onboardingTitle?.fontSize || 30,
@@ -366,8 +382,13 @@ const ProgressDashboardScreen = () => {
         }
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Detaylı Analiz</Text>
-          <Text style={styles.subtitle}>İlerlemenizi takip edin</Text>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
+          <View style={styles.headerTitle}>
+            <Text style={styles.title}>Detaylı Analiz</Text>
+            <Text style={styles.subtitle}>İlerlemenizi takip edin</Text>
+          </View>
         </View>
 
         <View style={styles.content}>

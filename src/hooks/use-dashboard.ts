@@ -4,8 +4,8 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { useUser } from '@/context/user-context';
 import { FIREBASE_CONFIG } from '@/constants/firebase';
+import { useUser } from '@/context/user-context';
 import {
   Achievement,
   DailyLog,
@@ -14,8 +14,8 @@ import {
   StreakData,
   UserDocument
 } from '@/types/user';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { useCallback, useEffect, useState } from 'react';
-import firestore from '@react-native-firebase/firestore';
 
 // Hook return interface
 interface UseDashboardReturn {
@@ -32,10 +32,11 @@ interface UseDashboardReturn {
   // Data fetching
   refreshDashboard: () => Promise<void>;
   getDailyLog: (date?: string) => Promise<DailyLog | null>;
-  getRecentMeals: (limit?: number) => Promise<any[]>;
+  getRecentMeals: (limit?: number, date?: string) => Promise<any[]>;
 
   // Actions
   addMeal: (mealData: Omit<MealLog, 'id' | 'createdAt'>) => Promise<MealLog>;
+  deleteMeal: (mealId: string) => Promise<void>;
   updateDailyLog: (logData: Partial<DailyLog>, date?: string) => Promise<DailyLog>;
   updateStreak: () => Promise<StreakData>;
 
@@ -62,6 +63,9 @@ export const useDashboard = (): UseDashboardReturn => {
     notifications: [] as Notification[],
   });
 
+  // Real-time listener unsubscribe functions
+  const [mealsUnsubscribe, setMealsUnsubscribe] = useState<(() => void) | null>(null);
+
   const updateState = (updates: Partial<typeof state>) => {
     setState(prev => ({ ...prev, ...updates }));
   };
@@ -86,31 +90,13 @@ export const useDashboard = (): UseDashboardReturn => {
         .doc(user.uid)
         .get();
 
-      const userDocument = userDoc.exists ? userDoc.data() as UserDocument : null;
+      const userDocument = userDoc.exists() ? userDoc.data() as UserDocument : null;
 
-      // Fetch today's meals - geçici çözüm: orderBy kaldırıldı
-      const mealsSnapshot = await db
-        .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid)
-        .collection('meals')
-        .where('date', '==', today)
-        .get();
+      // Meals are now handled by real-time listener (setup below in useEffect)
+      // We'll calculate todayLog from the current recentMeals state
 
-      const recentMeals = mealsSnapshot.docs
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          timestamp: doc.data().timestamp?.toDate(),
-        }))
-        .sort((a, b) => {
-          // Client-side sıralama: timestamp'e göre azalan sırada
-          const timeA = a.timestamp ? a.timestamp.getTime() : 0;
-          const timeB = b.timestamp ? b.timestamp.getTime() : 0;
-          return timeB - timeA;
-        });
-
-      // Calculate today's nutrition totals
-      const totals = recentMeals.reduce((acc, meal) => ({
+      // Calculate today's nutrition totals from current recentMeals
+      const totals = state.recentMeals.reduce((acc, meal) => ({
         calories: acc.calories + (meal.calories || 0),
         protein: acc.protein + (meal.nutrition?.protein || 0),
         carbs: acc.carbs + (meal.nutrition?.carbohydrates || 0),
@@ -161,7 +147,11 @@ export const useDashboard = (): UseDashboardReturn => {
           count: 0,
           goal: 10000,
         },
-        meals: recentMeals,
+        meals: state.recentMeals,
+        activities: [],
+        completed: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       // Calculate streak data
@@ -170,7 +160,6 @@ export const useDashboard = (): UseDashboardReturn => {
       updateState({
         userDocument,
         streakData,
-        recentMeals,
         todayLog,
         achievements: [], // TODO: Implement achievements
         notifications: [], // TODO: Implement notifications
@@ -184,17 +173,17 @@ export const useDashboard = (): UseDashboardReturn => {
         error: error instanceof Error ? error.message : 'Dashboard yüklenirken hata oluştu'
       });
     }
-  }, [user]);
+  }, [user, state.recentMeals]); // Added state.recentMeals dependency
 
   // Refresh dashboard data
   const refreshDashboard = useCallback(async () => {
     if (!user) return;
 
     try {
-      setState({ isRefreshing: true });
+      updateState({ isRefreshing: true });
       await initializeDashboard();
     } finally {
-      setState({ isRefreshing: false });
+      updateState({ isRefreshing: false });
     }
   }, [user, initializeDashboard]);
 
@@ -205,13 +194,16 @@ export const useDashboard = (): UseDashboardReturn => {
     }
 
     try {
+      // Clean undefined values from mealData before sending to Firestore
+      const cleanedMealData = JSON.parse(JSON.stringify(mealData));
+
       const db = firestore();
       const docRef = await db
         .collection(FIREBASE_CONFIG.collections.users)
         .doc(user.uid)
         .collection('meals')
         .add({
-          ...mealData,
+          ...cleanedMealData,
           createdAt: firestore.FieldValue.serverTimestamp(),
           userId: user.uid,
         });
@@ -239,6 +231,54 @@ export const useDashboard = (): UseDashboardReturn => {
     }
   }, [user, state.recentMeals]);
 
+  // Delete meal entry
+  const deleteMeal = useCallback(async (mealId: string): Promise<void> => {
+    if (!user) {
+      throw new Error('Kullanıcı giriş yapmamış');
+    }
+
+    try {
+      const db = firestore();
+
+      // Get the meal document before deleting to retrieve its nutrition data
+      const mealDoc = await db
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .collection('meals')
+        .doc(mealId)
+        .get();
+
+      if (!mealDoc.exists) {
+        throw new Error('Yemek kaydı bulunamadı');
+      }
+
+      const mealData = mealDoc.data();
+
+      // Delete the meal document
+      await db
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .collection('meals')
+        .doc(mealId)
+        .delete();
+
+      // Update local state - remove the deleted meal from the list
+      updateState({
+        recentMeals: (state.recentMeals || []).filter(meal => meal.id !== mealId),
+      });
+
+      // Refresh dashboard to recalculate daily totals
+      await refreshDashboard();
+
+      console.log('✅ Meal successfully deleted from Firebase:', mealId);
+    } catch (error) {
+      console.error('Error deleting meal from Firebase:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Öğün silinemedi';
+      updateState({ error: errorMessage });
+      throw error;
+    }
+  }, [user, state.recentMeals, refreshDashboard]);
+
   // Update daily log
   const updateDailyLog = useCallback(async (
     logData: Partial<DailyLog>,
@@ -250,12 +290,39 @@ export const useDashboard = (): UseDashboardReturn => {
         id: Date.now().toString(),
         date: date || new Date().toISOString().split('T')[0],
         meals: [],
-        water: 0,
-        calories: 0,
-        protein: 0,
-        carbs: 0,
-        fat: 0,
-        fiber: 0,
+        activities: [],
+        water: {
+          glasses: 0,
+          goal: 8,
+        },
+        calories: {
+          consumed: 0,
+          goal: 2000,
+          remaining: 2000,
+        },
+        nutrition: {
+          protein: {
+            current: 0,
+            goal: 120,
+          },
+          carbs: {
+            current: 0,
+            goal: 250,
+          },
+          fats: {
+            current: 0,
+            goal: 65,
+          },
+          fiber: {
+            current: 0,
+            goal: 25,
+          },
+        },
+        steps: {
+          count: 0,
+          goal: 10000,
+        },
+        completed: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -319,6 +386,7 @@ export const useDashboard = (): UseDashboardReturn => {
         currentStreak,
         bestStreak: currentStreak, // TODO: Calculate best streak from history
         weekDays,
+        streakHistory: [],
       };
     } catch (error) {
       console.error('Error calculating streak data:', error);
@@ -326,6 +394,7 @@ export const useDashboard = (): UseDashboardReturn => {
         currentStreak: 0,
         bestStreak: 0,
         weekDays: [false, false, false, false, false, false, false],
+        streakHistory: [],
       };
     }
   }, []);
@@ -356,29 +425,70 @@ export const useDashboard = (): UseDashboardReturn => {
     }
   }, []);
 
-  // Get recent meals
-  const getRecentMeals = useCallback(async (limit: number = 10): Promise<any[]> => {
+  // Get recent meals - now with optional date filter
+  // Note: For today's meals, the real-time listener provides automatic updates
+  // This function is mainly for meals-list to get meals on specific dates
+  const getRecentMeals = useCallback(async (limit: number = 10, date?: string): Promise<any[]> => {
     if (!user) return [];
 
     try {
       const db = firestore();
-      const mealsSnapshot = await db
+      let query: FirebaseFirestoreTypes.Query = db
         .collection(FIREBASE_CONFIG.collections.users)
         .doc(user.uid)
-        .collection('meals')
+        .collection('meals');
+
+      // If date is provided, filter by date
+      if (date) {
+        query = query.where('date', '==', date);
+      }
+
+      const mealsSnapshot = await query
         .orderBy('createdAt', 'desc')
         .limit(limit)
         .get();
 
       return mealsSnapshot.docs
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          timestamp: doc.data().createdAt?.toDate(),
-          date: doc.data().createdAt?.toDate()?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-          time: doc.data().createdAt?.toDate()?.toTimeString().slice(0, 5) || new Date().toTimeString().slice(0, 5),
-        }))
-        .sort((a, b) => {
+        .map((doc: FirebaseFirestoreTypes.DocumentSnapshot) => {
+          const data = doc.data();
+
+          // Handle both Firestore Timestamp and regular Date objects for createdAt
+          let createdAt: Date;
+          if (data?.createdAt) {
+            if (typeof data.createdAt.toDate === 'function') {
+              createdAt = data.createdAt.toDate();
+            } else if (data.createdAt instanceof Date) {
+              createdAt = data.createdAt;
+            } else if (typeof data.createdAt === 'string') {
+              createdAt = new Date(data.createdAt);
+            } else {
+              createdAt = new Date();
+            }
+          } else {
+            createdAt = new Date();
+          }
+
+          // Handle timestamp field as well
+          let timestamp: Date | undefined;
+          if (data?.timestamp) {
+            if (typeof data.timestamp.toDate === 'function') {
+              timestamp = data.timestamp.toDate();
+            } else if (data.timestamp instanceof Date) {
+              timestamp = data.timestamp;
+            } else if (typeof data.timestamp === 'string') {
+              timestamp = new Date(data.timestamp);
+            }
+          }
+
+          return {
+            id: doc.id,
+            ...data,
+            timestamp,
+            date: createdAt.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+            time: createdAt.toTimeString().slice(0, 5) || new Date().toTimeString().slice(0, 5),
+          };
+        })
+        .sort((a: any, b: any) => {
           // En son eklenenler üstte olacak
           const timeA = a.timestamp ? a.timestamp.getTime() : 0;
           const timeB = b.timestamp ? b.timestamp.getTime() : 0;
@@ -452,6 +562,83 @@ export const useDashboard = (): UseDashboardReturn => {
     }
   }, [user, refreshStreak]);
 
+  // Setup real-time listener for today's meals
+  useEffect(() => {
+    if (!user) {
+      // Clean up if user logs out
+      if (mealsUnsubscribe) {
+        mealsUnsubscribe();
+        setMealsUnsubscribe(null);
+      }
+      updateState({ recentMeals: [] });
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    console.log('🔄 Setting up real-time listener for today\'s meals:', today);
+
+    // Clean up existing listener
+    if (mealsUnsubscribe) {
+      console.log('🧹 Cleaning up existing meals listener');
+      mealsUnsubscribe();
+    }
+
+    // Setup new real-time listener
+    const db = firestore();
+    const unsubscribe = db
+      .collection(FIREBASE_CONFIG.collections.users)
+      .doc(user.uid)
+      .collection('meals')
+      .where('date', '==', today)
+      .onSnapshot((snapshot) => {
+        console.log('📡 Meals snapshot received:', snapshot.docs.length, 'meals');
+
+        const meals = snapshot.docs.map(doc => {
+          const data = doc.data();
+
+          // Handle both Firestore Timestamp and regular Date objects
+          let timestamp: Date | undefined;
+          if (data?.timestamp) {
+            if (typeof data.timestamp.toDate === 'function') {
+              timestamp = data.timestamp.toDate();
+            } else if (data.timestamp instanceof Date) {
+              timestamp = data.timestamp;
+            } else if (typeof data.timestamp === 'string') {
+              timestamp = new Date(data.timestamp);
+            }
+          }
+
+          return {
+            id: doc.id,
+            ...data,
+            timestamp,
+          };
+        }).sort((a, b) => {
+          // Client-side sorting by timestamp (most recent first)
+          const timeA = a.timestamp ? a.timestamp.getTime() : 0;
+          const timeB = b.timestamp ? b.timestamp.getTime() : 0;
+          return timeB - timeA;
+        });
+
+        console.log('✅ Meals updated in state:', meals.length);
+        updateState({ recentMeals: meals });
+      }, (error) => {
+        console.error('❌ Error in meals listener:', error);
+      });
+
+    // Store unsubscribe function
+    setMealsUnsubscribe(() => unsubscribe);
+    console.log('✅ Real-time meals listener setup complete');
+
+    // Cleanup on unmount or user change
+    return () => {
+      console.log('🧹 Cleaning up meals listener');
+      if (mealsUnsubscribe) {
+        mealsUnsubscribe();
+      }
+    };
+  }, [user]); // Only depend on user, so listener recreates when user changes
+
   return {
     // State
     userDocument: state.userDocument,
@@ -471,6 +658,7 @@ export const useDashboard = (): UseDashboardReturn => {
 
     // Actions
     addMeal,
+    deleteMeal,
     updateDailyLog,
     updateStreak,
 
@@ -480,6 +668,5 @@ export const useDashboard = (): UseDashboardReturn => {
     formatDateForDisplay,
     calculateProgressPercentage,
   };
-};
-
+}
 export default useDashboard;

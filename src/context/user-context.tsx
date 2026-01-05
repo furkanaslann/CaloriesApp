@@ -28,6 +28,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   const [userData, setUserData] = useState<UserDocument | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [unsubscribeListener, setUnsubscribeListener] = useState<(() => void) | null>(null);
 
   // Default calculated values
   const defaultCalculatedValues: CalculatedValues = {
@@ -87,62 +88,146 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (unsubscribe) {
         unsubscribe();
       }
+      if (unsubscribeListener) {
+        unsubscribeListener();
+      }
     };
   }, []);
 
-  // Load user data from Firestore
-  const loadUserData = async (userId: string) => {
+  // Load user data from Firestore with real-time listener
+  const loadUserData = (userId: string) => {
     try {
-      console.log('loadUserData: Loading data for user:', userId);
+      console.log('loadUserData: Setting up real-time listener for user:', userId);
 
-      // Add retry mechanism for emulator consistency
-      let retryCount = 0;
-      const maxRetries = 3;
-      let userDoc;
+      // Clean up any existing listener
+      if (unsubscribeListener) {
+        console.log('loadUserData: Cleaning up existing listener');
+        unsubscribeListener();
+      }
 
-      do {
-        userDoc = await firestore()
-          .collection(FIREBASE_CONFIG.collections.users)
-          .doc(userId)
-          .get();
+      // Set up real-time listener with onSnapshot
+      const unsubscribe = firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(userId)
+        .onSnapshot(
+          (docSnapshot) => {
+            console.log('loadUserData: Snapshot received, exists:', docSnapshot.exists);
 
-        if ((userDoc as any).exists) {
-          break;
-        }
+            if (docSnapshot.exists()) {
+              const rawData = docSnapshot.data();
+              console.log('loadUserData: Raw data from Firestore:', rawData);
 
-        if (retryCount < maxRetries - 1) {
-          console.log(`loadUserData: Retry ${retryCount + 1}/${maxRetries} - waiting 500ms`);
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        retryCount++;
-      } while (retryCount < maxRetries);
+              // If document exists but data is undefined/empty
+              if (!rawData || Object.keys(rawData).length === 0) {
+                console.log('⚠️ loadUserData: Document exists but has no data');
 
-      if ((userDoc as any).exists) {
-        const rawData = userDoc.data();
-        console.log('loadUserData: Raw data from Firestore:', rawData);
+                // Check if this is an anonymous user (they might be in onboarding flow)
+                const currentUser = auth().currentUser;
+                if (currentUser && !currentUser.isAnonymous) {
+                  // Permanent account with no data - logout and reset
+                  console.log('🔄 loadUserData: Permanent account with no data - logging out');
+                  auth().signOut().catch((logoutError) => {
+                    console.error('❌ loadUserData: Error during logout:', logoutError);
+                  });
+                  setUserData(null);
+                  return;
+                } else {
+                  // Anonymous user - create minimal data structure for onboarding
+                  console.log('⚠️ loadUserData: Anonymous user with no data - creating minimal structure');
+                  const minimalData: UserDocument = {
+                    uid: userId,
+                    email: undefined,
+                    displayName: undefined,
+                    isAnonymous: true,
+                    onboardingCompleted: false,
+                    onboardingCompletedAt: undefined,
+                    profile: {},
+                    goals: {},
+                    activity: {},
+                    diet: {},
+                    preferences: {},
+                    commitment: {},
+                    calculatedValues: defaultCalculatedValues,
+                    progress: defaultProgress,
+                    createdAt: firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firestore.FieldValue.serverTimestamp(),
+                    lastUpdated: undefined,
+                    version: undefined,
+                  };
+                  setUserData(minimalData);
+                  return;
+                }
+              }
 
-        // If document exists but data is undefined/empty
-        if (!rawData || Object.keys(rawData).length === 0) {
-          console.log('⚠️ loadUserData: Document exists but has no data');
-          
-          // Check if this is an anonymous user (they might be in onboarding flow)
-          const currentUser = auth().currentUser;
-          if (currentUser && !currentUser.isAnonymous) {
-            // Permanent account with no data - logout and reset
-            console.log('🔄 loadUserData: Permanent account with no data - logging out');
-            try {
-              await auth().signOut();
-              setUserData(null);
-              console.log('✅ loadUserData: User logged out successfully');
-            } catch (logoutError) {
-              console.error('❌ loadUserData: Error during logout:', logoutError);
-              setUserData(null);
+              // Safely handle the data with proper defaults
+              const safeData: UserDocument = {
+                uid: userId,
+                email: rawData?.email,
+                displayName: rawData?.displayName,
+                isAnonymous: rawData?.isAnonymous !== false,
+                onboardingCompleted: rawData?.onboardingCompleted === true,
+                onboardingCompletedAt: rawData?.onboardingCompletedAt,
+                profile: rawData?.profile || {},
+                goals: rawData?.goals || {},
+                activity: rawData?.activity || {},
+                diet: rawData?.diet || {},
+                preferences: rawData?.preferences || {},
+                commitment: rawData?.commitment || {},
+                calculatedValues: rawData?.calculatedValues || defaultCalculatedValues,
+                progress: rawData?.progress || defaultProgress,
+                createdAt: rawData?.createdAt ?? firestore.FieldValue.serverTimestamp(),
+                updatedAt: rawData?.updatedAt ?? firestore.FieldValue.serverTimestamp(),
+                lastUpdated: rawData?.lastUpdated,
+                version: rawData?.version,
+              };
+
+              console.log('loadUserData: Safe data created, onboardingCompleted:', safeData.onboardingCompleted);
+              setUserData(safeData);
+            } else {
+              console.log('⚠️ loadUserData: No Firestore document found for authenticated user');
+
+              // Check if this is an anonymous user (they might be in onboarding flow)
+              const currentUser = auth().currentUser;
+              if (currentUser && !currentUser.isAnonymous) {
+                // Permanent account with no document - logout and reset
+                console.log('🔄 loadUserData: Permanent account with no document - logging out');
+                auth().signOut().catch((logoutError) => {
+                  console.error('❌ loadUserData: Error during logout:', logoutError);
+                });
+                setUserData(null);
+              } else {
+                // Anonymous user - create minimal data structure for onboarding
+                console.log('⚠️ loadUserData: Anonymous user with no document - creating minimal structure');
+                const minimalData: UserDocument = {
+                  uid: userId,
+                  email: undefined,
+                  displayName: undefined,
+                  isAnonymous: true,
+                  onboardingCompleted: false,
+                  onboardingCompletedAt: undefined,
+                  profile: {},
+                  goals: {},
+                  activity: {},
+                  diet: {},
+                  preferences: {},
+                  commitment: {},
+                  calculatedValues: defaultCalculatedValues,
+                  progress: defaultProgress,
+                  createdAt: firestore.FieldValue.serverTimestamp(),
+                  updatedAt: firestore.FieldValue.serverTimestamp(),
+                  lastUpdated: undefined,
+                  version: undefined,
+                };
+                setUserData(minimalData);
+              }
             }
-            return;
-          } else {
-            // Anonymous user - create minimal data structure for onboarding
-            console.log('⚠️ loadUserData: Anonymous user with no data - creating minimal structure');
-            const minimalData: UserDocument = {
+
+            setIsLoading(false);
+          },
+          (error) => {
+            console.error('loadUserData: Real-time listener error:', error);
+            // On error, create a minimal safe user data object
+            const fallbackData: UserDocument = {
               uid: userId,
               email: undefined,
               displayName: undefined,
@@ -162,102 +247,19 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               lastUpdated: undefined,
               version: undefined,
             };
-            setUserData(minimalData);
-            return;
+            console.log('loadUserData: Using fallback data due to error');
+            setUserData(fallbackData);
+            setIsLoading(false);
           }
-        }
+        );
 
-        // Safely handle the data with proper defaults
-        const safeData: UserDocument = {
-          uid: userId,
-          email: rawData?.email,
-          displayName: rawData?.displayName,
-          isAnonymous: rawData?.isAnonymous !== false, // Default to true if not specified
-          onboardingCompleted: rawData?.onboardingCompleted === true,
-          onboardingCompletedAt: rawData?.onboardingCompletedAt,
-          profile: rawData?.profile || {},
-          goals: rawData?.goals || {},
-          activity: rawData?.activity || {},
-          diet: rawData?.diet || {},
-          preferences: rawData?.preferences || {},
-          commitment: rawData?.commitment || {},
-          calculatedValues: rawData?.calculatedValues || defaultCalculatedValues,
-          progress: rawData?.progress || defaultProgress,
-          createdAt: rawData?.createdAt ?? firestore.FieldValue.serverTimestamp(),
-          updatedAt: rawData?.updatedAt ?? firestore.FieldValue.serverTimestamp(),
-          lastUpdated: rawData?.lastUpdated,
-          version: rawData?.version,
-        };
+      // Store unsubscribe function for cleanup
+      setUnsubscribeListener(() => unsubscribe);
+      console.log('loadUserData: Real-time listener set up successfully');
 
-        console.log('loadUserData: Safe data created, onboardingCompleted:', safeData.onboardingCompleted);
-        setUserData(safeData);
-      } else {
-        console.log('⚠️ loadUserData: No Firestore document found for authenticated user');
-        
-        // Check if this is an anonymous user (they might be in onboarding flow)
-        const currentUser = auth().currentUser;
-        if (currentUser && !currentUser.isAnonymous) {
-          // Permanent account with no document - logout and reset
-          console.log('🔄 loadUserData: Permanent account with no document - logging out');
-          try {
-            await auth().signOut();
-            setUserData(null);
-            console.log('✅ loadUserData: User logged out successfully');
-          } catch (logoutError) {
-            console.error('❌ loadUserData: Error during logout:', logoutError);
-            setUserData(null);
-          }
-        } else {
-          // Anonymous user - create minimal data structure for onboarding
-          console.log('⚠️ loadUserData: Anonymous user with no document - creating minimal structure');
-          const minimalData: UserDocument = {
-            uid: userId,
-            email: undefined,
-            displayName: undefined,
-            isAnonymous: true,
-            onboardingCompleted: false,
-            onboardingCompletedAt: undefined,
-            profile: {},
-            goals: {},
-            activity: {},
-            diet: {},
-            preferences: {},
-            commitment: {},
-            calculatedValues: defaultCalculatedValues,
-            progress: defaultProgress,
-            createdAt: firestore.FieldValue.serverTimestamp(),
-            updatedAt: firestore.FieldValue.serverTimestamp(),
-            lastUpdated: undefined,
-            version: undefined,
-          };
-          setUserData(minimalData);
-        }
-      }
     } catch (error) {
-      console.error('Error loading user data:', error);
-      // On error, create a minimal safe user data object
-      const fallbackData: UserDocument = {
-        uid: userId,
-        email: undefined,
-        displayName: undefined,
-        isAnonymous: true,
-        onboardingCompleted: false,
-        onboardingCompletedAt: undefined,
-        profile: {},
-        goals: {},
-        activity: {},
-        diet: {},
-        preferences: {},
-        commitment: {},
-        calculatedValues: defaultCalculatedValues,
-        progress: defaultProgress,
-        createdAt: firestore.FieldValue.serverTimestamp(),
-        updatedAt: firestore.FieldValue.serverTimestamp(),
-        lastUpdated: undefined,
-        version: undefined,
-      };
-      console.log('loadUserData: Using fallback data due to error');
-      setUserData(fallbackData);
+      console.error('Error setting up real-time listener:', error);
+      setIsLoading(false);
     }
   };
 
@@ -411,8 +413,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .doc(user.uid)
         .set(updateData, { merge: true });
 
-      // Refresh user data
-      await refreshUserData();
+      // Real-time listener will automatically update userData
     } catch (error) {
       console.error('Error updating user profile:', error);
       throw error;
@@ -441,7 +442,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .doc(user.uid)
         .set(updateData, { merge: true });
 
-      await refreshUserData();
+      // Real-time listener will automatically update userData
     } catch (error) {
       console.error('Error updating goals:', error);
       throw error;
@@ -470,7 +471,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .doc(user.uid)
         .set(updateData, { merge: true });
 
-      await refreshUserData();
+      // Real-time listener will automatically update userData
     } catch (error) {
       console.error('Error updating activity:', error);
       throw error;
@@ -499,7 +500,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .doc(user.uid)
         .set(updateData, { merge: true });
 
-      await refreshUserData();
+      // Real-time listener will automatically update userData
     } catch (error) {
       console.error('Error updating diet:', error);
       throw error;
@@ -528,7 +529,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .doc(user.uid)
         .set(updateData, { merge: true });
 
-      await refreshUserData();
+      // Real-time listener will automatically update userData
     } catch (error) {
       console.error('Error updating preferences:', error);
       throw error;
@@ -557,7 +558,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .doc(user.uid)
         .set(updateData, { merge: true });
 
-      await refreshUserData();
+      // Real-time listener will automatically update userData
     } catch (error) {
       console.error('Error updating commitment:', error);
       throw error;
@@ -725,7 +726,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }, { merge: true });
 
       console.log('completeOnboarding: Onboarding status updated to true');
-      await refreshUserData();
+      // Real-time listener will automatically update userData
 
       console.log('completeOnboarding: User data refreshed successfully');
     } catch (error) {
@@ -744,14 +745,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Refresh user data from Firestore
+  // Refresh user data from Firestore (no-op since we use real-time listener)
   const refreshUserData = async () => {
-    if (user) {
-      console.log('refreshUserData: Refreshing data for user:', user.uid);
-      await loadUserData(user.uid);
-    } else {
-      console.warn('refreshUserData: No user to refresh');
-    }
+    // Real-time listener automatically keeps data in sync
+    // This function is kept for compatibility but does nothing
+    console.log('refreshUserData: Data is automatically synced via real-time listener');
   };
 
   // Computed values

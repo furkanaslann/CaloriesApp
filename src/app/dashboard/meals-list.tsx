@@ -11,8 +11,10 @@ import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   FlatList,
+  Image,
   Modal,
   RefreshControl,
   ScrollView,
@@ -46,7 +48,7 @@ interface Meal {
   ingredients?: string[];
   healthTips?: string[];
   tags?: string[];
-  portion?: string;
+  portion?: string | { amount: number; unit: string };
   healthScore?: number;
   allergens?: string[];
   processingLevel?: string;
@@ -57,7 +59,7 @@ interface Meal {
 const MealsListScreen = () => {
   const router = useRouter();
   const { user } = useUser();
-  const { getRecentMeals } = useDashboard();
+  const { getRecentMeals, deleteMeal, refreshDashboard } = useDashboard();
 
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,6 +68,7 @@ const MealsListScreen = () => {
   const [showMealDetail, setShowMealDetail] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedMeal, setEditedMeal] = useState<Meal | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   // Theme object
   const theme = {
@@ -161,6 +164,29 @@ const MealsListScreen = () => {
       borderWidth: 1,
       borderColor: theme.semanticColors.border.primary,
       ...theme.shadows.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    mealImageContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: theme.borderRadius.md,
+      overflow: 'hidden',
+      marginRight: theme.spacing.md,
+      backgroundColor: '#F8FAFC',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    mealImage: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+    mealPlaceholderIcon: {
+      fontSize: 32,
+    },
+    mealContentContainer: {
+      flex: 1,
     },
     mealHeader: {
       flexDirection: 'row',
@@ -515,6 +541,79 @@ const MealsListScreen = () => {
       color: theme.semanticColors.text.primary,
       minHeight: 44,
     },
+    // Delete button styles
+    deleteButton: {
+      backgroundColor: theme.colors.danger,
+      paddingHorizontal: theme.spacing.lg,
+      paddingVertical: theme.spacing.md,
+      borderRadius: theme.borderRadius.md,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: theme.spacing.sm,
+    },
+    deleteButtonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    deleteModalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: theme.spacing['2xl'],
+    },
+    deleteModalContent: {
+      backgroundColor: '#FFFFFF',
+      borderRadius: theme.borderRadius.xl,
+      padding: theme.spacing['2xl'],
+      width: '100%',
+      maxWidth: 400,
+      ...theme.shadows.xl,
+    },
+    deleteModalTitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: theme.semanticColors.text.primary,
+      marginBottom: theme.spacing.sm,
+      textAlign: 'center',
+    },
+    deleteModalText: {
+      fontSize: 16,
+      color: theme.semanticColors.text.secondary,
+      textAlign: 'center',
+      marginBottom: theme.spacing['2xl'],
+      lineHeight: 24,
+    },
+    deleteModalButtons: {
+      flexDirection: 'row',
+      gap: theme.spacing.md,
+    },
+    deleteModalCancelButton: {
+      flex: 1,
+      backgroundColor: '#F1F5F9',
+      paddingVertical: theme.spacing.md,
+      borderRadius: theme.borderRadius.md,
+      alignItems: 'center',
+    },
+    deleteModalCancelText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.semanticColors.text.secondary,
+    },
+    deleteModalConfirmButton: {
+      flex: 1,
+      backgroundColor: theme.colors.danger,
+      paddingVertical: theme.spacing.md,
+      borderRadius: theme.borderRadius.md,
+      alignItems: 'center',
+    },
+    deleteModalConfirmText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#FFFFFF',
+    },
   });
 
   // Load meals from dashboard hook
@@ -522,7 +621,9 @@ const MealsListScreen = () => {
     if (!user) return;
 
     try {
-      const recentMeals = await getRecentMeals(50); // Load more meals for the list view
+      // Get today's date to fetch only today's meals
+      const today = new Date().toISOString().split('T')[0];
+      const recentMeals = await getRecentMeals(50, today); // Load today's meals only
 
       // Transform meals to expected format
       const transformedMeals: Meal[] = recentMeals.map(meal => ({
@@ -544,6 +645,7 @@ const MealsListScreen = () => {
         ingredients: meal.ingredients || [],
         healthTips: meal.healthTips || [],
         tags: meal.tags || [],
+        // Handle portion - if it's an object, keep it as is, otherwise use default
         portion: meal.portion || '1 porsiyon',
         healthScore: meal.healthScore,
         allergens: meal.allergens || [],
@@ -702,6 +804,33 @@ const MealsListScreen = () => {
   const [newHealthTip, setNewHealthTip] = useState('');
   const [newAllergen, setNewAllergen] = useState('');
 
+  // Delete meal function
+  const handleDeleteMeal = async (mealId: string) => {
+    try {
+      await deleteMeal(mealId);
+
+      // Update local state
+      setMeals(prevMeals => prevMeals.filter(meal => meal.id !== mealId));
+
+      // Close modal
+      setShowDeleteConfirmation(false);
+      setShowMealDetail(false);
+      setSelectedMeal(null);
+
+      // Show success message
+      Alert.alert('Başarılı', 'Yemek kaydı başarıyla silindi');
+    } catch (error) {
+      console.error('Error deleting meal:', error);
+      Alert.alert('Hata', 'Yemek kaydı silinirken bir hata oluştu');
+    }
+  };
+
+  const confirmDeleteMeal = () => {
+    if (selectedMeal) {
+      setShowDeleteConfirmation(true);
+    }
+  };
+
   const getMealIcon = (type: string) => {
     switch (type) {
       case 'Kahvaltı':
@@ -721,44 +850,69 @@ const MealsListScreen = () => {
       onPress={() => handleMealPress(item)}
       activeOpacity={0.7}
     >
-      <View style={styles.mealHeader}>
-        <View style={styles.mealInfo}>
-          <Text style={styles.mealName}>{item.name}</Text>
-          <View style={styles.mealMeta}>
-            <Text style={styles.mealTime}>{item.date} • {item.time}</Text>
-            <View style={styles.mealType}>
-              <Ionicons
-                name={getMealIcon(item.type)}
-                size={12}
-                color="#64748B"
-                style={{ marginRight: 4 }}
-              />
-              <Text style={{ fontSize: 12, color: theme.semanticColors.text.tertiary }}>{item.type}</Text>
-            </View>
-          </View>
-        </View>
-        {item.confidence !== undefined && item.confidence > 0 && (
-          <View style={styles.confidenceBadge}>
-            <Text style={styles.confidenceText}>{item.confidence}%</Text>
-          </View>
+      {/* Meal Image */}
+      <View style={styles.mealImageContainer}>
+        {item.imageBase64 ? (
+          <Image
+            source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }}
+            style={styles.mealImage}
+          />
+        ) : item.imageUrl ? (
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={styles.mealImage}
+          />
+        ) : (
+          <Ionicons
+            name={getMealIcon(item.type)}
+            size={32}
+            color={theme.colors.primary}
+            style={styles.mealPlaceholderIcon}
+          />
         )}
       </View>
-      <View style={styles.nutritionInfo}>
-        <View style={styles.nutritionItem}>
-          <Text style={[styles.nutritionValue, styles.caloriesMain]}>{item.calories}</Text>
-          <Text style={styles.nutritionLabel}>Kalori</Text>
+
+      {/* Meal Content */}
+      <View style={styles.mealContentContainer}>
+        <View style={styles.mealHeader}>
+          <View style={styles.mealInfo}>
+            <Text style={styles.mealName}>{item.name}</Text>
+            <View style={styles.mealMeta}>
+              <Text style={styles.mealTime}>{item.date} • {item.time}</Text>
+              <View style={styles.mealType}>
+                <Ionicons
+                  name={getMealIcon(item.type)}
+                  size={12}
+                  color="#64748B"
+                  style={{ marginRight: 4 }}
+                />
+                <Text style={{ fontSize: 12, color: theme.semanticColors.text.tertiary }}>{item.type}</Text>
+              </View>
+            </View>
+          </View>
+          {item.confidence !== undefined && item.confidence > 0 && (
+            <View style={styles.confidenceBadge}>
+              <Text style={styles.confidenceText}>{item.confidence}%</Text>
+            </View>
+          )}
         </View>
-        <View style={styles.nutritionItem}>
-          <Text style={styles.nutritionValue}>{item.protein}g</Text>
-          <Text style={styles.nutritionLabel}>Protein</Text>
-        </View>
-        <View style={styles.nutritionItem}>
-          <Text style={styles.nutritionValue}>{item.carbs}g</Text>
-          <Text style={styles.nutritionLabel}>Karbonhidrat</Text>
-        </View>
-        <View style={styles.nutritionItem}>
-          <Text style={styles.nutritionValue}>{item.fat}g</Text>
-          <Text style={styles.nutritionLabel}>Yağ</Text>
+        <View style={styles.nutritionInfo}>
+          <View style={styles.nutritionItem}>
+            <Text style={[styles.nutritionValue, styles.caloriesMain]}>{item.calories}</Text>
+            <Text style={styles.nutritionLabel}>Kalori</Text>
+          </View>
+          <View style={styles.nutritionItem}>
+            <Text style={styles.nutritionValue}>{item.protein}g</Text>
+            <Text style={styles.nutritionLabel}>Protein</Text>
+          </View>
+          <View style={styles.nutritionItem}>
+            <Text style={styles.nutritionValue}>{item.carbs}g</Text>
+            <Text style={styles.nutritionLabel}>Karbonhidrat</Text>
+          </View>
+          <View style={styles.nutritionItem}>
+            <Text style={styles.nutritionValue}>{item.fat}g</Text>
+            <Text style={styles.nutritionLabel}>Yağ</Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -821,9 +975,14 @@ const MealsListScreen = () => {
                   </TouchableOpacity>
                 </View>
               ) : (
-                <TouchableOpacity style={styles.editButton} onPress={startEdit}>
-                  <Ionicons name="pencil" size={18} color={theme.colors.primary} />
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+                  <TouchableOpacity style={styles.editButton} onPress={startEdit}>
+                    <Ionicons name="pencil" size={18} color={theme.colors.primary} />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.editButton} onPress={confirmDeleteMeal}>
+                    <Ionicons name="trash" size={18} color={theme.colors.danger} />
+                  </TouchableOpacity>
+                </View>
               )}
             </View>
 
@@ -1072,13 +1231,17 @@ const MealsListScreen = () => {
                   {isEditMode ? (
                     <TextInput
                       style={styles.editableInput}
-                      value={editedMeal?.portion || ''}
+                      value={typeof editedMeal?.portion === 'string' ? editedMeal.portion : `${editedMeal?.portion?.amount || 1} ${editedMeal?.portion?.unit || 'porsiyon'}`}
                       onChangeText={(text) => updateEditedMeal('portion', text)}
                       placeholder="Örn: 1 porsiyon, 100g"
                     />
                   ) : (
                     displayMeal?.portion && (
-                      <Text style={{ fontSize: 14, color: '#64748B' }}>{displayMeal.portion}</Text>
+                      <Text style={{ fontSize: 14, color: '#64748B' }}>
+                        {typeof displayMeal.portion === 'string'
+                          ? displayMeal.portion
+                          : `${displayMeal.portion.amount} ${displayMeal.portion.unit}`}
+                      </Text>
                     )
                   )}
                 </View>
@@ -1149,6 +1312,39 @@ const MealsListScreen = () => {
           <Text style={styles.navLabel}>Profil</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={showDeleteConfirmation}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDeleteConfirmation(false)}
+      >
+        <View style={styles.deleteModalOverlay}>
+          <View style={styles.deleteModalContent}>
+            <Text style={styles.deleteModalTitle}>Yemeği Sil</Text>
+            <Text style={styles.deleteModalText}>
+              "{selectedMeal?.name}" yemeğini silmek istediğinizden emin misiniz?
+              {'\n\n'}
+              Bu işlem geri alınamaz ve günlük kalori takibinden çıkarılacaktır.
+            </Text>
+            <View style={styles.deleteModalButtons}>
+              <TouchableOpacity
+                style={styles.deleteModalCancelButton}
+                onPress={() => setShowDeleteConfirmation(false)}
+              >
+                <Text style={styles.deleteModalCancelText}>İptal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteModalConfirmButton}
+                onPress={() => selectedMeal && handleDeleteMeal(selectedMeal.id)}
+              >
+                <Text style={styles.deleteModalConfirmText}>Sil</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Meal Detail Modal */}
       {renderMealDetailModal()}
