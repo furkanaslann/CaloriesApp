@@ -77,6 +77,11 @@
           "ios": {
             "useFrameworks": "static",
             "buildReactNativeFromSource": true
+          },
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "35.0.0"
           }
         }
       ]

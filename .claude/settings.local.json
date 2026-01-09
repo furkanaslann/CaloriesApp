@@ -49,7 +49,8 @@
       "Bash(\"C:\\Program Files\\Java\\jdk-21\\bin\\java.exe\" -version)",
       "Bash(npx expo start --dev-client)",
       "Bash(npm ls:*)",
-      "mcp__figma-remote-mcp__get_screenshot"
+      "mcp__figma-remote-mcp__get_screenshot",
+      "mcp__figma-remote-mcp__get_design_context"
     ],
     "deny": [],
     "ask": []

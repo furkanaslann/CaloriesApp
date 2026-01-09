@@ -3,30 +3,30 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import GeminiAnalyzer from '@/components/common/gemini-analyzer';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
-import React, { useState, useEffect, useCallback } from 'react';
+import { useUser } from '@/context/user-context';
+import { useDashboard } from '@/hooks/use-dashboard';
+import { FoodAnalysisResult } from '@/services/gemini-service';
+import { Ionicons } from '@expo/vector-icons';
+import { Camera } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   Dimensions,
+  Linking,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
   TextStyle,
   TouchableOpacity,
-  View,
-  Modal,
-  Linking
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useDashboard } from '@/hooks/use-dashboard';
-import GeminiAnalyzer from '@/components/common/gemini-analyzer';
-import { FoodAnalysisResult } from '@/services/gemini-service';
-import { useUser } from '@/context/user-context';
-import * as ImagePicker from 'expo-image-picker';
-import { Camera } from 'expo-camera';
 
 const { width } = Dimensions.get('window');
 
@@ -864,25 +864,7 @@ const CameraDashboardScreen = () => {
             </Text>
           </TouchableOpacity>
 
-          {/* AI Features */}
-          <View style={styles.aiFeaturesSection}>
-            <View style={styles.featureCard}>
-              <Ionicons name="bulb" size={24} color="#7C3AED" />
-              <Text style={styles.featureTitle}>Akıllı Tanıma</Text>
-              <Text style={styles.featureDescription}>Gemini 2.0 Flash ile yiyecekleri otomatik tanı</Text>
-            </View>
-            <View style={styles.featureCard}>
-              <Ionicons name="bar-chart" size={24} color="#10B981" />
-              <Text style={styles.featureTitle}>Detaylı Besin</Text>
-              <Text style={styles.featureDescription}>Kalori, protein, karbonhidrat, yağ değerleri</Text>
-            </View>
-            <View style={styles.featureCard}>
-              <Ionicons name="shield-checkmark" size={24} color="#F59E0B" />
-              <Text style={styles.featureTitle}>Yüksek Doğruluk</Text>
-              <Text style={styles.featureDescription}>95+ başarı oranı ile analiz</Text>
-            </View>
-          </View>
-
+          
           {/* Quick Add Section */}
           <View style={styles.quickAddSection}>
             <Text style={styles.sectionTitle}>Hızlı Ekle</Text>

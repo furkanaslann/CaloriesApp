@@ -4,6 +4,7 @@
  * Figma Design: https://www.figma.com/design/V4OjFZYz1hhZdeWSgZyYtu/Calories-Pages?node-id=47-9
  */
 
+import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -1147,26 +1148,6 @@ const RecipesScreen = () => {
         </ScrollView>
       )}
 
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard')}>
-          <Ionicons name="home" size={24} color="#94A3B8" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Ana Sayfa</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/camera')}>
-          <Ionicons name="camera-outline" size={24} color="#94A3B8" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Kamera</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="restaurant-outline" size={24} color="#7C3AED" style={styles.navIcon} />
-          <Text style={[styles.navLabel, styles.navLabelActive]}>Tarifler</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/profile')}>
-          <Ionicons name="person-outline" size={24} color="#94A3B8" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Profil</Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Filter Modal */}
       <Modal
         visible={showFilterModal}
@@ -1303,6 +1284,9 @@ const RecipesScreen = () => {
 
       {/* Search Focus Overlay */}
       {renderSearchOverlay()}
+
+      {/* Bottom Navigation */}
+      <BottomNavigation activeRoute="/recipes" />
     </SafeAreaView>
   );
 };

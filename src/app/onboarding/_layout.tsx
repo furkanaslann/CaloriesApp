@@ -33,7 +33,7 @@ export default function OnboardingLayout() {
       <Stack.Screen name="commitment" options={{ headerShown: false }} />
       <Stack.Screen name="account-creation" options={{ headerShown: false }} />
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="profile" options={{ headerShown: false }} />
     </Stack>
   );
 }
-//<Stack.Screen name="profile" options={{ headerShown: false }} />

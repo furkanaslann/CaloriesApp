@@ -173,22 +173,15 @@ const DashboardIndexScreen = () => {
           protein: food.protein,
           carbohydrates: food.carbs,
           fats: food.fats,
-          fiber: 0,
-          sugar: 0,
-          sodium: 0,
         },
         portion: {
           amount: 1,
           unit: 'porsiyon',
         },
-        type: mealTypeMap[mealType],
+        type: mealType,
         time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
-        date: new Date().toISOString().split('T')[0],
-        method: 'quick_add',
+        method: 'quickadd',
         confidence: 100,
-        tags: ['Hızlı Ekle'],
-        ingredients: [],
-        healthTips: [],
       });
 
       Alert.alert('✅ Başarılı', `${food.name} (${food.calories} kcal) eklendi!`);

@@ -224,14 +224,64 @@ CaloriTrack is an innovative mobile application that leverages artificial intell
 ### 8. Monetization Strategy
 
 #### 8.1 Freemium Model
-- **Free Tier:** Basic camera recognition (10 scans/day), manual logging, basic dashboard
-- **Premium Tier ($9.99/month):** Unlimited scans, advanced analytics, personalized meal planning, recipe access
+
+**Free Tier:**
+- AI camera recognition: **10 scans/day**
+- Manual food logging: Unlimited
+- Basic dashboard with daily tracking
+- Meal history: **Last 7 days**
+- Recipe access: **5 recipes/month**
+- Active meal plans: **1 plan**
+- Custom foods: **10 items**
+- Basic analytics (daily view only)
+- Weight history: **Last 30 days**
+
+**Premium Tier ($9.99/month):**
+- AI camera recognition: **50 scans/day** with enhanced accuracy
+- **Unlimited** meal history
+- **Unlimited** recipe access
+- Active meal plans: **10 plans**
+- **Unlimited** custom foods
+- **Advanced analytics & reports** (weekly, monthly, custom date ranges)
+- **AI-powered insights** and personalized recommendations
+- **Meal planning** with AI suggestions, grocery lists, and scheduling
+- **Data export** (PDF/CSV) for sharing with health professionals
+- **Pattern recognition** and eating habit analysis
+- **Offline mode** for basic functionality
+- **Priority support**
+- **Ad-free experience**
+
+**Key Premium Features:**
+1. **Advanced Analytics & Reports** - Weekly/monthly trends, comparative analysis
+2. **Meal Planning** - AI suggestions, custom recipes, grocery lists
+3. **Data Export** - PDF/CSV export for professionals
+4. **AI Insights** - Personalized recommendations and nutritional gap detection
+
+**Pricing Options:**
+- Monthly: $9.99/month
+- Annual: $79.99/year (33% savings = $6.67/month)
+- Lifetime: $199.99 (one-time payment, future consideration)
 
 #### 8.2 Additional Revenue Streams
 - **Premium Recipe Collections:** Curated recipe bundles ($2.99-$4.99)
-- **Personalized Coaching:** AI-powered nutrition coaching ($19.99/month)
+- **Personalized Coaching:** AI-powered nutrition coaching ($19.99/month) - Future Pro tier consideration
 - **Brand Partnerships:** Sponsored content and food product integration
 - **Corporate Wellness Programs:** B2B subscription packages
+
+#### 8.3 Feature Gating Strategy
+
+**Core Value Proposition:** AI-powered food recognition is the primary driver for premium conversion.
+
+**Upgrade Triggers:**
+- Daily AI scan limit reached (10 scans)
+- History access beyond 7 days
+- Advanced analytics access
+- Recipe limit reached (5/month)
+- Meal planning beyond 1 active plan
+
+**Target Conversion Rate:** 5-10% (industry standard for freemium apps)
+
+For detailed feature specifications, see [PREMIUM_FEATURES.md](./PREMIUM_FEATURES.md)
 
 ### 9. Success Metrics & KPIs
 
