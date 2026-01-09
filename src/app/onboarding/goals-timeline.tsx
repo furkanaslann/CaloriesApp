@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
+import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const TimelineScreen = () => {
@@ -135,27 +136,6 @@ const TimelineScreen = () => {
       padding: theme.spacing.lg,
       justifyContent: 'flex-start',
     },
-    progressIndicator: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: theme.spacing['2xl'] || 24,
-      paddingTop: '5%',
-      marginTop: '15%',
-    },
-    dot: {
-      width: 8,
-      height: 8,
-      borderRadius: theme.borderRadius.full || 9999,
-      backgroundColor: theme.semanticColors.border.secondary || '#E2E8F0',
-      marginHorizontal: 4,
-    },
-    dotActive: {
-      backgroundColor: theme.colors.primary || '#7C3AED',
-      width: 32,
-      height: 8,
-      borderRadius: theme.borderRadius.sm || 8,
-    },
     header: {
       marginBottom: theme.spacing['3xl'],
       alignItems: 'center',
@@ -245,17 +225,7 @@ const TimelineScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.progressIndicator}>
-          {Array.from({ length: totalSteps }).map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.dot,
-                index === currentStep - 1 && styles.dotActive,
-              ]}
-            />
-          ))}
-        </View>
+        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
 
         <View style={styles.header}>
           <Text style={styles.title}>Zaman Çizelgesi</Text>
