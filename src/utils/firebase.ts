@@ -12,13 +12,24 @@
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
+import { Platform } from 'react-native';
 
 import { FIREBASE_CONFIG } from '@/constants/firebase';
 
 // Firebase Emulator Configuration for Development
 const IS_DEV = __DEV__;
+// Android emulator needs 10.0.2.2 to reach host machine, iOS simulator uses localhost
+const getEmulatorHost = () => {
+  if (Platform.OS === 'android') {
+    return '10.0.2.2';
+  } else if (Platform.OS === 'ios') {
+    return 'localhost';
+  }
+  return 'localhost'; // Default for web/other platforms
+};
+
 const EMULATOR_CONFIG = {
-  host: '10.0.2.2', // Android emulator needs 10.0.2.2 to reach host machine
+  host: getEmulatorHost(),
   ports: {
     auth: 9099,
     firestore: 8080,
@@ -32,10 +43,43 @@ const EMULATOR_CONFIG = {
 // We'll initialize emulators in a separate function that can be called after Firebase is ready
 let emulatorsInitialized = false;
 
+/**
+ * Helper function to retry Firestore operations with exponential backoff
+ */
+const retryWithBackoff = async <T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  initialDelay: number = 1000
+): Promise<T> => {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error: any) {
+      lastError = error;
+      const isUnavailableError = error?.code === 'firestore/unavailable' || 
+                                  error?.message?.includes('unavailable') ||
+                                  error?.message?.includes('transient');
+      
+      if (!isUnavailableError || attempt === maxRetries - 1) {
+        throw error;
+      }
+      
+      const delay = initialDelay * Math.pow(2, attempt);
+      console.log(`⚠️ Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw lastError || new Error('Operation failed after retries');
+};
+
 export const initializeFirebaseEmulators = async () => {
   if (IS_DEV && !emulatorsInitialized) {
     try {
       console.log('🔥 Initializing Firebase Emulators...');
+      console.log(`📱 Platform: ${Platform.OS}, Host: ${EMULATOR_CONFIG.host}`);
 
       // Connect to Auth Emulator - requires full URL
       const authUrl = `http://${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.auth}`;
@@ -54,6 +98,10 @@ export const initializeFirebaseEmulators = async () => {
       // Connect to Firestore Emulator
       console.log('Connecting to Firestore Emulator at:', `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.firestore}`);
       firestore().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.firestore);
+
+      // Give the emulator connection a moment to stabilize
+      // This delay helps ensure the connection is fully established before any operations
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // NOT: Storage Emulator'üne bağlanmıyoruz
       // Storage için özel bir solution gerekiyor
@@ -233,14 +281,16 @@ export const saveUserProfile = async (userId: string, userData: {
 };
 
 /**
- * Get user profile from Firestore
+ * Get user profile from Firestore with retry logic
  */
 export const getUserProfile = async (userId: string) => {
   try {
-    const doc = await firestore()
-      .collection(FIREBASE_CONFIG.collections.users)
-      .doc(userId)
-      .get();
+    const doc = await retryWithBackoff(async () => {
+      return await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(userId)
+        .get();
+    });
 
     if (!doc.exists) {
       return null;
@@ -742,5 +792,5 @@ export const updateOnboardingData = async (
 };
 
 // Export auth and firestore instances for direct use
-export { auth, firestore };
+export { auth, firestore, retryWithBackoff };
 

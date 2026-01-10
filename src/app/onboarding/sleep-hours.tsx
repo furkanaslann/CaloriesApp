@@ -166,7 +166,7 @@ const SleepHoursScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
+        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
         <View style={styles.header}>
             <Text style={styles.title}>Uyku Süresi</Text>
@@ -211,11 +211,6 @@ const SleepHoursScreen = () => {
         </View>
 
       <View style={styles.buttonContainer}>
-        <Button
-          title="Geri"
-          onPress={handlePrevious}
-          variant="secondary"
-        />
         <Button
           title="Devam Et"
           onPress={handleNext}

@@ -10,7 +10,7 @@ import { OnboardingProvider } from '@/context/onboarding-context';
 import { ThemeProvider as CustomThemeProvider } from '@/context/theme-context';
 import { UserProvider, useUser } from '@/context/user-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { initializeFirebaseEmulators } from '@/utils/firebase';
+import { initializeFirebaseEmulators, retryWithBackoff } from '@/utils/firebase';
 import firestore from '@react-native-firebase/firestore';
 
 export const unstable_settings = {
@@ -118,10 +118,12 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
         else if (!shouldShowDashboard && !hasInitialized) {
           try {
             console.log('🔎 App: Doing direct Firestore check for onboarding status...');
-            const doc = await firestore()
-              .collection(FIREBASE_CONFIG.collections.users)
-              .doc(user.uid)
-              .get();
+            const doc = await retryWithBackoff(async () => {
+              return await firestore()
+                .collection(FIREBASE_CONFIG.collections.users)
+                .doc(user.uid)
+                .get();
+            }, 3, 1000); // 3 retries with exponential backoff starting at 1s
 
             if (doc.exists()) {
               const data = doc.data();
@@ -141,7 +143,9 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
               console.log('⚠️ App: No user document found in Firestore yet - routing to onboarding');
             }
           } catch (error) {
-            console.warn('⚠️ App: Error checking Firestore:', error);
+            console.warn('⚠️ App: Error checking Firestore after retries:', error);
+            // If Firestore is unavailable, we'll route to onboarding as a safe default
+            // The user can complete onboarding and data will sync when Firestore is available
           }
         }
 

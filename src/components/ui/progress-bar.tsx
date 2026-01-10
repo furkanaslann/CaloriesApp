@@ -4,8 +4,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
-import { COLORS, BORDER_RADIUS, SPACING } from '@/constants/theme';
+import { View, StyleSheet, Animated, TouchableOpacity, Text } from 'react-native';
+import { COLORS, BORDER_RADIUS, SPACING, TYPOGRAPHY } from '@/constants/theme';
 
 interface ProgressBarProps {
   currentStep: number;
@@ -14,6 +14,8 @@ interface ProgressBarProps {
   backgroundColor?: string;
   height?: number;
   animated?: boolean;
+  onBack?: () => void;
+  showBackButton?: boolean;
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
@@ -23,6 +25,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   backgroundColor = COLORS.border,
   height = 4,
   animated = true,
+  onBack,
+  showBackButton = true,
 }) => {
   const progress = (currentStep / totalSteps) * 100;
   const animatedWidth = React.useRef(new Animated.Value(0)).current;
@@ -41,30 +45,39 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <View style={styles.container}>
-      <View
-        style={[
-          styles.track,
-          {
-            backgroundColor,
-            height,
-            borderRadius: height / 2,
-          },
-        ]}
-      >
-        <Animated.View
-          style={[
-            styles.fill,
-            {
-              backgroundColor: color,
-              height,
-              borderRadius: height / 2,
-              width: animatedWidth.interpolate({
-                inputRange: [0, 100],
-                outputRange: ['0%', '100%'],
-              }),
-            },
-          ]}
-        />
+      <View style={styles.headerRow}>
+        {showBackButton && onBack && (
+          <TouchableOpacity onPress={onBack} style={styles.backButton} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Text style={styles.backButtonText}>←</Text>
+          </TouchableOpacity>
+        )}
+        <View style={styles.progressContainer}>
+          <View
+            style={[
+              styles.track,
+              {
+                backgroundColor,
+                height,
+                borderRadius: height / 2,
+              },
+            ]}
+          >
+            <Animated.View
+              style={[
+                styles.fill,
+                {
+                  backgroundColor: color,
+                  height,
+                  borderRadius: height / 2,
+                  width: animatedWidth.interpolate({
+                    inputRange: [0, 100],
+                    outputRange: ['0%', '100%'],
+                  }),
+                },
+              ]}
+            />
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -77,6 +90,26 @@ const styles = StyleSheet.create({
     paddingTop: SPACING[4],
     marginTop: SPACING[8],
     marginBottom: SPACING[6],
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING[3],
+  },
+  backButton: {
+    paddingVertical: SPACING[2],
+    paddingHorizontal: SPACING[2],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButtonText: {
+    fontSize: TYPOGRAPHY.fontSizes['2xl'],
+    fontWeight: TYPOGRAPHY.fontWeights.semibold,
+    color: COLORS.textPrimary,
+    lineHeight: 28,
+  },
+  progressContainer: {
+    flex: 1,
   },
   track: {
     width: '100%',

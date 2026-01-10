@@ -281,7 +281,7 @@ const TargetWeightScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
+        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
         <View style={styles.header}>
           <Text style={styles.title}>Hedef Kilo</Text>
@@ -331,11 +331,6 @@ const TargetWeightScreen = () => {
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button
-          title="Geri"
-          onPress={handlePrevious}
-          variant="secondary"
-        />
         <Button
           title="Devam Et"
           onPress={handleNext}

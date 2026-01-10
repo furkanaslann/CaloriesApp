@@ -1,57 +1,48 @@
-[debug] [2026-01-09T18:07:48.027Z] ----------------------------------------------------------------------
-[debug] [2026-01-09T18:07:48.029Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\furka\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only auth,functions,firestore
-[debug] [2026-01-09T18:07:48.030Z] CLI Version:   15.0.0
-[debug] [2026-01-09T18:07:48.030Z] Platform:      win32
-[debug] [2026-01-09T18:07:48.030Z] Node Version:  v22.17.1
-[debug] [2026-01-09T18:07:48.030Z] Time:          Fri Jan 09 2026 21:07:48 GMT+0300 (GMT+03:00)
-[debug] [2026-01-09T18:07:48.031Z] ----------------------------------------------------------------------
+[debug] [2026-01-10T14:34:58.290Z] ----------------------------------------------------------------------
+[debug] [2026-01-10T14:34:58.292Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\furka\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only auth,functions,firestore
+[debug] [2026-01-10T14:34:58.292Z] CLI Version:   15.0.0
+[debug] [2026-01-10T14:34:58.292Z] Platform:      win32
+[debug] [2026-01-10T14:34:58.293Z] Node Version:  v22.17.1
+[debug] [2026-01-10T14:34:58.293Z] Time:          Sat Jan 10 2026 17:34:58 GMT+0300 (GMT+03:00)
+[debug] [2026-01-10T14:34:58.293Z] ----------------------------------------------------------------------
 [debug] 
-[debug] [2026-01-09T18:07:50.258Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"react-native"}
-[debug] [2026-01-09T18:07:50.262Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2026-01-09T18:07:50.263Z] > authorizing via signed-in user (furkansln.011@gmail.com)
-[debug] [2026-01-09T18:07:50.393Z] java version "21.0.9" 2025-10-21 LTS
+[debug] [2026-01-10T14:35:00.246Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"react-native"}
+[debug] [2026-01-10T14:35:00.250Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-10T14:35:00.251Z] > authorizing via signed-in user (furkansln.011@gmail.com)
+[debug] [2026-01-10T14:35:00.372Z] java version "21.0.9" 2025-10-21 LTS
+Java(TM) SE Runtime Environment (build 21.0.9+7-LTS-338)
 
-[debug] [2026-01-09T18:07:50.394Z] Java(TM) SE Runtime Environment (build 21.0.9+7-LTS-338)
-Java HotSpot(TM) 64-Bit Server VM (build 21.0.9+7-LTS-338, mixed mode, sharing)
+[debug] [2026-01-10T14:35:00.373Z] Java HotSpot(TM) 64-Bit Server VM (build 21.0.9+7-LTS-338, mixed mode, sharing)
 
-[debug] [2026-01-09T18:07:50.407Z] Parsed Java major version: 21
+[debug] [2026-01-10T14:35:00.386Z] Parsed Java major version: 21
 [info] i  emulators: Starting emulators: auth, functions, firestore {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, functions, firestore"}}
-[debug] [2026-01-09T18:07:50.423Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2026-01-09T18:07:50.424Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2026-01-09T18:07:50.424Z] [firestore] Firestore Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2026-01-09T18:07:50.424Z] [firestore.websocket] websocket server for firestore only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2026-01-09T18:07:50.424Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}]},"metadata":{"message":"assigned listening specs for emulators"}}
-[debug] [2026-01-09T18:07:50.427Z] Emulator locator file path: C:\Users\furka\AppData\Local\Temp\hub-calories-app-185b6.json
-[debug] [2026-01-09T18:07:50.427Z] [hub] writing locator at C:\Users\furka\AppData\Local\Temp\hub-calories-app-185b6.json
-[debug] [2026-01-09T18:07:50.437Z] [functions] Functions Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2026-01-09T18:07:50.437Z] [eventarc] Eventarc Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2026-01-09T18:07:50.437Z] [tasks] Cloud Tasks Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2026-01-09T18:07:50.437Z] late-assigned ports for functions and eventarc emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"functions":[{"address":"127.0.0.1","family":"IPv4","port":5001}],"eventarc":[{"address":"127.0.0.1","family":"IPv4","port":9299}],"tasks":[{"address":"127.0.0.1","family":"IPv4","port":9499}]},"metadata":{"message":"late-assigned ports for functions and eventarc emulators"}}
+[debug] [2026-01-10T14:35:00.400Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-01-10T14:35:00.400Z] assigned listening specs for emulators {"user":{"ui":[{"address":"0.0.0.0","family":"IPv4","port":4000}],"auth":[{"address":"0.0.0.0","family":"IPv4","port":9099}],"firestore":[{"address":"0.0.0.0","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"0.0.0.0","family":"IPv4","port":9150}],"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-01-10T14:35:00.404Z] Emulator locator file path: C:\Users\furka\AppData\Local\Temp\hub-calories-app-185b6.json
+[debug] [2026-01-10T14:35:00.404Z] [hub] writing locator at C:\Users\furka\AppData\Local\Temp\hub-calories-app-185b6.json
+[debug] [2026-01-10T14:35:00.414Z] [eventarc] Eventarc Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-01-10T14:35:00.414Z] [tasks] Cloud Tasks Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-01-10T14:35:00.414Z] late-assigned ports for functions and eventarc emulators {"user":{"ui":[{"address":"0.0.0.0","family":"IPv4","port":4000}],"auth":[{"address":"0.0.0.0","family":"IPv4","port":9099}],"firestore":[{"address":"0.0.0.0","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"0.0.0.0","family":"IPv4","port":9150}],"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"functions":[{"address":"0.0.0.0","family":"IPv4","port":5001}],"eventarc":[{"address":"127.0.0.1","family":"IPv4","port":9299}],"tasks":[{"address":"127.0.0.1","family":"IPv4","port":9499}]},"metadata":{"message":"late-assigned ports for functions and eventarc emulators"}}
 [warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: apphosting, database, hosting, pubsub, storage, dataconnect {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mapphosting, database, hosting, pubsub, storage, dataconnect\u001b[22m"}}
-[debug] [2026-01-09T18:07:50.453Z] defaultcredentials: writing to file C:\Users\furka\AppData\Roaming\firebase\furkansln_011_gmail.com_application_default_credentials.json
-[debug] [2026-01-09T18:07:50.454Z] Setting GAC to C:\Users\furka\AppData\Roaming\firebase\furkansln_011_gmail.com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\furka\\AppData\\Roaming\\firebase\\furkansln_011_gmail.com_application_default_credentials.json"}}
-[debug] [2026-01-09T18:07:50.455Z] Checked if tokens are valid: false, expires at: 1767980650748
-[debug] [2026-01-09T18:07:50.456Z] Checked if tokens are valid: false, expires at: 1767980650748
-[debug] [2026-01-09T18:07:50.456Z] > refreshing access token with scopes: []
-[debug] [2026-01-09T18:07:50.457Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
-[debug] [2026-01-09T18:07:50.457Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2026-01-09T18:07:50.690Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
-[debug] [2026-01-09T18:07:50.691Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2026-01-09T18:07:50.709Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/calories-app-185b6/adminSdkConfig [none]
-[debug] [2026-01-09T18:07:51.439Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/calories-app-185b6/adminSdkConfig 200
-[debug] [2026-01-09T18:07:51.439Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/calories-app-185b6/adminSdkConfig {"projectId":"calories-app-185b6","storageBucket":"calories-app-185b6.firebasestorage.app"}
+[debug] [2026-01-10T14:35:00.430Z] defaultcredentials: writing to file C:\Users\furka\AppData\Roaming\firebase\furkansln_011_gmail.com_application_default_credentials.json
+[debug] [2026-01-10T14:35:00.431Z] Setting GAC to C:\Users\furka\AppData\Roaming\firebase\furkansln_011_gmail.com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\furka\\AppData\\Roaming\\firebase\\furkansln_011_gmail.com_application_default_credentials.json"}}
+[debug] [2026-01-10T14:35:00.432Z] Checked if tokens are valid: true, expires at: 1768058127389
+[debug] [2026-01-10T14:35:00.432Z] Checked if tokens are valid: true, expires at: 1768058127389
+[debug] [2026-01-10T14:35:00.433Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/calories-app-185b6/adminSdkConfig [none]
+[debug] [2026-01-10T14:35:01.155Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/calories-app-185b6/adminSdkConfig 200
+[debug] [2026-01-10T14:35:01.155Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/calories-app-185b6/adminSdkConfig {"projectId":"calories-app-185b6","storageBucket":"calories-app-185b6.firebasestorage.app"}
 [warn] !  firestore: Cloud Firestore Emulator does not support multiple databases yet. {"metadata":{"emulator":{"name":"firestore"},"message":"Cloud Firestore Emulator does not support multiple databases yet."}}
 [warn] !  firestore: Did not find a Cloud Firestore rules file specified in a firebase.json config file. {"metadata":{"emulator":{"name":"firestore"},"message":"Did not find a Cloud Firestore rules file specified in a firebase.json config file."}}
 [warn] !  firestore: The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration. {"metadata":{"emulator":{"name":"firestore"},"message":"The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration."}}
-[debug] [2026-01-09T18:07:51.469Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
-[debug] [2026-01-09T18:07:51.469Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
-[debug] [2026-01-09T18:07:51.469Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","C:\\Users\\furka\\.cache\\firebase\\emulators\\cloud-firestore-emulator-v1.20.2.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","calories-app-185b6","--single_project_mode",true,"--functions_emulator","127.0.0.1:5001"],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\furka\\\\.cache\\\\firebase\\\\emulators\\\\cloud-firestore-emulator-v1.20.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"calories-app-185b6\",\"--single_project_mode\",true,\"--functions_emulator\",\"127.0.0.1:5001\"],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[debug] [2026-01-10T14:35:01.170Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-01-10T14:35:01.170Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2026-01-10T14:35:01.170Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","C:\\Users\\furka\\.cache\\firebase\\emulators\\cloud-firestore-emulator-v1.20.2.jar","--host","0.0.0.0","--port",8080,"--websocket_port",9150,"--project_id","calories-app-185b6","--single_project_mode",true,"--functions_emulator","127.0.0.1:5001"],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\furka\\\\.cache\\\\firebase\\\\emulators\\\\cloud-firestore-emulator-v1.20.2.jar\",\"--host\",\"0.0.0.0\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"calories-app-185b6\",\"--single_project_mode\",true,\"--functions_emulator\",\"127.0.0.1:5001\"],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
 [info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
 [info] +  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
 [info] i  functions: Watching "D:\Projeler\CaloriesApp\caloriesApp\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"D:\\Projeler\\CaloriesApp\\caloriesApp\\functions\" for Cloud Functions..."}}
-[debug] [2026-01-09T18:07:59.055Z] Validating nodejs source
+[debug] [2026-01-10T14:35:08.787Z] Validating nodejs source
 [warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
-[debug] [2026-01-09T18:07:59.865Z] > [functions] package.json contents: {
+[debug] [2026-01-10T14:35:09.764Z] > [functions] package.json contents: {
   "name": "functions",
   "version": "1.0.0",
   "main": "lib/index.js",
@@ -100,46 +91,42 @@ Java HotSpot(TM) 64-Bit Server VM (build 21.0.9+7-LTS-338, mixed mode, sharing)
     "node": "20"
   }
 }
-[debug] [2026-01-09T18:07:59.866Z] Building nodejs source
-[debug] [2026-01-09T18:07:59.866Z] Failed to find version of module node: reached end of search path D:\Projeler\CaloriesApp\caloriesApp\functions\node_modules
+[debug] [2026-01-10T14:35:09.764Z] Building nodejs source
+[debug] [2026-01-10T14:35:09.765Z] Failed to find version of module node: reached end of search path D:\Projeler\CaloriesApp\caloriesApp\functions\node_modules
 [warn] !  functions: Your requested "node" version "20" doesn't match your global version "22". Using node@22 from host. 
-[debug] [2026-01-09T18:07:59.868Z] Could not find functions.yaml. Must use http discovery
-[debug] [2026-01-09T18:07:59.876Z] Found firebase-functions binary at 'D:\Projeler\CaloriesApp\caloriesApp\functions\node_modules\.bin\firebase-functions'
-[info] Serving at port 8504
+[debug] [2026-01-10T14:35:09.766Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-01-10T14:35:09.776Z] Found firebase-functions binary at 'D:\Projeler\CaloriesApp\caloriesApp\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8596
 
 [info] GEMINI_API_KEY exists: false
 
 [info] GEMINI_API_KEY length: 0
 
-[debug] [2026-01-09T18:08:00.933Z] Got response from /__/functions.yaml {"endpoints":{"analyzeFood":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["us-central1"],"secretEnvironmentVariables":[{"key":"GEMINI_API_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"analyzeFood"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
+[debug] [2026-01-10T14:35:10.704Z] Got response from /__/functions.yaml {"endpoints":{"analyzeFood":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["us-central1"],"secretEnvironmentVariables":[{"key":"GEMINI_API_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"analyzeFood"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
 [info] +  functions: Loaded functions definitions from source: analyzeFood. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: analyzeFood."}}
 [info] +  functions[us-central1-analyzeFood]: http function initialized (http://127.0.0.1:5001/calories-app-185b6/us-central1/analyzeFood). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://127.0.0.1:5001/calories-app-185b6/us-central1/analyzeFood)."}}
-[debug] [2026-01-09T18:08:04.978Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[debug] [2026-01-10T14:35:14.759Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
 [info] 
 ┌─────────────────────────────────────────────────────────────┐
 │ ✔  All emulators ready! It is now safe to connect your app. │
 │ i  View Emulator UI at http://127.0.0.1:4000/               │
 └─────────────────────────────────────────────────────────────┘
 
-┌────────────────┬────────────────┬─────────────────────────────────┐
-│ Emulator       │ Host:Port      │ View in Emulator UI             │
-├────────────────┼────────────────┼─────────────────────────────────┤
-│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth      │
-├────────────────┼────────────────┼─────────────────────────────────┤
-│ Functions      │ 127.0.0.1:5001 │ http://127.0.0.1:4000/functions │
-├────────────────┼────────────────┼─────────────────────────────────┤
-│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore │
-└────────────────┴────────────────┴─────────────────────────────────┘
+┌────────────────┬──────────────┬─────────────────────────────────┐
+│ Emulator       │ Host:Port    │ View in Emulator UI             │
+├────────────────┼──────────────┼─────────────────────────────────┤
+│ Authentication │ 0.0.0.0:9099 │ http://127.0.0.1:4000/auth      │
+├────────────────┼──────────────┼─────────────────────────────────┤
+│ Functions      │ 0.0.0.0:5001 │ http://127.0.0.1:4000/functions │
+├────────────────┼──────────────┼─────────────────────────────────┤
+│ Firestore      │ 0.0.0.0:8080 │ http://127.0.0.1:4000/firestore │
+└────────────────┴──────────────┴─────────────────────────────────┘
   Emulator Hub host: 127.0.0.1 port: 4400
   Other reserved ports: 4500, 9150
 
 Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
  
-[debug] [2026-01-09T18:18:15.682Z] >>> [apiv2][query] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast [none]
-[debug] [2026-01-09T18:18:15.693Z] >>> [apiv2][body] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast {"eventId":"c6c75ef6-6199-4aa7-8330-470dfed7ee20","eventType":"providers/firebase.auth/eventTypes/user.create","resource":{"name":"projects/calories-app-185b6","service":"firebaseauth.googleapis.com"},"params":{},"timestamp":"2026-01-09T18:18:15.670Z","data":{"uid":"SI6A3OdTrTMOtWBMKuzJkuVZQed4","metadata":{"creationTime":"2026-01-09T18:18:15.659Z","lastSignInTime":"2026-01-09T18:18:15.659Z"},"customClaims":{}}}
-[debug] [2026-01-09T18:18:15.818Z] <<< [apiv2][status] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast 200
-[debug] [2026-01-09T18:18:15.818Z] <<< [apiv2][body] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast {"status":"multicast_acknowledged"}
-[debug] [2026-01-09T18:51:12.485Z] >>> [apiv2][query] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast [none]
-[debug] [2026-01-09T18:51:12.487Z] >>> [apiv2][body] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast {"eventId":"54f0631d-c567-4b72-aea4-a7ec92819833","eventType":"providers/firebase.auth/eventTypes/user.create","resource":{"name":"projects/calories-app-185b6","service":"firebaseauth.googleapis.com"},"params":{},"timestamp":"2026-01-09T18:51:12.484Z","data":{"uid":"gpMXeeSUXfUnvyjCJjBBKI5fGZG3","metadata":{"creationTime":"2026-01-09T18:51:12.484Z","lastSignInTime":"2026-01-09T18:51:12.484Z"},"customClaims":{}}}
-[debug] [2026-01-09T18:51:12.496Z] <<< [apiv2][status] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast 200
-[debug] [2026-01-09T18:51:12.496Z] <<< [apiv2][body] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast {"status":"multicast_acknowledged"}
+[debug] [2026-01-10T15:01:20.737Z] >>> [apiv2][query] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast [none]
+[debug] [2026-01-10T15:01:20.759Z] >>> [apiv2][body] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast {"eventId":"425c52c5-22e2-46c9-b2b7-a5b5a238df92","eventType":"providers/firebase.auth/eventTypes/user.create","resource":{"name":"projects/calories-app-185b6","service":"firebaseauth.googleapis.com"},"params":{},"timestamp":"2026-01-10T15:01:20.707Z","data":{"uid":"yWLbbCmf6G5OWZKSlNdkBqE4Bl0z","metadata":{"creationTime":"2026-01-10T15:01:20.679Z","lastSignInTime":"2026-01-10T15:01:20.679Z"},"customClaims":{}}}
+[debug] [2026-01-10T15:01:20.886Z] <<< [apiv2][status] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast 200
+[debug] [2026-01-10T15:01:20.886Z] <<< [apiv2][body] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast {"status":"multicast_acknowledged"}

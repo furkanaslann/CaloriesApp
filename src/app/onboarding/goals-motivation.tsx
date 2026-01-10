@@ -312,7 +312,7 @@ const MotivationScreen = () => {
         contentContainerStyle={{ paddingBottom: theme.spacing.xl }}
       >
         <View style={styles.content}>
-          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
           <View style={styles.header}>
             <Text style={styles.title}>Motivasyon Seviyeniz</Text>
@@ -372,11 +372,6 @@ const MotivationScreen = () => {
       </ScrollView>
 
       <View style={styles.buttonContainer}>
-        <Button
-          title="Geri"
-          onPress={handlePrevious}
-          variant="secondary"
-        />
         <Button
           title="Devam Et"
           onPress={handleNext}

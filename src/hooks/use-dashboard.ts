@@ -14,6 +14,7 @@ import {
   StreakData,
   UserDocument
 } from '@/types/user';
+import { retryWithBackoff } from '@/utils/firebase';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -83,12 +84,14 @@ export const useDashboard = (): UseDashboardReturn => {
       // Get today's date
       const today = new Date().toISOString().split('T')[0];
 
-      // Fetch user document
+      // Fetch user document with retry logic
       const db = firestore();
-      const userDoc = await db
-        .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid)
-        .get();
+      const userDoc = await retryWithBackoff(async () => {
+        return await db
+          .collection(FIREBASE_CONFIG.collections.users)
+          .doc(user.uid)
+          .get();
+      });
 
       const userDocument = userDoc.exists() ? userDoc.data() as UserDocument : null;
 
@@ -241,12 +244,14 @@ export const useDashboard = (): UseDashboardReturn => {
       const db = firestore();
 
       // Get the meal document before deleting to retrieve its nutrition data
-      const mealDoc = await db
-        .collection(FIREBASE_CONFIG.collections.users)
-        .doc(user.uid)
-        .collection('meals')
-        .doc(mealId)
-        .get();
+      const mealDoc = await retryWithBackoff(async () => {
+        return await db
+          .collection(FIREBASE_CONFIG.collections.users)
+          .doc(user.uid)
+          .collection('meals')
+          .doc(mealId)
+          .get();
+      });
 
       if (!mealDoc.exists) {
         throw new Error('Yemek kaydı bulunamadı');
@@ -348,13 +353,15 @@ export const useDashboard = (): UseDashboardReturn => {
         const dateStr = date.toISOString().split('T')[0];
 
         const db = firestore();
-        const dayMeals = await db
-          .collection(FIREBASE_CONFIG.collections.users)
-          .doc(userId)
-          .collection('meals')
-          .where('date', '==', dateStr)
-          .limit(1)
-          .get();
+        const dayMeals = await retryWithBackoff(async () => {
+          return await db
+            .collection(FIREBASE_CONFIG.collections.users)
+            .doc(userId)
+            .collection('meals')
+            .where('date', '==', dateStr)
+            .limit(1)
+            .get();
+        }, 2, 500); // Fewer retries for streak calculation to avoid blocking
 
         weekDays[6 - i] = !dayMeals.empty;
       }
@@ -366,13 +373,15 @@ export const useDashboard = (): UseDashboardReturn => {
       while (true) {
         const dateStr = checkDate.toISOString().split('T')[0];
         const db = firestore();
-        const dayMeals = await db
-          .collection(FIREBASE_CONFIG.collections.users)
-          .doc(userId)
-          .collection('meals')
-          .where('date', '==', dateStr)
-          .limit(1)
-          .get();
+        const dayMeals = await retryWithBackoff(async () => {
+          return await db
+            .collection(FIREBASE_CONFIG.collections.users)
+            .doc(userId)
+            .collection('meals')
+            .where('date', '==', dateStr)
+            .limit(1)
+            .get();
+        }, 2, 500); // Fewer retries for streak calculation
 
         if (!dayMeals.empty) {
           currentStreak++;
@@ -443,10 +452,12 @@ export const useDashboard = (): UseDashboardReturn => {
         query = query.where('date', '==', date);
       }
 
-      const mealsSnapshot = await query
-        .orderBy('createdAt', 'desc')
-        .limit(limit)
-        .get();
+      const mealsSnapshot = await retryWithBackoff(async () => {
+        return await query
+          .orderBy('createdAt', 'desc')
+          .limit(limit)
+          .get();
+      });
 
       return mealsSnapshot.docs
         .map((doc: FirebaseFirestoreTypes.DocumentSnapshot) => {
