@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
   View
@@ -84,10 +85,16 @@ const LastNameScreen = () => {
       flex: 1,
       backgroundColor: theme?.semanticColors?.background?.primary || '#FFFFFF',
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      justifyContent: 'flex-start',
+      paddingTop: theme?.spacing?.['4xl'] || 48,
+      paddingBottom: theme?.spacing?.['4xl'] || 48,
     },
     header: {
       marginTop: '10%',
@@ -155,39 +162,41 @@ const LastNameScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-          <View style={styles.iconContainer}>
-            <Text style={styles.iconText}>👤</Text>
+          <View style={styles.header}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.iconText}>👤</Text>
+            </View>
+            <Text style={styles.title}>Soyadınız</Text>
+            <Text style={styles.subtitle}>
+              Şimdi soyadınızı öğrenelim.
+            </Text>
           </View>
-          <Text style={styles.title}>Soyadınız</Text>
-          <Text style={styles.subtitle}>
-            Şimdi soyadınızı öğrenelim.
-          </Text>
-        </View>
 
-        <View style={styles.inputContainer}>
-          <View style={styles.inputWrapper}>
-            <Input
-              label=""
-              value={lastName}
-              onChangeText={setLastName}
-              placeholder="Soyadınızı girin"
-              autoCapitalize="words"
-              autoFocus
-              style={{
-                borderWidth: 0,
-                backgroundColor: 'transparent',
-                fontSize: 18,
-                fontWeight: '500',
-                paddingVertical: theme?.spacing?.lg || 24,
-              }}
-            />
+          <View style={styles.inputContainer}>
+            <View style={styles.inputWrapper}>
+              <Input
+                label=""
+                value={lastName}
+                onChangeText={setLastName}
+                placeholder="Soyadınızı girin"
+                autoCapitalize="words"
+                autoFocus
+                style={{
+                  borderWidth: 0,
+                  backgroundColor: 'transparent',
+                  fontSize: 18,
+                  fontWeight: '500',
+                  paddingVertical: theme?.spacing?.lg || 24,
+                }}
+              />
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

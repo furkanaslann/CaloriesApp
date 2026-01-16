@@ -97,8 +97,8 @@ const styles = StyleSheet.create({
     gap: SPACING[3],
   },
   backButton: {
-    paddingVertical: SPACING[2],
-    paddingHorizontal: SPACING[2],
+    width: '10%',
+    height: 28,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -107,9 +107,10 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeights.semibold,
     color: COLORS.textPrimary,
     lineHeight: 28,
+    textAlignVertical: 'center',
   },
   progressContainer: {
-    flex: 1,
+    width: '90%',
   },
   track: {
     width: '100%',

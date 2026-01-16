@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
+import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const ProfileScreen = () => {
@@ -39,11 +40,11 @@ const ProfileScreen = () => {
     borderRadius: { md: 10 },
     shadows: {},
   };
-  const { profile, nextStep, previousStep } = useOnboarding();
+  const { profile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const handleNext = () => {
     nextStep();
-    router.push('/onboarding/goals');
+    router.push('/onboarding/goals-primary');
   };
 
   const handlePrevious = () => {
@@ -85,6 +86,9 @@ const ProfileScreen = () => {
     },
     scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
     },
     content: {
       padding: theme.spacing.lg,
@@ -180,6 +184,10 @@ const ProfileScreen = () => {
       paddingHorizontal: theme.spacing.lg,
       paddingBottom: theme.spacing.xl,
     },
+    topBar: {
+      paddingTop: SPACING[4],
+      backgroundColor: theme.semanticColors.background.primary,
+    },
   });
 
   const getGenderLabel = (gender: string) => {
@@ -197,7 +205,11 @@ const ProfileScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <View style={styles.topBar}>
+        <ProgressBar currentStep={getCurrentStep('profile')} totalSteps={totalSteps} onBack={handlePrevious} />
+      </View>
+
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>Profil Özeti</Text>

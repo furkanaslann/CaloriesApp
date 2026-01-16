@@ -7,6 +7,7 @@ import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -92,8 +93,14 @@ const CulturalRestrictionsScreen = () => {
       backgroundColor: theme.semanticColors.background.primary,
     },
     content: {
-      flex: 1,
       padding: theme.spacing.lg,
+      paddingBottom: theme.spacing['4xl'],
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
     },
     header: {
       marginBottom: theme.spacing['3xl'],
@@ -199,64 +206,66 @@ const CulturalRestrictionsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
-        <View style={styles.header}>
-          <Text style={styles.title}>Dinsel/Kültürel Kısıtlamalarınız</Text>
-          <Text style={styles.subtitle}>
-            Dinsel veya kültürel beslenme kısıtlamalarınızı belirtin. Bu bilgiler inançlarınıza uygun beslenme planı oluşturmamıza yardımcı olacaktır.
-          </Text>
-        </View>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+          <View style={styles.header}>
+            <Text style={styles.title}>Dinsel/Kültürel Kısıtlamalarınız</Text>
+            <Text style={styles.subtitle}>
+              Dinsel veya kültürel beslenme kısıtlamalarınızı belirtin. Bu bilgiler inançlarınıza uygun beslenme planı oluşturmamıza yardımcı olacaktır.
+            </Text>
+          </View>
 
-        {culturalRestrictions.length > 0 && (
-          <View style={styles.selectedTagsContainer}>
-            {culturalRestrictions.map((restriction) => (
-              <View key={restriction} style={styles.selectedTag}>
-                <Text style={styles.selectedTagText}>{restriction}</Text>
-                <TouchableOpacity onPress={() => handleRemove(restriction)}>
-                  <Text style={styles.removeTag}>×</Text>
-                </TouchableOpacity>
-              </View>
+          {culturalRestrictions.length > 0 && (
+            <View style={styles.selectedTagsContainer}>
+              {culturalRestrictions.map((restriction) => (
+                <View key={restriction} style={styles.selectedTag}>
+                  <Text style={styles.selectedTagText}>{restriction}</Text>
+                  <TouchableOpacity onPress={() => handleRemove(restriction)}>
+                    <Text style={styles.removeTag}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+
+          <View style={styles.tagContainer}>
+            {culturalRestrictionsOptions.map((restriction) => (
+              <TouchableOpacity
+                key={restriction.value}
+                style={[
+                  styles.tagButton,
+                  culturalRestrictions.includes(restriction.value) && styles.tagButtonSelected,
+                ]}
+                onPress={() => handleToggle(restriction.value)}
+              >
+                <Text style={styles.tagIcon}>{restriction.icon}</Text>
+                <Text
+                  style={[
+                    styles.tagText,
+                    culturalRestrictions.includes(restriction.value) && styles.tagTextSelected,
+                  ]}
+                >
+                  {restriction.label}
+                </Text>
+              </TouchableOpacity>
             ))}
           </View>
-        )}
 
-        <View style={styles.tagContainer}>
-          {culturalRestrictionsOptions.map((restriction) => (
-            <TouchableOpacity
-              key={restriction.value}
-              style={[
-                styles.tagButton,
-                culturalRestrictions.includes(restriction.value) && styles.tagButtonSelected,
-              ]}
-              onPress={() => handleToggle(restriction.value)}
-            >
-              <Text style={styles.tagIcon}>{restriction.icon}</Text>
-              <Text
-                style={[
-                  styles.tagText,
-                  culturalRestrictions.includes(restriction.value) && styles.tagTextSelected,
-                ]}
-              >
-                {restriction.label}
-              </Text>
+          <View style={styles.customInputContainer}>
+            <TextInput
+              style={styles.customInput}
+              value={customCulturalRestriction}
+              onChangeText={setCustomCulturalRestriction}
+              placeholder="Diğer kültürel kısıtlamalar"
+              placeholderTextColor={theme.semanticColors.text.tertiary}
+            />
+            <TouchableOpacity style={styles.addButton} onPress={handleAddCustom}>
+              <Text style={styles.addButtonText}>Ekle</Text>
             </TouchableOpacity>
-          ))}
+          </View>
         </View>
-
-        <View style={styles.customInputContainer}>
-          <TextInput
-            style={styles.customInput}
-            value={customCulturalRestriction}
-            onChangeText={setCustomCulturalRestriction}
-            placeholder="Diğer kültürel kısıtlamalar"
-            placeholderTextColor={theme.semanticColors.text.tertiary}
-          />
-          <TouchableOpacity style={styles.addButton} onPress={handleAddCustom}>
-            <Text style={styles.addButtonText}>Ekle</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

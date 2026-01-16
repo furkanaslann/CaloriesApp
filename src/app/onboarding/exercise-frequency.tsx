@@ -7,6 +7,7 @@ import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants
 import { Alert, router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -86,10 +87,16 @@ const ExerciseFrequencyScreen = () => {
       flex: 1,
       backgroundColor: theme.semanticColors.background.primary,
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       padding: theme.spacing.lg,
-      justifyContent: 'flex-start',
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     title: {
       ...theme.textStyles.heading2,
@@ -153,43 +160,45 @@ const ExerciseFrequencyScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-            <Text style={styles.title}>Egzersiz Sıklığı</Text>
-            <Text style={styles.subtitle}>
-              Haftada kaç gün egzersiz yaptığınızı belirtin. Bu bilgiler antrenman programınızı ve kalori hedeflerinizi belirlememize yardımcı olacaktır.
-            </Text>
-          </View>
+          <View style={styles.header}>
+              <Text style={styles.title}>Egzersiz Sıklığı</Text>
+              <Text style={styles.subtitle}>
+                Haftada kaç gün egzersiz yaptığınızı belirtin. Bu bilgiler antrenman programınızı ve kalori hedeflerinizi belirlememize yardımcı olacaktır.
+              </Text>
+            </View>
 
-          <View style={styles.section}>
-            <View style={styles.optionGrid}>
-              {frequencyOptions.map((option) => (
-                <TouchableOpacity
-                  key={option.value}
-                  style={[
-                    styles.optionCard,
-                    exerciseFrequency === option.value && styles.optionCardSelected,
-                  ]}
-                  onPress={() => setExerciseFrequency(option.value)}
-                >
-                  <View style={styles.optionHeader}>
-                    <Text
-                      style={[
-                        styles.optionLabel,
-                        exerciseFrequency === option.value && styles.optionLabelSelected,
-                      ]}
-                    >
-                      {option.label}
-                    </Text>
-                  </View>
-                  <Text style={styles.optionDescription}>{option.description}</Text>
-                </TouchableOpacity>
-              ))}
+            <View style={styles.section}>
+              <View style={styles.optionGrid}>
+                {frequencyOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    style={[
+                      styles.optionCard,
+                      exerciseFrequency === option.value && styles.optionCardSelected,
+                    ]}
+                    onPress={() => setExerciseFrequency(option.value)}
+                  >
+                    <View style={styles.optionHeader}>
+                      <Text
+                        style={[
+                          styles.optionLabel,
+                          exerciseFrequency === option.value && styles.optionLabelSelected,
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </View>
+                    <Text style={styles.optionDescription}>{option.description}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           </View>
-        </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

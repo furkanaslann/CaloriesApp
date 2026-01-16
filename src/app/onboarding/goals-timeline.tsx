@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -131,10 +132,16 @@ const TimelineScreen = () => {
       flex: 1,
       backgroundColor: theme.semanticColors.background.primary,
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       padding: theme.spacing.lg,
-      justifyContent: 'flex-start',
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     header: {
       marginBottom: theme.spacing['3xl'],
@@ -224,48 +231,50 @@ const TimelineScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-          <Text style={styles.title}>Zaman Çizelgesi</Text>
-          <Text style={styles.subtitle}>
-            Hedefinize ulaşmak için bir zaman çizelgesi belirleyin.
-          </Text>
-        </View>
+          <View style={styles.header}>
+            <Text style={styles.title}>Zaman Çizelgesi</Text>
+            <Text style={styles.subtitle}>
+              Hedefinize ulaşmak için bir zaman çizelgesi belirleyin.
+            </Text>
+          </View>
 
-        <View style={styles.timelineGrid}>
-          {timelineOptions.map((option) => (
-            <TouchableOpacity
-              key={option.value}
-              style={[
-                styles.timelineOption,
-                timeline === option.value && styles.timelineOptionSelected,
-              ]}
-              onPress={() => setTimeline(option.value)}
-            >
-              <Text style={styles.timelineIcon}>{option.icon}</Text>
-              <View style={styles.timelineContent}>
-                <Text
-                  style={[
-                    styles.timelineLabel,
-                    timeline === option.value && styles.timelineLabelSelected,
-                  ]}
-                >
-                  {option.label}
-                </Text>
-                <Text style={styles.timelineDescription}>{option.description}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
+          <View style={styles.timelineGrid}>
+            {timelineOptions.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.timelineOption,
+                  timeline === option.value && styles.timelineOptionSelected,
+                ]}
+                onPress={() => setTimeline(option.value)}
+              >
+                <Text style={styles.timelineIcon}>{option.icon}</Text>
+                <View style={styles.timelineContent}>
+                  <Text
+                    style={[
+                      styles.timelineLabel,
+                      timeline === option.value && styles.timelineLabelSelected,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                  <Text style={styles.timelineDescription}>{option.description}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        <View style={styles.infoCard}>
-          <Text style={styles.infoText}>
-            {getTimelineDescription()}
-          </Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.infoText}>
+              {getTimelineDescription()}
+            </Text>
+          </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

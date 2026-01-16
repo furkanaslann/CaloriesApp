@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -88,10 +89,16 @@ const HeightScreen = () => {
       flex: 1,
       backgroundColor: theme?.semanticColors?.background?.primary || '#FFFFFF',
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      justifyContent: 'flex-start',
+      paddingTop: theme?.spacing?.['4xl'] || 48,
+      paddingBottom: theme?.spacing?.['4xl'] || 48,
     },
     header: {
       marginTop: '10%',
@@ -206,68 +213,70 @@ const HeightScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-          <View style={styles.iconContainer}>
-            <Text style={styles.iconText}>📏</Text>
+          <View style={styles.header}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.iconText}>📏</Text>
+            </View>
+            <Text style={styles.title}>Boyunuz</Text>
+            <Text style={styles.subtitle}>
+              Boyunuzu girerek kişisel hedeflerinizi daha doğru belirleyebiliriz.
+            </Text>
           </View>
-          <Text style={styles.title}>Boyunuz</Text>
-          <Text style={styles.subtitle}>
-            Boyunuzu girerek kişisel hedeflerinizi daha doğru belirleyebiliriz.
-          </Text>
-        </View>
 
-        <View style={styles.inputContainer}>
-          <View style={styles.inputWrapper}>
-            <Input
-              label=""
-              value={height}
-              onChangeText={setHeight}
-              placeholder="175"
-              keyboardType="numeric"
-              autoFocus
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              style={{
-                borderWidth: 0,
-                backgroundColor: 'transparent',
-                fontSize: 24,
-                fontWeight: '600',
-                textAlign: 'center',
-                minWidth: 100,
-              }}
-            />
-            <Text style={styles.inputSuffix}>cm</Text>
+          <View style={styles.inputContainer}>
+            <View style={styles.inputWrapper}>
+              <Input
+                label=""
+                value={height}
+                onChangeText={setHeight}
+                placeholder="175"
+                keyboardType="numeric"
+                autoFocus
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                style={{
+                  borderWidth: 0,
+                  backgroundColor: 'transparent',
+                  fontSize: 24,
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  minWidth: 100,
+                }}
+              />
+              <Text style={styles.inputSuffix}>cm</Text>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.quickSelectContainer}>
-          <Text style={styles.quickSelectLabel}>Yaygın Boy Seçenekleri</Text>
-          <View style={styles.quickSelectGrid}>
-            {commonHeights.map((h) => (
-              <TouchableOpacity
-                key={h}
-                style={[
-                  styles.quickSelectButton,
-                  height === h.toString() && styles.quickSelectButtonSelected,
-                ]}
-                onPress={() => setHeight(h.toString())}
-              >
-                <Text
+          <View style={styles.quickSelectContainer}>
+            <Text style={styles.quickSelectLabel}>Yaygın Boy Seçenekleri</Text>
+            <View style={styles.quickSelectGrid}>
+              {commonHeights.map((h) => (
+                <TouchableOpacity
+                  key={h}
                   style={[
-                    styles.quickSelectText,
-                    height === h.toString() && styles.quickSelectTextSelected,
+                    styles.quickSelectButton,
+                    height === h.toString() && styles.quickSelectButtonSelected,
                   ]}
+                  onPress={() => setHeight(h.toString())}
                 >
-                  {h}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.quickSelectText,
+                      height === h.toString() && styles.quickSelectTextSelected,
+                    ]}
+                  >
+                    {h}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

@@ -156,9 +156,13 @@ const MotivationScreen = () => {
     scrollView: {
       flex: 1,
     },
+    scrollContent: {
+      flexGrow: 1,
+    },
     content: {
       padding: theme.spacing.lg,
-      paddingBottom: 0, // ScrollView'de alt boşluğu azalt
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing.xl,
     },
     header: {
       marginBottom: theme.spacing['3xl'],
@@ -308,8 +312,8 @@ const MotivationScreen = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView
         style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: theme.spacing.xl }}
       >
         <View style={styles.content}>
           <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />

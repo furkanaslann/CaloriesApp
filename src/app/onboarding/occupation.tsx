@@ -6,6 +6,7 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -86,9 +87,14 @@ const OccupationScreen = () => {
       backgroundColor: theme.semanticColors.background.primary,
     },
     content: {
-      flex: 1,
       padding: theme.spacing.lg,
-      justifyContent: 'flex-start',
+      paddingBottom: theme.spacing['4xl'],
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
     },
     title: {
       ...theme.textStyles.heading2,
@@ -100,6 +106,9 @@ const OccupationScreen = () => {
       ...theme.textStyles.onboardingDescription,
       color: theme.semanticColors.text.secondary,
       lineHeight: theme.typography.lineHeight.relaxed,
+    },
+    header: {
+      marginBottom: theme.spacing['3xl'],
     },
     section: {
       marginBottom: theme.spacing['3xl'],
@@ -154,10 +163,11 @@ const OccupationScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
+          <View style={styles.header}>
             <Text style={styles.title}>Mesleğiniz</Text>
             <Text style={styles.subtitle}>
               Mesleki aktivitenizi belirtin. Bu bilgiler günlük kalori ihtiyacınızı daha doğru hesaplamamıza yardımcı olacaktır.
@@ -192,6 +202,7 @@ const OccupationScreen = () => {
             </View>
           </View>
         </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

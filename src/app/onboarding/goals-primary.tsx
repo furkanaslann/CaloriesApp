@@ -7,6 +7,7 @@ import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -98,10 +99,13 @@ const PrimaryGoalScreen = () => {
     scrollView: {
       flex: 1,
     },
+    scrollContent: {
+      flexGrow: 1,
+    },
     content: {
-      flex: 1,
       padding: theme.spacing.lg,
-      justifyContent: 'flex-start',
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     header: {
       marginBottom: theme.spacing['3xl'],
@@ -175,42 +179,44 @@ const PrimaryGoalScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-          <Text style={styles.title}>Ana Hedefiniz</Text>
-          <Text style={styles.subtitle}>
-            Ulaşmak istediğiniz ana hedefi seçin.
-          </Text>
-        </View>
+          <View style={styles.header}>
+            <Text style={styles.title}>Ana Hedefiniz</Text>
+            <Text style={styles.subtitle}>
+              Ulaşmak istediğiniz ana hedefi seçin.
+            </Text>
+          </View>
 
-        <View style={styles.goalGrid}>
-          {goalOptions.map((goal) => (
-            <TouchableOpacity
-              key={goal.value}
-              style={[
-                styles.goalOption,
-                selectedGoal === goal.value && styles.goalOptionSelected,
-              ]}
-              onPress={() => setSelectedGoal(goal.value)}
-            >
-              <Text style={styles.goalIcon}>{goal.icon}</Text>
-              <View style={styles.goalContent}>
-                <Text
-                  style={[
-                    styles.goalLabel,
-                    selectedGoal === goal.value && styles.goalLabelSelected,
-                  ]}
-                >
-                  {goal.label}
-                </Text>
-                <Text style={styles.goalDescription}>{goal.description}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+          <View style={styles.goalGrid}>
+            {goalOptions.map((goal) => (
+              <TouchableOpacity
+                key={goal.value}
+                style={[
+                  styles.goalOption,
+                  selectedGoal === goal.value && styles.goalOptionSelected,
+                ]}
+                onPress={() => setSelectedGoal(goal.value)}
+              >
+                <Text style={styles.goalIcon}>{goal.icon}</Text>
+                <View style={styles.goalContent}>
+                  <Text
+                    style={[
+                      styles.goalLabel,
+                      selectedGoal === goal.value && styles.goalLabelSelected,
+                    ]}
+                  >
+                    {goal.label}
+                  </Text>
+                  <Text style={styles.goalDescription}>{goal.description}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

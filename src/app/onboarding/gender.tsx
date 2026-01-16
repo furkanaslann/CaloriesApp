@@ -7,6 +7,7 @@ import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -77,10 +78,16 @@ const GenderScreen = () => {
       flex: 1,
       backgroundColor: theme?.semanticColors?.background?.primary || '#FFFFFF',
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      justifyContent: 'flex-start',
+      paddingTop: theme?.spacing?.['4xl'] || 48,
+      paddingBottom: theme?.spacing?.['4xl'] || 48,
     },
     header: {
       marginTop: '10%',
@@ -175,58 +182,60 @@ const GenderScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-          <View style={styles.iconContainer}>
-            <Text style={styles.iconText}>⚧️</Text>
-          </View>
-          <Text style={styles.title}>Cinsiyetiniz</Text>
-          <Text
-            style={[
-              styles.subtitle,
-              {
-                ...(theme?.textStyles?.bodySmall || {}),
-                color: theme?.semanticColors?.text?.secondary || '#475569',
-                fontSize: 16,
-                fontWeight: '400',
-                lineHeight: 24,
-              }
-            ]}
-          >
-            Cinsiyetiniz, metabolik hesaplamalar için önemlidir.
-          </Text>
-        </View>
-
-        <View style={styles.genderContainer}>
-          {genderOptions.map((option) => (
-            <TouchableOpacity
-              key={option.value}
+          <View style={styles.header}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.iconText}>⚧️</Text>
+            </View>
+            <Text style={styles.title}>Cinsiyetiniz</Text>
+            <Text
               style={[
-                styles.genderOption,
-                gender === option.value && styles.genderOptionSelected,
+                styles.subtitle,
+                {
+                  ...(theme?.textStyles?.bodySmall || {}),
+                  color: theme?.semanticColors?.text?.secondary || '#475569',
+                  fontSize: 16,
+                  fontWeight: '400',
+                  lineHeight: 24,
+                }
               ]}
-              onPress={() => setGender(option.value)}
             >
-              <Text style={styles.genderIcon}>{option.icon}</Text>
-              <View style={styles.genderContent}>
-                <Text
-                  style={[
-                    styles.genderLabel,
-                    gender === option.value && styles.genderLabelSelected,
-                  ]}
-                >
-                  {option.label}
-                </Text>
-                <Text style={styles.genderDescription}>
-                  {option.description}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+              Cinsiyetiniz, metabolik hesaplamalar için önemlidir.
+            </Text>
+          </View>
+
+          <View style={styles.genderContainer}>
+            {genderOptions.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.genderOption,
+                  gender === option.value && styles.genderOptionSelected,
+                ]}
+                onPress={() => setGender(option.value)}
+              >
+                <Text style={styles.genderIcon}>{option.icon}</Text>
+                <View style={styles.genderContent}>
+                  <Text
+                    style={[
+                      styles.genderLabel,
+                      gender === option.value && styles.genderLabelSelected,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                  <Text style={styles.genderDescription}>
+                    {option.description}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -102,10 +103,16 @@ const WeightScreen = () => {
       flex: 1,
       backgroundColor: theme?.semanticColors?.background?.primary || '#FFFFFF',
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      justifyContent: 'flex-start',
+      paddingTop: theme?.spacing?.['4xl'] || 48,
+      paddingBottom: theme?.spacing?.['4xl'] || 48,
     },
     header: {
       marginTop: '10%',
@@ -216,79 +223,81 @@ const WeightScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-          <View style={styles.iconContainer}>
-            <Text style={styles.iconText}>⚖️</Text>
+          <View style={styles.header}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.iconText}>⚖️</Text>
+            </View>
+            <Text style={styles.title}>Kilonuz</Text>
+            <Text style={styles.subtitle}>
+              Mevcut kilonuzu kilogram cinsinden girin.
+            </Text>
           </View>
-          <Text style={styles.title}>Kilonuz</Text>
-          <Text style={styles.subtitle}>
-            Mevcut kilonuzu kilogram cinsinden girin.
+
+          <View style={styles.inputContainer}>
+            <View style={styles.inputWrapper}>
+              <Input
+                label=""
+                value={weight}
+                onChangeText={setWeight}
+                placeholder="Örn: 70"
+                keyboardType="numeric"
+                autoFocus
+                style={{
+                  borderWidth: 0,
+                  backgroundColor: 'transparent',
+                  fontSize: 18,
+                  fontWeight: '500',
+                  paddingVertical: theme?.spacing?.lg || 24,
+                }}
+              />
+            </View>
+          </View>
+
+          <View style={styles.quickSelectContainer}>
+            <Text style={styles.quickSelectLabel}>Hızlı Seçim</Text>
+            <View style={styles.quickSelectGrid}>
+              {commonWeights.map((w) => (
+                <TouchableOpacity
+                  key={w}
+                  style={[
+                    styles.quickSelectButton,
+                    weight === w.toString() && styles.quickSelectButtonSelected,
+                  ]}
+                  onPress={() => setWeight(w.toString())}
+                >
+                  <Text
+                    style={[
+                      styles.quickSelectText,
+                      weight === w.toString() && styles.quickSelectTextSelected,
+                    ]}
+                  >
+                    {w}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <Text
+            style={[
+              styles.infoText,
+              {
+                ...(theme?.textStyles?.bodySmall || {}),
+                color: theme?.semanticColors?.text?.secondary || '#475569',
+                fontSize: 14,
+                fontWeight: '400',
+                lineHeight: 20,
+              }
+            ]}
+          >
+            Bu bilgi, günlük kalori ihtiyacınızı hesaplamak için kullanılacaktır.
           </Text>
         </View>
-
-        <View style={styles.inputContainer}>
-          <View style={styles.inputWrapper}>
-            <Input
-              label=""
-              value={weight}
-              onChangeText={setWeight}
-              placeholder="Örn: 70"
-              keyboardType="numeric"
-              autoFocus
-              style={{
-                borderWidth: 0,
-                backgroundColor: 'transparent',
-                fontSize: 18,
-                fontWeight: '500',
-                paddingVertical: theme?.spacing?.lg || 24,
-              }}
-            />
-          </View>
-        </View>
-
-        <View style={styles.quickSelectContainer}>
-          <Text style={styles.quickSelectLabel}>Hızlı Seçim</Text>
-          <View style={styles.quickSelectGrid}>
-            {commonWeights.map((w) => (
-              <TouchableOpacity
-                key={w}
-                style={[
-                  styles.quickSelectButton,
-                  weight === w.toString() && styles.quickSelectButtonSelected,
-                ]}
-                onPress={() => setWeight(w.toString())}
-              >
-                <Text
-                  style={[
-                    styles.quickSelectText,
-                    weight === w.toString() && styles.quickSelectTextSelected,
-                  ]}
-                >
-                  {w}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        <Text
-          style={[
-            styles.infoText,
-            {
-              ...(theme?.textStyles?.bodySmall || {}),
-              color: theme?.semanticColors?.text?.secondary || '#475569',
-              fontSize: 14,
-              fontWeight: '400',
-              lineHeight: 20,
-            }
-          ]}
-        >
-          Bu bilgi, günlük kalori ihtiyacınızı hesaplamak için kullanılacaktır.
-        </Text>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

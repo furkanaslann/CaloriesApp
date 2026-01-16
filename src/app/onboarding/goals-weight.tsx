@@ -10,6 +10,7 @@ import {
   Alert,
   Dimensions,
   PanResponder,
+  ScrollView,
   StyleSheet,
   Text,
   View
@@ -139,10 +140,13 @@ const TargetWeightScreen = () => {
     scrollView: {
       flex: 1,
     },
+    scrollContent: {
+      flexGrow: 1,
+    },
     content: {
-      flex: 1,
       padding: theme.spacing.lg,
-      justifyContent: 'flex-start',
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     header: {
       marginBottom: theme.spacing['3xl'],
@@ -280,55 +284,57 @@ const TargetWeightScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-          <Text style={styles.title}>Hedef Kilo</Text>
-          <Text style={styles.subtitle}>
-            Ulaşmak istediğiniz ideal kilonuzu belirleyin.
-          </Text>
-        </View>
+          <View style={styles.header}>
+            <Text style={styles.title}>Hedef Kilo</Text>
+            <Text style={styles.subtitle}>
+              Ulaşmak istediğiniz ideal kilonuzu belirleyin.
+            </Text>
+          </View>
 
-        <View style={styles.weightDisplay}>
-          <Text style={styles.weightValue}>{targetWeight}</Text>
-          <Text style={styles.weightUnit}>kg</Text>
-        </View>
+          <View style={styles.weightDisplay}>
+            <Text style={styles.weightValue}>{targetWeight}</Text>
+            <Text style={styles.weightUnit}>kg</Text>
+          </View>
 
-        <View style={styles.sliderContainer}>
-          <View style={styles.sliderBackground}>
-            <View style={styles.sliderBar}>
-              <View
-                style={[
-                  styles.sliderBarFill,
-                  { width: sliderPosition }
-                ]}
-              />
-              <View
-                style={[
-                  styles.sliderHandle,
-                  { left: sliderPosition }
-                ]}
-                {...panResponder.panHandlers}
-              >
-                <View style={styles.sliderHandleInner}>
+          <View style={styles.sliderContainer}>
+            <View style={styles.sliderBackground}>
+              <View style={styles.sliderBar}>
+                <View
+                  style={[
+                    styles.sliderBarFill,
+                    { width: sliderPosition }
+                  ]}
+                />
+                <View
+                  style={[
+                    styles.sliderHandle,
+                    { left: sliderPosition }
+                  ]}
+                  {...panResponder.panHandlers}
+                >
+                  <View style={styles.sliderHandleInner}>
+                  </View>
                 </View>
               </View>
             </View>
+            <View style={styles.scaleNumbers}>
+              <Text style={styles.scaleNumber}>{minWeight}</Text>
+              <Text style={styles.scaleNumber}>{Math.round((minWeight + maxWeight) / 2)}</Text>
+              <Text style={styles.scaleNumber}>{maxWeight}</Text>
+            </View>
           </View>
-          <View style={styles.scaleNumbers}>
-            <Text style={styles.scaleNumber}>{minWeight}</Text>
-            <Text style={styles.scaleNumber}>{Math.round((minWeight + maxWeight) / 2)}</Text>
-            <Text style={styles.scaleNumber}>{maxWeight}</Text>
-          </View>
-        </View>
 
-        <View style={styles.infoCard}>
-          <Text style={styles.infoText}>
-            Mevcut kilonuz: {profile.currentWeight || 'Belirtilmemiş'} kg
-          </Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.infoText}>
+              Mevcut kilonuz: {profile.currentWeight || 'Belirtilmemiş'} kg
+            </Text>
+          </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

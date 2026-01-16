@@ -9,6 +9,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -116,10 +117,16 @@ const DateOfBirthScreen = () => {
       flex: 1,
       backgroundColor: theme?.semanticColors?.background?.primary || '#FFFFFF',
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      justifyContent: 'flex-start',
+      paddingTop: theme?.spacing?.['4xl'] || 48,
+      paddingBottom: theme?.spacing?.['4xl'] || 48,
     },
     header: {
       marginTop: '10%',
@@ -199,54 +206,56 @@ const DateOfBirthScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-          <View style={styles.iconContainer}>
-            <Text style={styles.iconText}>📅</Text>
+          <View style={styles.header}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.iconText}>📅</Text>
+            </View>
+            <Text style={styles.title}>Doğum Tarihiniz</Text>
+            <Text style={styles.subtitle}>
+              Doğum tarihiniz, yaşınızı hesaplamak için gereklidir.
+            </Text>
           </View>
-          <Text style={styles.title}>Doğum Tarihiniz</Text>
-          <Text style={styles.subtitle}>
-            Doğum tarihiniz, yaşınızı hesaplamak için gereklidir.
-          </Text>
-        </View>
 
-        <View style={styles.inputContainer}>
-          <TouchableOpacity
-            style={styles.dateButton}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Input
-              label=""
-              value={dateOfBirth.toLocaleDateString('tr-TR')}
-              placeholder="Doğum tarihinizi seçin"
-              editable={false}
-              style={{
-                borderWidth: 0,
-                backgroundColor: 'transparent',
-                fontSize: 18,
-                fontWeight: '500',
-                paddingVertical: theme?.spacing?.lg || 24,
-              }}
+          <View style={styles.inputContainer}>
+            <TouchableOpacity
+              style={styles.dateButton}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Input
+                label=""
+                value={dateOfBirth.toLocaleDateString('tr-TR')}
+                placeholder="Doğum tarihinizi seçin"
+                editable={false}
+                style={{
+                  borderWidth: 0,
+                  backgroundColor: 'transparent',
+                  fontSize: 18,
+                  fontWeight: '500',
+                  paddingVertical: theme?.spacing?.lg || 24,
+                }}
+              />
+            </TouchableOpacity>
+
+            <Text style={styles.ageText}>
+              Yaşınız: <Text style={styles.ageNumber}>{age}</Text>
+            </Text>
+          </View>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={dateOfBirth}
+              mode="date"
+              display="default"
+              maximumDate={new Date()}
+              onChange={handleDateChange}
             />
-          </TouchableOpacity>
-
-          <Text style={styles.ageText}>
-            Yaşınız: <Text style={styles.ageNumber}>{age}</Text>
-          </Text>
+          )}
         </View>
-
-        {showDatePicker && (
-          <DateTimePicker
-            value={dateOfBirth}
-            mode="date"
-            display="default"
-            maximumDate={new Date()}
-            onChange={handleDateChange}
-          />
-        )}
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

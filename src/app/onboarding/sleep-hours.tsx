@@ -7,6 +7,7 @@ import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants
 import { Alert, router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -83,10 +84,16 @@ const SleepHoursScreen = () => {
       flex: 1,
       backgroundColor: theme.semanticColors.background.primary,
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       padding: theme.spacing.lg,
-      justifyContent: 'flex-start',
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     title: {
       ...theme.textStyles.heading2,
@@ -165,50 +172,52 @@ const SleepHoursScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-            <Text style={styles.title}>Uyku Süresi</Text>
-            <Text style={styles.subtitle}>
-              Günde ortalama kaç saat uyuduğunuzu belirtin. Uyku süresi metabolizma hızınızı ve genel sağlık durumunuzu etkiler.
-            </Text>
-          </View>
-
-          <View style={styles.section}>
-            <View style={styles.optionGrid}>
-              {sleepOptions.map((option) => (
-                <TouchableOpacity
-                  key={option.value}
-                  style={[
-                    styles.optionCard,
-                    sleepHours === option.value && styles.optionCardSelected,
-                  ]}
-                  onPress={() => setSleepHours(option.value)}
-                >
-                  <View style={styles.optionHeader}>
-                    <Text style={styles.optionIcon}>{option.icon}</Text>
-                    <Text
-                      style={[
-                        styles.optionLabel,
-                        sleepHours === option.value && styles.optionLabelSelected,
-                      ]}
-                    >
-                      {option.label}
-                    </Text>
-                  </View>
-                  <Text style={styles.optionDescription}>{option.description}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <View style={styles.noteContainer}>
-              <Text style={styles.noteText}>
-                Yetişkinler için önerilen uyku süresi 7-9 saattir. Yeterli uyku, kilo kontrolü ve genel sağlık için önemlidir.
+          <View style={styles.header}>
+              <Text style={styles.title}>Uyku Süresi</Text>
+              <Text style={styles.subtitle}>
+                Günde ortalama kaç saat uyuduğunuzu belirtin. Uyku süresi metabolizma hızınızı ve genel sağlık durumunuzu etkiler.
               </Text>
             </View>
+
+            <View style={styles.section}>
+              <View style={styles.optionGrid}>
+                {sleepOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    style={[
+                      styles.optionCard,
+                      sleepHours === option.value && styles.optionCardSelected,
+                    ]}
+                    onPress={() => setSleepHours(option.value)}
+                  >
+                    <View style={styles.optionHeader}>
+                      <Text style={styles.optionIcon}>{option.icon}</Text>
+                      <Text
+                        style={[
+                          styles.optionLabel,
+                          sleepHours === option.value && styles.optionLabelSelected,
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </View>
+                    <Text style={styles.optionDescription}>{option.description}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <View style={styles.noteContainer}>
+                <Text style={styles.noteText}>
+                  Yetişkinler için önerilen uyku süresi 7-9 saattir. Yeterli uyku, kilo kontrolü ve genel sağlık için önemlidir.
+                </Text>
+              </View>
+            </View>
           </View>
-        </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

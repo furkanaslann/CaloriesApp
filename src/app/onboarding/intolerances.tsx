@@ -7,6 +7,7 @@ import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -93,9 +94,16 @@ const IntolerancesScreen = () => {
       flex: 1,
       backgroundColor: theme.semanticColors.background.primary,
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       padding: theme.spacing.lg,
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     header: {
       marginBottom: theme.spacing['3xl'],
@@ -201,64 +209,66 @@ const IntolerancesScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-    <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
-        <View style={styles.header}>
-          <Text style={styles.title}>İntoleranslarınız</Text>
-          <Text style={styles.subtitle}>
-            Gıda intoleranslarınızı belirtin. Bu bilgiler sindirim sisteminize uygun beslenme planı oluşturmamıza yardımcı olacaktır.
-          </Text>
-        </View>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+          <View style={styles.header}>
+            <Text style={styles.title}>İntoleranslarınız</Text>
+            <Text style={styles.subtitle}>
+              Gıda intoleranslarınızı belirtin. Bu bilgiler sindirim sisteminize uygun beslenme planı oluşturmamıza yardımcı olacaktır.
+            </Text>
+          </View>
 
-        {intolerances.length > 0 && (
-          <View style={styles.selectedTagsContainer}>
-            {intolerances.map((intolerance) => (
-              <View key={intolerance} style={styles.selectedTag}>
-                <Text style={styles.selectedTagText}>{intolerance}</Text>
-                <TouchableOpacity onPress={() => handleRemove(intolerance)}>
-                  <Text style={styles.removeTag}>×</Text>
-                </TouchableOpacity>
-              </View>
+          {intolerances.length > 0 && (
+            <View style={styles.selectedTagsContainer}>
+              {intolerances.map((intolerance) => (
+                <View key={intolerance} style={styles.selectedTag}>
+                  <Text style={styles.selectedTagText}>{intolerance}</Text>
+                  <TouchableOpacity onPress={() => handleRemove(intolerance)}>
+                    <Text style={styles.removeTag}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+
+          <View style={styles.tagContainer}>
+            {commonIntolerances.map((intolerance) => (
+              <TouchableOpacity
+                key={intolerance.value}
+                style={[
+                  styles.tagButton,
+                  intolerances.includes(intolerance.value) && styles.tagButtonSelected,
+                ]}
+                onPress={() => handleToggle(intolerance.value)}
+              >
+                <Text style={styles.tagIcon}>{intolerance.icon}</Text>
+                <Text
+                  style={[
+                    styles.tagText,
+                    intolerances.includes(intolerance.value) && styles.tagTextSelected,
+                  ]}
+                >
+                  {intolerance.label}
+                </Text>
+              </TouchableOpacity>
             ))}
           </View>
-        )}
 
-        <View style={styles.tagContainer}>
-          {commonIntolerances.map((intolerance) => (
-            <TouchableOpacity
-              key={intolerance.value}
-              style={[
-                styles.tagButton,
-                intolerances.includes(intolerance.value) && styles.tagButtonSelected,
-              ]}
-              onPress={() => handleToggle(intolerance.value)}
-            >
-              <Text style={styles.tagIcon}>{intolerance.icon}</Text>
-              <Text
-                style={[
-                  styles.tagText,
-                  intolerances.includes(intolerance.value) && styles.tagTextSelected,
-                ]}
-              >
-                {intolerance.label}
-              </Text>
+          <View style={styles.customInputContainer}>
+            <TextInput
+              style={styles.customInput}
+              value={customIntolerance}
+              onChangeText={setCustomIntolerance}
+              placeholder="Diğer intoleransınızı yazın"
+              placeholderTextColor={theme.semanticColors.text.tertiary}
+            />
+            <TouchableOpacity style={styles.addButton} onPress={handleAddCustom}>
+              <Text style={styles.addButtonText}>Ekle</Text>
             </TouchableOpacity>
-          ))}
+          </View>
         </View>
-
-        <View style={styles.customInputContainer}>
-          <TextInput
-            style={styles.customInput}
-            value={customIntolerance}
-            onChangeText={setCustomIntolerance}
-            placeholder="Diğer intoleransınızı yazın"
-            placeholderTextColor={theme.semanticColors.text.tertiary}
-          />
-          <TouchableOpacity style={styles.addButton} onPress={handleAddCustom}>
-            <Text style={styles.addButtonText}>Ekle</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

@@ -7,6 +7,7 @@ import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -85,10 +86,16 @@ const ExerciseTypesScreen = () => {
       flex: 1,
       backgroundColor: theme.semanticColors.background.primary,
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       padding: theme.spacing.lg,
-      justifyContent: 'flex-start',
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     title: {
       ...theme.textStyles.heading2,
@@ -151,44 +158,46 @@ const ExerciseTypesScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-            <Text style={styles.title}>Egzersiz Türleri</Text>
-            <Text style={styles.subtitle}>
-              Yaptığınız egzersiz türlerini seçin. Bu bilgiler antrenman programınızı kişiselleştirmemize yardımcı olacaktır.
-            </Text>
-          </View>
+          <View style={styles.header}>
+              <Text style={styles.title}>Egzersiz Türleri</Text>
+              <Text style={styles.subtitle}>
+                Yaptığınız egzersiz türlerini seçin. Bu bilgiler antrenman programınızı kişiselleştirmemize yardımcı olacaktır.
+              </Text>
+            </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionDescription}>
-              Birden fazla egzersiz türü seçebilirsiniz (isteğe bağlı)
-            </Text>
-            <View style={styles.exerciseTypesContainer}>
-              {exerciseTypeOptions.map((type) => (
-                <TouchableOpacity
-                  key={type.value}
-                  style={[
-                    styles.exerciseTypeButton,
-                    exerciseTypes.includes(type.value) && styles.exerciseTypeButtonSelected,
-                  ]}
-                  onPress={() => handleExerciseTypeToggle(type.value)}
-                >
-                  <Text style={styles.exerciseTypeIcon}>{type.icon}</Text>
-                  <Text
+            <View style={styles.section}>
+              <Text style={styles.sectionDescription}>
+                Birden fazla egzersiz türü seçebilirsiniz (isteğe bağlı)
+              </Text>
+              <View style={styles.exerciseTypesContainer}>
+                {exerciseTypeOptions.map((type) => (
+                  <TouchableOpacity
+                    key={type.value}
                     style={[
-                      styles.exerciseTypeText,
-                      exerciseTypes.includes(type.value) && styles.exerciseTypeTextSelected,
+                      styles.exerciseTypeButton,
+                      exerciseTypes.includes(type.value) && styles.exerciseTypeButtonSelected,
                     ]}
+                    onPress={() => handleExerciseTypeToggle(type.value)}
                   >
-                    {type.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Text style={styles.exerciseTypeIcon}>{type.icon}</Text>
+                    <Text
+                      style={[
+                        styles.exerciseTypeText,
+                        exerciseTypes.includes(type.value) && styles.exerciseTypeTextSelected,
+                      ]}
+                    >
+                      {type.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           </View>
-        </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

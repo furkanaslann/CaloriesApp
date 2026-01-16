@@ -6,6 +6,7 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   View
@@ -105,10 +106,15 @@ const CameraTutorialScreen = () => {
       backgroundColor: theme.semanticColors.background.primary,
     },
     content: {
-      flex: 1,
       paddingHorizontal: theme.spacing['2xl'],
       paddingTop: '15%',
-      paddingBottom: theme.spacing.xl,
+      paddingBottom: theme.spacing['4xl'],
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
     },
     iconContainer: {
       width: 150,
@@ -240,40 +246,42 @@ const CameraTutorialScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {currentSlideData.hasLogo ? (
-          <View>
-            <Text style={styles.logo}>CaloriTrack</Text>
-            <Text style={[styles.subtitle, {
-              marginBottom: theme.spacing['2xl'],
-              fontSize: 16,
-              fontWeight: '400',
-              fontStyle: 'italic',
-              color: theme.semanticColors.text.tertiary
-            }]}>
-              Minimal. Cool. Aesthetic.
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.iconContainer}>
-            <Text style={styles.icon}>{currentSlideData.icon}</Text>
-          </View>
-        )}
-
-        <Text style={styles.title}>{currentSlideData.title}</Text>
-        <Text style={styles.subtitle}>{currentSlideData.subtitle}</Text>
-        <Text style={styles.description}>{currentSlideData.description}</Text>
-
-        <View style={styles.tipsContainer}>
-          <Text style={styles.tipsTitle}>💡 İpuçları</Text>
-          {currentSlideData.tips.map((tip, index) => (
-            <View key={index} style={styles.tipItem}>
-              <View style={styles.tipBullet} />
-              <Text style={styles.tipText}>{tip}</Text>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          {currentSlideData.hasLogo ? (
+            <View>
+              <Text style={styles.logo}>CaloriTrack</Text>
+              <Text style={[styles.subtitle, {
+                marginBottom: theme.spacing['2xl'],
+                fontSize: 16,
+                fontWeight: '400',
+                fontStyle: 'italic',
+                color: theme.semanticColors.text.tertiary
+              }]}>
+                Minimal. Cool. Aesthetic.
+              </Text>
             </View>
-          ))}
+          ) : (
+            <View style={styles.iconContainer}>
+              <Text style={styles.icon}>{currentSlideData.icon}</Text>
+            </View>
+          )}
+
+          <Text style={styles.title}>{currentSlideData.title}</Text>
+          <Text style={styles.subtitle}>{currentSlideData.subtitle}</Text>
+          <Text style={styles.description}>{currentSlideData.description}</Text>
+
+          <View style={styles.tipsContainer}>
+            <Text style={styles.tipsTitle}>💡 İpuçları</Text>
+            {currentSlideData.tips.map((tip, index) => (
+              <View key={index} style={styles.tipItem}>
+                <View style={styles.tipBullet} />
+                <Text style={styles.tipText}>{tip}</Text>
+              </View>
+            ))}
+          </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <View style={styles.progressIndicator}>

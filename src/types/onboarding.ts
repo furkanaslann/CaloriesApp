@@ -78,6 +78,8 @@ export const ONBOARDING_SCREENS = [
   'date-of-birth',
   'height',
   'weight',
+  'profile-photo',
+  'profile',
   'goals-primary',
   'goals-motivation',
   'goals-weight',

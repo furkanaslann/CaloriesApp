@@ -6,11 +6,11 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
@@ -100,13 +100,19 @@ const ActivityScreen = () => {
       flex: 1,
       backgroundColor: theme.semanticColors.background.primary,
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       padding: theme.spacing.lg,
-      justifyContent: 'flex-start',
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     title: {
-      ...theme.textStyles.heading2,
+      ...theme.textStyles.onboardingTitle,
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.md,
       lineHeight: 40,
@@ -180,55 +186,57 @@ const ActivityScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-            <Text style={styles.title}>Aktivite Seviyeniz</Text>
-            <Text
-              style={[
-                styles.subtitle,
-                {
-                  ...(theme?.textStyles?.bodySmall || {}),
-                  color: theme?.semanticColors?.text?.secondary || '#475569',
-                  fontSize: 16,
-                  fontWeight: '400',
-                  lineHeight: 24,
-                }
-              ]}
-            >
-              Genel aktivite seviyenizi belirtin. Bu bilgi, günlük kalori ihtiyacınızı hesaplamamıza yardımcı olacaktır.
-            </Text>
-          </View>
-
-          <View style={styles.section}>
-            <View style={styles.optionGrid}>
-              {activityLevels.map((activityLevel) => (
-                <TouchableOpacity
-                  key={activityLevel.value}
-                  style={[
-                    styles.optionCard,
-                    level === activityLevel.value && styles.optionCardSelected,
-                  ]}
-                  onPress={() => setLevel(activityLevel.value)}
-                >
-                  <View style={styles.optionHeader}>
-                    <Text style={styles.optionIcon}>{activityLevel.icon}</Text>
-                    <Text
-                      style={[
-                        styles.optionLabel,
-                        level === activityLevel.value && styles.optionLabelSelected,
-                      ]}
-                    >
-                      {activityLevel.label}
-                    </Text>
-                  </View>
-                  <Text style={styles.optionDescription}>{activityLevel.description}</Text>
-                </TouchableOpacity>
-              ))}
+          <View style={styles.header}>
+              <Text style={styles.title}>Aktivite Seviyeniz</Text>
+              <Text
+                style={[
+                  styles.subtitle,
+                  {
+                    ...(theme?.textStyles?.bodySmall || {}),
+                    color: theme?.semanticColors?.text?.secondary || '#475569',
+                    fontSize: 16,
+                    fontWeight: '400',
+                    lineHeight: 24,
+                  }
+                ]}
+              >
+                Genel aktivite seviyenizi belirtin. Bu bilgi, günlük kalori ihtiyacınızı hesaplamamıza yardımcı olacaktır.
+              </Text>
             </View>
-          </View>
-      </View>
+
+            <View style={styles.section}>
+              <View style={styles.optionGrid}>
+                {activityLevels.map((activityLevel) => (
+                  <TouchableOpacity
+                    key={activityLevel.value}
+                    style={[
+                      styles.optionCard,
+                      level === activityLevel.value && styles.optionCardSelected,
+                    ]}
+                    onPress={() => setLevel(activityLevel.value)}
+                  >
+                    <View style={styles.optionHeader}>
+                      <Text style={styles.optionIcon}>{activityLevel.icon}</Text>
+                      <Text
+                        style={[
+                          styles.optionLabel,
+                          level === activityLevel.value && styles.optionLabelSelected,
+                        ]}
+                      >
+                        {activityLevel.label}
+                      </Text>
+                    </View>
+                    <Text style={styles.optionDescription}>{activityLevel.description}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+        </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

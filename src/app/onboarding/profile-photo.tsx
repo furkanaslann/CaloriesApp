@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import {
   Alert,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -120,7 +121,7 @@ const ProfilePhotoScreen = () => {
   const handleNext = () => {
     updateProfile({ profilePhoto });
     nextStep();
-    router.push('/onboarding/goals-primary');
+    router.push('/onboarding/profile');
   };
 
   const handlePrevious = () => {
@@ -133,10 +134,16 @@ const ProfilePhotoScreen = () => {
       flex: 1,
       backgroundColor: theme.semanticColors.background.primary,
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       padding: theme.spacing.lg,
-      justifyContent: 'flex-start',
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     header: {
       marginBottom: theme.spacing['3xl'],
@@ -249,54 +256,56 @@ const ProfilePhotoScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-          <Text style={styles.title}>Profil Fotoğrafı</Text>
-          <Text style={styles.subtitle}>
-            Profilinize bir fotoğraf ekleyerek kişiselleştirebilirsiniz.
-          </Text>
-        </View>
+          <View style={styles.header}>
+            <Text style={styles.title}>Profil Fotoğrafı</Text>
+            <Text style={styles.subtitle}>
+              Profilinize bir fotoğraf ekleyerek kişiselleştirebilirsiniz.
+            </Text>
+          </View>
 
-        <View style={styles.photoContainer}>
-          <View style={styles.photoWrapper}>
-            {profilePhoto ? (
-              <Image source={{ uri: profilePhoto }} style={styles.photoImage} />
-            ) : (
-              <View style={{ alignItems: 'center' }}>
-                <Text style={styles.placeholderIcon}>👤</Text>
-                <Text style={styles.placeholderText}>Fotoğraf Yok</Text>
-              </View>
+          <View style={styles.photoContainer}>
+            <View style={styles.photoWrapper}>
+              {profilePhoto ? (
+                <Image source={{ uri: profilePhoto }} style={styles.photoImage} />
+              ) : (
+                <View style={{ alignItems: 'center' }}>
+                  <Text style={styles.placeholderIcon}>👤</Text>
+                  <Text style={styles.placeholderText}>Fotoğraf Yok</Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.actionButton} onPress={pickImageFromGallery}>
+              <Text style={styles.buttonText}>📷 Galeriden Seç</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.actionButton} onPress={takePhoto}>
+              <Text style={styles.buttonText}>📸 Fotoğraf Çek</Text>
+            </TouchableOpacity>
+
+            {profilePhoto && (
+              <TouchableOpacity
+                style={[styles.actionButton, styles.removeButton]}
+                onPress={removePhoto}
+              >
+                <Text style={[styles.buttonText, styles.removeButtonText]}>
+                  🗑️ Fotoğrafı Kaldır
+                </Text>
+              </TouchableOpacity>
             )}
           </View>
+
+          <Text style={styles.skipText}>
+            Profil fotoğrafı eklemek isteğe bağlıdır. Devam etmek için "Atla" butonuna basabilirsiniz.
+          </Text>
         </View>
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.actionButton} onPress={pickImageFromGallery}>
-            <Text style={styles.buttonText}>📷 Galeriden Seç</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton} onPress={takePhoto}>
-            <Text style={styles.buttonText}>📸 Fotoğraf Çek</Text>
-          </TouchableOpacity>
-
-          {profilePhoto && (
-            <TouchableOpacity
-              style={[styles.actionButton, styles.removeButton]}
-              onPress={removePhoto}
-            >
-              <Text style={[styles.buttonText, styles.removeButtonText]}>
-                🗑️ Fotoğrafı Kaldır
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <Text style={styles.skipText}>
-          Profil fotoğrafı eklemek isteğe bağlıdır. Devam etmek için "Atla" butonuna basabilirsiniz.
-        </Text>
-      </View>
+      </ScrollView>
 
       <View style={styles.bottomButtonContainer}>
         <Button

@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
   View
@@ -91,9 +92,15 @@ const NameScreen = () => {
       backgroundColor: theme?.semanticColors?.background?.primary || '#FFFFFF',
     },
     content: {
-      flex: 1,
       paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      justifyContent: 'flex-start',
+      paddingTop: theme?.spacing?.['4xl'] || 48,
+      paddingBottom: theme?.spacing?.['4xl'] || 48,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
     },
     header: {
       marginTop: '10%',
@@ -130,8 +137,6 @@ const NameScreen = () => {
       ...(theme?.shadows?.md || {}),
     },
     buttonContainer: {
-      flexDirection: 'row',
-      gap: theme?.spacing?.md || 16,
       paddingHorizontal: theme?.spacing?.['2xl'] || 24,
       paddingBottom: theme?.spacing?.['4xl'] || 48,
       paddingTop: theme?.spacing?.xl || 32,
@@ -161,46 +166,49 @@ const NameScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-          <View style={styles.iconContainer}>
-            <Text style={styles.iconText}>👤</Text>
+          <View style={styles.header}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.iconText}>👤</Text>
+            </View>
+            <Text style={styles.title}>Adınız</Text>
+            <Text style={styles.subtitle}>
+              Başlamak için adınızı paylaşır mısınız? Bu bilgiyi size özel deneyim sunmak için kullanacağız.
+            </Text>
           </View>
-          <Text style={styles.title}>Adınız</Text>
-          <Text style={styles.subtitle}>
-            Başlamak için adınızı paylaşır mısınız? Bu bilgiyi size özel deneyim sunmak için kullanacağız.
-          </Text>
-        </View>
 
-        <View style={styles.inputContainer}>
-          <View style={styles.inputWrapper}>
-            <Input
-              label=""
-              value={name}
-              onChangeText={setName}
-              placeholder="Adınızı girin"
-              autoCapitalize="words"
-              autoFocus
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              style={{
-                borderWidth: 0,
-                backgroundColor: 'transparent',
-                fontSize: 18,
-                fontWeight: '500',
-                paddingVertical: theme?.spacing?.lg || 24,
-              }}
-            />
+          <View style={styles.inputContainer}>
+            <View style={styles.inputWrapper}>
+              <Input
+                label=""
+                value={name}
+                onChangeText={setName}
+                placeholder="Adınızı girin"
+                autoCapitalize="words"
+                autoFocus
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                style={{
+                  borderWidth: 0,
+                  backgroundColor: 'transparent',
+                  fontSize: 18,
+                  fontWeight: '500',
+                  paddingVertical: theme?.spacing?.lg || 24,
+                }}
+              />
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button
           title="Devam Et"
           onPress={handleNext}
+          fullWidth
           style={theme?.coloredShadows?.primary || {}}
         />
       </View>

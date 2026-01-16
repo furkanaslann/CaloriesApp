@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -142,10 +143,13 @@ const WeeklyGoalScreen = () => {
     scrollView: {
       flex: 1,
     },
+    scrollContent: {
+      flexGrow: 1,
+    },
     content: {
-      flex: 1,
       padding: theme.spacing.lg,
-      justifyContent: 'flex-start',
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     header: {
       marginBottom: theme.spacing['3xl'],
@@ -242,42 +246,44 @@ const WeeklyGoalScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-          <Text style={styles.title}>Haftalık Hedef</Text>
-          <Text style={styles.subtitle}>
-            Haftalık ilerleme hedefinizi belirleyin.
-          </Text>
-        </View>
+          <View style={styles.header}>
+            <Text style={styles.title}>Haftalık Hedef</Text>
+            <Text style={styles.subtitle}>
+              Haftalık ilerleme hedefinizi belirleyin.
+            </Text>
+          </View>
 
-        <View style={styles.goalContainer}>
-          {weeklyGoalOptions.map((option) => (
-            <TouchableOpacity
-              key={option.value}
-              style={[
-                styles.goalOption,
-                weeklyGoal === option.value && styles.goalOptionSelected,
-              ]}
-              onPress={() => setWeeklyGoal(option.value)}
-            >
-              <Text style={styles.goalIcon}>{option.icon}</Text>
-              <View style={styles.goalContent}>
-                <Text
-                  style={[
-                    styles.goalLabel,
-                    weeklyGoal === option.value && styles.goalLabelSelected,
-                  ]}
-                >
-                  {option.label}
-                </Text>
-                <Text style={styles.goalDescription}>{option.description}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+          <View style={styles.goalContainer}>
+            {weeklyGoalOptions.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.goalOption,
+                  weeklyGoal === option.value && styles.goalOptionSelected,
+                ]}
+                onPress={() => setWeeklyGoal(option.value)}
+              >
+                <Text style={styles.goalIcon}>{option.icon}</Text>
+                <View style={styles.goalContent}>
+                  <Text
+                    style={[
+                      styles.goalLabel,
+                      weeklyGoal === option.value && styles.goalLabelSelected,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                  <Text style={styles.goalDescription}>{option.description}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

@@ -7,6 +7,7 @@ import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -95,9 +96,16 @@ const DislikedFoodsScreen = () => {
       flex: 1,
       backgroundColor: theme.semanticColors.background.primary,
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       padding: theme.spacing.lg,
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     header: {
       marginBottom: theme.spacing['3xl'],
@@ -203,64 +211,66 @@ const DislikedFoodsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-    <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
-        <View style={styles.header}>
-          <Text style={styles.title}>Sevmediğiniz Besinler</Text>
-          <Text style={styles.subtitle}>
-            Sevmediğiniz besinleri belirtin. Bu bilgiler size özel ve zevkinize uygun beslenme planı oluşturmamıza yardımcı olacaktır.
-          </Text>
-        </View>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+          <View style={styles.header}>
+            <Text style={styles.title}>Sevmediğiniz Besinler</Text>
+            <Text style={styles.subtitle}>
+              Sevmediğiniz besinleri belirtin. Bu bilgiler size özel ve zevkinize uygun beslenme planı oluşturmamıza yardımcı olacaktır.
+            </Text>
+          </View>
 
-        {dislikedFoods.length > 0 && (
-          <View style={styles.selectedTagsContainer}>
-            {dislikedFoods.map((food) => (
-              <View key={food} style={styles.selectedTag}>
-                <Text style={styles.selectedTagText}>{food}</Text>
-                <TouchableOpacity onPress={() => handleRemove(food)}>
-                  <Text style={styles.removeTag}>×</Text>
-                </TouchableOpacity>
-              </View>
+          {dislikedFoods.length > 0 && (
+            <View style={styles.selectedTagsContainer}>
+              {dislikedFoods.map((food) => (
+                <View key={food} style={styles.selectedTag}>
+                  <Text style={styles.selectedTagText}>{food}</Text>
+                  <TouchableOpacity onPress={() => handleRemove(food)}>
+                    <Text style={styles.removeTag}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+
+          <View style={styles.tagContainer}>
+            {commonDislikedFoods.map((food) => (
+              <TouchableOpacity
+                key={food.value}
+                style={[
+                  styles.tagButton,
+                  dislikedFoods.includes(food.value) && styles.tagButtonSelected,
+                ]}
+                onPress={() => handleToggle(food.value)}
+              >
+                <Text style={styles.tagIcon}>{food.icon}</Text>
+                <Text
+                  style={[
+                    styles.tagText,
+                    dislikedFoods.includes(food.value) && styles.tagTextSelected,
+                  ]}
+                >
+                  {food.label}
+                </Text>
+              </TouchableOpacity>
             ))}
           </View>
-        )}
 
-        <View style={styles.tagContainer}>
-          {commonDislikedFoods.map((food) => (
-            <TouchableOpacity
-              key={food.value}
-              style={[
-                styles.tagButton,
-                dislikedFoods.includes(food.value) && styles.tagButtonSelected,
-              ]}
-              onPress={() => handleToggle(food.value)}
-            >
-              <Text style={styles.tagIcon}>{food.icon}</Text>
-              <Text
-                style={[
-                  styles.tagText,
-                  dislikedFoods.includes(food.value) && styles.tagTextSelected,
-                ]}
-              >
-                {food.label}
-              </Text>
+          <View style={styles.customInputContainer}>
+            <TextInput
+              style={styles.customInput}
+              value={customDislikedFood}
+              onChangeText={setCustomDislikedFood}
+              placeholder="Sevmediğiniz başka besinler"
+              placeholderTextColor={theme.semanticColors.text.tertiary}
+            />
+            <TouchableOpacity style={styles.addButton} onPress={handleAddCustom}>
+              <Text style={styles.addButtonText}>Ekle</Text>
             </TouchableOpacity>
-          ))}
+          </View>
         </View>
-
-        <View style={styles.customInputContainer}>
-          <TextInput
-            style={styles.customInput}
-            value={customDislikedFood}
-            onChangeText={setCustomDislikedFood}
-            placeholder="Sevmediğiniz başka besinler"
-            placeholderTextColor={theme.semanticColors.text.tertiary}
-          />
-          <TouchableOpacity style={styles.addButton} onPress={handleAddCustom}>
-            <Text style={styles.addButtonText}>Ekle</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

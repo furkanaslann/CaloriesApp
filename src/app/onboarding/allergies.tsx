@@ -6,11 +6,12 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
@@ -95,9 +96,16 @@ const AllergiesScreen = () => {
       flex: 1,
       backgroundColor: theme.semanticColors.background.primary,
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       padding: theme.spacing.lg,
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     header: {
       marginBottom: theme.spacing['3xl'],
@@ -203,64 +211,66 @@ const AllergiesScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-    <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
-        <View style={styles.header}>
-          <Text style={styles.title}>Alerjileriniz</Text>
-          <Text style={styles.subtitle}>
-            Alerjilerinizi belirtin. Bu bilgiler size özel beslenme planı oluşturmamıza yardımcı olacaktır.
-          </Text>
-        </View>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+          <View style={styles.header}>
+            <Text style={styles.title}>Alerjileriniz</Text>
+            <Text style={styles.subtitle}>
+              Alerjilerinizi belirtin. Bu bilgiler size özel beslenme planı oluşturmamıza yardımcı olacaktır.
+            </Text>
+          </View>
 
-        {allergies.length > 0 && (
-          <View style={styles.selectedTagsContainer}>
-            {allergies.map((allergy) => (
-              <View key={allergy} style={styles.selectedTag}>
-                <Text style={styles.selectedTagText}>{allergy}</Text>
-                <TouchableOpacity onPress={() => handleRemove(allergy)}>
-                  <Text style={styles.removeTag}>×</Text>
-                </TouchableOpacity>
-              </View>
+          {allergies.length > 0 && (
+            <View style={styles.selectedTagsContainer}>
+              {allergies.map((allergy) => (
+                <View key={allergy} style={styles.selectedTag}>
+                  <Text style={styles.selectedTagText}>{allergy}</Text>
+                  <TouchableOpacity onPress={() => handleRemove(allergy)}>
+                    <Text style={styles.removeTag}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+
+          <View style={styles.tagContainer}>
+            {commonAllergies.map((allergy) => (
+              <TouchableOpacity
+                key={allergy.value}
+                style={[
+                  styles.tagButton,
+                  allergies.includes(allergy.value) && styles.tagButtonSelected,
+                ]}
+                onPress={() => handleToggle(allergy.value)}
+              >
+                <Text style={styles.tagIcon}>{allergy.icon}</Text>
+                <Text
+                  style={[
+                    styles.tagText,
+                    allergies.includes(allergy.value) && styles.tagTextSelected,
+                  ]}
+                >
+                  {allergy.label}
+                </Text>
+              </TouchableOpacity>
             ))}
           </View>
-        )}
 
-        <View style={styles.tagContainer}>
-          {commonAllergies.map((allergy) => (
-            <TouchableOpacity
-              key={allergy.value}
-              style={[
-                styles.tagButton,
-                allergies.includes(allergy.value) && styles.tagButtonSelected,
-              ]}
-              onPress={() => handleToggle(allergy.value)}
-            >
-              <Text style={styles.tagIcon}>{allergy.icon}</Text>
-              <Text
-                style={[
-                  styles.tagText,
-                  allergies.includes(allergy.value) && styles.tagTextSelected,
-                ]}
-              >
-                {allergy.label}
-              </Text>
+          <View style={styles.customInputContainer}>
+            <TextInput
+              style={styles.customInput}
+              value={customAllergy}
+              onChangeText={setCustomAllergy}
+              placeholder="Diğer alerjinizi yazın"
+              placeholderTextColor={theme.semanticColors.text.tertiary}
+            />
+            <TouchableOpacity style={styles.addButton} onPress={handleAddCustom}>
+              <Text style={styles.addButtonText}>Ekle</Text>
             </TouchableOpacity>
-          ))}
+          </View>
         </View>
-
-        <View style={styles.customInputContainer}>
-          <TextInput
-            style={styles.customInput}
-            value={customAllergy}
-            onChangeText={setCustomAllergy}
-            placeholder="Diğer alerjinizi yazın"
-            placeholderTextColor={theme.semanticColors.text.tertiary}
-          />
-          <TouchableOpacity style={styles.addButton} onPress={handleAddCustom}>
-            <Text style={styles.addButtonText}>Ekle</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button

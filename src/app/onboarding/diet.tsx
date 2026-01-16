@@ -7,6 +7,7 @@ import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -83,9 +84,16 @@ const DietScreen = () => {
       flex: 1,
       backgroundColor: theme.semanticColors.background.primary,
     },
-    content: {
+    scrollView: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
       padding: theme.spacing.lg,
+      paddingTop: theme.spacing['4xl'],
+      paddingBottom: theme.spacing['4xl'],
     },
     header: {
       marginBottom: theme.spacing['3xl'],
@@ -161,45 +169,47 @@ const DietScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
 
-        <View style={styles.header}>
-          <Text style={styles.title}>Beslenme Tercihleriniz</Text>
-          <Text style={styles.subtitle}>
-            Beslenme tarzınızı seçin. Bu bilgi, size özel beslenme planı oluşturmamıza yardımcı olacaktır.
-          </Text>
-        </View>
+          <View style={styles.header}>
+            <Text style={styles.title}>Beslenme Tercihleriniz</Text>
+            <Text style={styles.subtitle}>
+              Beslenme tarzınızı seçin. Bu bilgi, size özel beslenme planı oluşturmamıza yardımcı olacaktır.
+            </Text>
+          </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Beslenme Türü</Text>
-          <View style={styles.optionGrid}>
-            {dietTypes.map((dietType) => (
-              <TouchableOpacity
-                key={dietType.value}
-                style={[
-                  styles.optionCard,
-                  type === dietType.value && styles.optionCardSelected,
-                ]}
-                onPress={() => handleTypeSelect(dietType.value)}
-              >
-                <View style={styles.optionHeader}>
-                  <Text style={styles.optionIcon}>{dietType.icon}</Text>
-                  <Text
-                    style={[
-                      styles.optionLabel,
-                      type === dietType.value && styles.optionLabelSelected,
-                    ]}
-                  >
-                    {dietType.label}
-                  </Text>
-                </View>
-                <Text style={styles.optionDescription}>{dietType.description}</Text>
-              </TouchableOpacity>
-            ))}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Beslenme Türü</Text>
+            <View style={styles.optionGrid}>
+              {dietTypes.map((dietType) => (
+                <TouchableOpacity
+                  key={dietType.value}
+                  style={[
+                    styles.optionCard,
+                    type === dietType.value && styles.optionCardSelected,
+                  ]}
+                  onPress={() => handleTypeSelect(dietType.value)}
+                >
+                  <View style={styles.optionHeader}>
+                    <Text style={styles.optionIcon}>{dietType.icon}</Text>
+                    <Text
+                      style={[
+                        styles.optionLabel,
+                        type === dietType.value && styles.optionLabelSelected,
+                      ]}
+                    >
+                      {dietType.label}
+                    </Text>
+                  </View>
+                  <Text style={styles.optionDescription}>{dietType.description}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
         <Button
