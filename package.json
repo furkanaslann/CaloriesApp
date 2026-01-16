@@ -9,9 +9,9 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "emulators": "firebase emulators:start --only auth,functions,firestore",
-    "emulators:start": "firebase emulators:start --only auth,functions,firestore",
-    "emulators:exec": "firebase emulators:exec --only auth,functions,firestore"
+    "emulators": "firebase emulators:start --only auth,functions,firestore,storage",
+    "emulators:start": "firebase emulators:start --only auth,functions,firestore,storage",
+    "emulators:exec": "firebase emulators:exec --only auth,functions,firestore,storage"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -46,8 +46,8 @@
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
     "react-native-gesture-handler": "~2.28.0",
-    "react-native-purchases": "^9.6.11",
-    "react-native-purchases-ui": "^9.6.11",
+    "react-native-purchases": "^9.7.1",
+    "react-native-purchases-ui": "^9.7.1",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",

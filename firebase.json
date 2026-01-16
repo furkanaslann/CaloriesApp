@@ -69,9 +69,10 @@
       "enabled": true,
       "port": 4000
     },
+      "storage": {
+        "port": 9199,
+        "rules": "storage.rules"
+    },
     "singleProjectMode": true
-  },
-  "storage": {
-    "rules": "storage.rules"
   }
 }

@@ -31,26 +31,31 @@ const ProfilePhotoScreen = () => {
     },
     colors: { primary: COLORS.primary, error: COLORS.error },
     textStyles: {
-      heading2: { fontSize: TYPOGRAPHY.fontSizes['2xl'], fontWeight: '600' },
-      body: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' },
-      bodySmall: { fontSize: TYPOGRAPHY.fontSizes.sm, fontWeight: '400' },
-      buttonMedium: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '500' },
+      heading2: { fontSize: TYPOGRAPHY.fontSizes['2xl'], fontWeight: '600' as const },
+      onboardingTitle: { fontSize: TYPOGRAPHY.fontSizes['3xl'], fontWeight: '600' as const, lineHeight: TYPOGRAPHY.lineHeights.tight, letterSpacing: -0.5 },
+      body: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' as const },
+      bodySmall: { fontSize: TYPOGRAPHY.fontSizes.sm, fontWeight: '400' as const },
+      buttonMedium: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '500' as const },
     },
-    typography: { lineHeight: { relaxed: TYPOGRAPHY.lineHeights.relaxed } },
+    typography: {
+      fontWeights: TYPOGRAPHY.fontWeights,
+      lineHeight: { relaxed: TYPOGRAPHY.lineHeights.relaxed },
+    },
     spacing: {
       ...SPACING,
       sm: SPACING[2],
       md: SPACING[3],
       lg: SPACING[4],
       xl: SPACING[5],
-      '3xl': SPACING[10],
+      '3xl': SPACING[12],
+      '4xl': SPACING[12],
     },
     borderRadius: BORDER_RADIUS,
     shadows: SHADOWS,
   };
   const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
-  const [profilePhoto, setProfilePhoto] = useState(profile.profilePhoto || null);
+  const [profilePhoto, setProfilePhoto] = useState<string | undefined>(profile.profilePhoto);
 
   const requestPermissions = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -115,7 +120,7 @@ const ProfilePhotoScreen = () => {
   };
 
   const removePhoto = () => {
-    setProfilePhoto(null);
+    setProfilePhoto(undefined);
   };
 
   const handleNext = () => {
@@ -151,27 +156,21 @@ const ProfilePhotoScreen = () => {
     },
     title: {
       ...theme.textStyles.onboardingTitle,
-      fontSize: 32,
-      fontWeight: '700',
-      color: '#1E293B',
+      color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.md,
       marginTop: theme.spacing.sm,
       textAlign: 'center',
-      lineHeight: 40,
-      //textShadowColor: 'rgba(0, 0, 0, 0.1)',
-      //textShadowOffset: { width: 0, height: 1 },
-      //textShadowRadius: 2,
     },
     subtitle: {
       ...theme.textStyles.body,
-      color: '#1E293B',
+      color: theme.semanticColors.text.primary,
       textAlign: 'center',
-      lineHeight: 26,
-      fontWeight: '700',
-      fontSize: 20,
+      lineHeight: theme.typography.lineHeight.relaxed,
+      fontWeight: theme.typography.fontWeights.semibold,
+      fontSize: TYPOGRAPHY.fontSizes.xl,
       marginTop: theme.spacing.md,
       marginBottom: theme.spacing.xl,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: theme.semanticColors.background.primary,
       paddingVertical: theme.spacing.md,
       paddingHorizontal: theme.spacing.lg
     },
@@ -230,13 +229,12 @@ const ProfilePhotoScreen = () => {
       color: theme.colors.error,
     },
     skipText: {
-      ...theme.textStyles.body,
       color: theme.semanticColors.text.primary,
       textAlign: 'center',
       marginTop: theme.spacing.lg,
-      fontSize: 15,
-      fontWeight: '500',
-      lineHeight: 22,
+      fontSize: TYPOGRAPHY.fontSizes.base,
+      fontWeight: theme.typography.fontWeights.medium,
+      lineHeight: theme.typography.lineHeight.relaxed,
       backgroundColor: theme.semanticColors.background.surface,
       paddingVertical: theme.spacing.sm,
       paddingHorizontal: theme.spacing.md,

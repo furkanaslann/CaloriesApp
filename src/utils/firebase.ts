@@ -18,7 +18,6 @@ import { FIREBASE_CONFIG } from '@/constants/firebase';
 
 // Firebase Emulator Configuration for Development
 const IS_DEV = __DEV__;
-// Android emulator needs 10.0.2.2 to reach host machine, iOS simulator uses localhost
 const getEmulatorHost = () => {
   if (Platform.OS === 'android') {
     return '10.0.2.2';
@@ -103,15 +102,12 @@ export const initializeFirebaseEmulators = async () => {
       // This delay helps ensure the connection is fully established before any operations
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // NOT: Storage Emulator'üne bağlanmıyoruz
-      // Storage için özel bir solution gerekiyor
-      console.log('⚠️  Storage Emulator disabled - Using production Firebase Storage');
-      console.log('⚠️  Need to handle Auth token sync between emulator and production');
+      // Connect to Storage Emulator
+      console.log('Connecting to Storage Emulator at:', `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.storage}`);
+      storage().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.storage);
+      console.log('✅ Storage emulator enabled');
 
-      // Storage emulator'ü kullanmadığımızı belirt
-      console.log('📦 Storage will use: gs://calories-app-185b6.firebasestorage.app');
-
-      console.log('✅ Firebase configuration: Auth: Emulator, Firestore: Emulator, Functions: Emulator, Storage: Production');
+      console.log('✅ Firebase configuration: Auth: Emulator, Firestore: Emulator, Functions: Emulator, Storage: Emulator');
       emulatorsInitialized = true;
       return true; // Success
     } catch (error) {
