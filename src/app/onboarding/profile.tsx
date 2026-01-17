@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { COLORS, SPACING } from '@/constants/theme';
 import { router } from 'expo-router';
 import React from 'react';
 import {
@@ -12,6 +12,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
@@ -22,23 +23,26 @@ const ProfileScreen = () => {
   // Modern theme system using constants
   const theme = {
     semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
+      background: { primary: COLORS.background, surface: COLORS.surfaceAlt },
+      text: { primary: COLORS.textPrimary, secondary: COLORS.textSecondary, tertiary: COLORS.textTertiary },
+      border: { primary: COLORS.border, secondary: COLORS.border },
     },
-    colors: { primary: '#7C3AED' },
+    colors: { primary: COLORS.primary },
     textStyles: {
-      heading2: { fontSize: 28, fontWeight: '600' },
-      heading3: { fontSize: 24, fontWeight: '600' },
-      heading4: { fontSize: 20, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodyMedium: { fontSize: 16, fontWeight: '500' },
-      labelSmall: { fontSize: 13, fontWeight: '500' },
+      heading2: { fontSize: 28, fontWeight: '600' as const },
+      heading3: { fontSize: 24, fontWeight: '600' as const },
+      heading4: { fontSize: 20, fontWeight: '600' as const },
+      body: { fontSize: 16, fontWeight: '400' as const },
+      bodyMedium: { fontSize: 16, fontWeight: '500' as const },
+      labelSmall: { fontSize: 13, fontWeight: '500' as const },
     },
-    typography: { lineHeight: { relaxed: 24 } },
+    typography: {
+      fontWeights: { regular: '400', medium: '500', semibold: '600' },
+      lineHeight: { relaxed: 24 }
+    },
     spacing: { lg: 24, md: 16, xl: 32, xs: 4, sm: 8, '3xl': 40 },
-    borderRadius: { md: 10 },
-    shadows: {},
+    borderRadius: { sm: 4, md: 10 },
+    shadows: { lg: {}, md: {} },
   };
   const { profile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
@@ -94,20 +98,19 @@ const ProfileScreen = () => {
       padding: theme.spacing.lg,
     },
     header: {
-      marginTop: '10%',
+      marginTop: 40,
       marginBottom: theme.spacing['3xl'],
     },
     title: {
-      ...theme.textStyles.heading2,
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.md,
       textAlign: 'center',
       lineHeight: 40,
       fontSize: 32,
-      fontWeight: '700',
+      fontWeight: '700' as const,
     },
     subtitle: {
-      ...theme.textStyles.body,
+      fontSize: theme.textStyles.body.fontSize,
       color: theme.semanticColors.text.secondary,
       textAlign: 'center',
       lineHeight: theme.typography.lineHeight.relaxed,
@@ -134,19 +137,20 @@ const ProfileScreen = () => {
       fontSize: 40,
     },
     profileName: {
-      ...theme.textStyles.heading3,
+      fontSize: theme.textStyles.heading3.fontSize,
+      fontWeight: theme.textStyles.heading3.fontWeight,
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.xs,
     },
     profileDetails: {
-      ...theme.textStyles.body,
+      fontSize: theme.textStyles.body.fontSize,
       color: theme.semanticColors.text.secondary,
     },
     section: {
       marginBottom: theme.spacing.xl,
     },
     sectionTitle: {
-      ...theme.textStyles.heading4,
+      fontSize: theme.textStyles.heading4.fontSize,
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.md,
     },
@@ -162,20 +166,23 @@ const ProfileScreen = () => {
       borderColor: theme.semanticColors.border.primary,
     },
     infoLabel: {
-      ...theme.textStyles.body,
+      fontSize: theme.textStyles.body.fontSize,
+      fontWeight: theme.textStyles.body.fontWeight,
       color: theme.semanticColors.text.secondary,
       flex: 1,
     },
     infoValue: {
-      ...theme.textStyles.bodyMedium,
+      fontSize: theme.textStyles.bodyMedium.fontSize,
+      fontWeight: theme.textStyles.bodyMedium.fontWeight,
       color: theme.semanticColors.text.primary,
       flex: 2,
       textAlign: 'right',
     },
     editButton: {
-      ...theme.textStyles.labelSmall,
+      fontSize: theme.textStyles.labelSmall.fontSize,
+      fontWeight: theme.textStyles.labelSmall.fontWeight,
       color: theme.colors.primary,
-      textDecorationLine: 'underline',
+      textDecorationLine: 'underline' as const,
       marginLeft: theme.spacing.sm,
     },
     buttonContainer: {
@@ -204,12 +211,12 @@ const ProfileScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container as ViewStyle} edges={['left', 'right', 'bottom']}>
       <View style={styles.topBar}>
         <ProgressBar currentStep={getCurrentStep('profile')} totalSteps={totalSteps} onBack={handlePrevious} />
       </View>
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>Profil Özeti</Text>
@@ -298,13 +305,9 @@ const ProfileScreen = () => {
 
       <View style={styles.buttonContainer}>
         <Button
-          title="Geri"
-          onPress={handlePrevious}
-          variant="secondary"
-        />
-        <Button
           title="Devam Et"
           onPress={handleNext}
+          fullWidth
         />
       </View>
     </SafeAreaView>

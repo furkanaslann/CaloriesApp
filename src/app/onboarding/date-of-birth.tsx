@@ -125,7 +125,7 @@ const DateOfBirthScreen = () => {
     },
     content: {
       paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      paddingTop: theme?.spacing?.['4xl'] || 48,
+      paddingTop: theme?.spacing?.lg || 16,
       paddingBottom: theme?.spacing?.['4xl'] || 48,
     },
     header: {
@@ -205,7 +205,7 @@ const DateOfBirthScreen = () => {
   const age = calculateAge(dateOfBirth);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
@@ -261,6 +261,7 @@ const DateOfBirthScreen = () => {
         <Button
           title="Devam Et"
           onPress={handleNext}
+          fullWidth
           style={theme?.coloredShadows?.primary || {}}
         />
       </View>

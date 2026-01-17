@@ -24,14 +24,15 @@ const CommitmentScreen = () => {
   // Theme object using constants
   const theme = {
     semanticColors: {
-      background: { primary: COLORS.background, surface: COLORS.surfaceAlt },
+      background: { primary: COLORS.background, surface: COLORS.surfaceAlt, tertiary: COLORS.surfaceAlt },
       text: {
         primary: COLORS.textPrimary,
         secondary: COLORS.textSecondary,
         tertiary: COLORS.textTertiary,
+        muted: COLORS.textSecondary,
         onPrimary: '#FFFFFF'
       },
-      border: { primary: COLORS.border, secondary: COLORS.border },
+      border: { primary: COLORS.border, secondary: COLORS.border, focus: COLORS.primary },
       success: { background: COLORS.successLight, text: COLORS.successDark },
       error: { background: COLORS.errorLight, text: COLORS.errorDark },
     },
@@ -43,13 +44,15 @@ const CommitmentScreen = () => {
       error: COLORS.error,
     },
     textStyles: {
-      heading1: { fontSize: TYPOGRAPHY.fontSizes['4xl'], fontWeight: '700' },
-      heading2: { fontSize: TYPOGRAPHY.fontSizes['2xl'], fontWeight: '600' },
-      heading3: { fontSize: TYPOGRAPHY.fontSizes.xl, fontWeight: '600' },
-      body: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' },
-      bodySmall: { fontSize: TYPOGRAPHY.fontSizes.sm, fontWeight: '400' },
-      button: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '500' },
-      input: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' },
+      onboardingTitle: { fontSize: TYPOGRAPHY.fontSizes['3xl'], fontWeight: TYPOGRAPHY.fontWeights.semibold },
+      onboardingSubtitle: { fontSize: TYPOGRAPHY.fontSizes.xl, fontWeight: TYPOGRAPHY.fontWeights.medium },
+      heading1: { fontSize: TYPOGRAPHY.fontSizes['4xl'], fontWeight: TYPOGRAPHY.fontWeights.bold },
+      heading2: { fontSize: TYPOGRAPHY.fontSizes['2xl'], fontWeight: TYPOGRAPHY.fontWeights.semibold },
+      heading3: { fontSize: TYPOGRAPHY.fontSizes.xl, fontWeight: TYPOGRAPHY.fontWeights.semibold },
+      body: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: TYPOGRAPHY.fontWeights.regular },
+      bodySmall: { fontSize: TYPOGRAPHY.fontSizes.sm, fontWeight: TYPOGRAPHY.fontWeights.regular },
+      button: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: TYPOGRAPHY.fontWeights.medium },
+      input: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: TYPOGRAPHY.fontWeights.regular },
     },
     typography: {
       lineHeight: {
@@ -78,6 +81,7 @@ const CommitmentScreen = () => {
     borderRadius: BORDER_RADIUS,
     shadows: SHADOWS,
     coloredShadows: {
+      gradient: SHADOWS.lg,
       primary: SHADOWS.md,
       success: SHADOWS.sm,
       error: SHADOWS.sm,
@@ -209,7 +213,7 @@ const CommitmentScreen = () => {
     },
     content: {
       paddingHorizontal: theme.spacing['2xl'],
-      paddingVertical: theme.spacing['4xl'],
+      paddingVertical: theme.spacing.lg,
     },
     header: {
       alignItems: 'center',
@@ -223,22 +227,26 @@ const CommitmentScreen = () => {
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: theme.spacing.xl,
-      ...theme.shadows.md,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 6,
+      elevation: 3,
     },
     icon: {
       fontSize: 40,
     },
     title: {
-      fontSize: theme.textStyles.onboardingTitle?.fontSize || 30,
-      fontWeight: theme.textStyles.onboardingTitle?.fontWeight || '600',
+      fontSize: theme.textStyles.onboardingTitle.fontSize,
+      fontWeight: theme.textStyles.onboardingTitle.fontWeight,
       color: theme.semanticColors.text.primary,
       textAlign: 'center',
       marginBottom: theme.spacing.lg,
       lineHeight: 36,
     },
     subtitle: {
-      fontSize: theme.textStyles.onboardingSubtitle?.fontSize || 20,
-      fontWeight: theme.textStyles.onboardingSubtitle?.fontWeight || '500',
+      fontSize: theme.textStyles.onboardingSubtitle.fontSize,
+      fontWeight: theme.textStyles.onboardingSubtitle.fontWeight,
       color: theme.semanticColors.text.secondary,
       textAlign: 'center',
       marginBottom: theme.spacing.lg,
@@ -246,7 +254,7 @@ const CommitmentScreen = () => {
     },
     description: {
       fontSize: 16,
-      fontWeight: '400',
+      fontWeight: TYPOGRAPHY.fontWeights.regular,
       color: theme.semanticColors.text.secondary,
       textAlign: 'center',
       paddingHorizontal: theme.spacing.lg,
@@ -261,7 +269,7 @@ const CommitmentScreen = () => {
     },
     label: {
       fontSize: 16,
-      fontWeight: '500',
+      fontWeight: TYPOGRAPHY.fontWeights.medium,
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.xs,
     },
@@ -278,7 +286,11 @@ const CommitmentScreen = () => {
     inputFocused: {
       borderColor: theme.semanticColors.border.focus,
       borderWidth: 2,
-      ...theme.shadows.sm,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
     },
     textArea: {
       height: 100,
@@ -293,14 +305,14 @@ const CommitmentScreen = () => {
     },
     previewTitle: {
       fontSize: 14,
-      fontWeight: '600',
+      fontWeight: TYPOGRAPHY.fontWeights.semibold,
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.sm,
     },
     previewText: {
       fontSize: 14,
       color: theme.semanticColors.text.secondary,
-      fontStyle: 'italic',
+      fontStyle: 'italic' as const,
     },
     footer: {
       paddingHorizontal: theme.spacing['2xl'],
@@ -309,7 +321,11 @@ const CommitmentScreen = () => {
       backgroundColor: theme.semanticColors.background.primary,
       borderTopLeftRadius: theme.borderRadius.xl,
       borderTopRightRadius: theme.borderRadius.xl,
-      ...theme.shadows.lg,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.1,
+      shadowRadius: 15,
+      elevation: 5,
     },
     buttonContainer: {
       gap: theme.spacing.md,
@@ -317,7 +333,7 @@ const CommitmentScreen = () => {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <View style={styles.header}>
@@ -414,13 +430,7 @@ const CommitmentScreen = () => {
             onPress={handleSubmit}
             disabled={isSubmitting}
             fullWidth
-            style={theme.coloredShadows?.gradient || {}}
-          />
-          <Button
-            title="Geri Dön"
-            onPress={() => router.back()}
-            variant="secondary"
-            fullWidth
+            style={theme.coloredShadows.gradient}
           />
         </View>
       </View>

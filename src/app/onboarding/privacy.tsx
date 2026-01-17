@@ -108,7 +108,7 @@ const PrivacyScreen = () => {
       flex: 1,
     },
     content: {
-      padding: SPACING[6],
+      padding: SPACING[4],
     },
     header: {
       marginTop: '10%',
@@ -296,7 +296,7 @@ const PrivacyScreen = () => {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <View style={styles.header}>
@@ -380,13 +380,9 @@ const PrivacyScreen = () => {
 
       <View style={styles.buttonContainer}>
         <Button
-          title="Geri"
-          onPress={handlePrevious}
-          variant="secondary"
-        />
-        <Button
           title="Devam Et"
           onPress={handleNext}
+          fullWidth
         />
       </View>
     </SafeAreaView>

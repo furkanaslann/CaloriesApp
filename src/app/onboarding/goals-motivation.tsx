@@ -161,7 +161,7 @@ const MotivationScreen = () => {
     },
     content: {
       padding: theme.spacing.lg,
-      paddingTop: theme.spacing['4xl'],
+      paddingTop: theme.spacing.lg,
       paddingBottom: theme.spacing.xl,
     },
     header: {
@@ -309,7 +309,7 @@ const MotivationScreen = () => {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -379,6 +379,7 @@ const MotivationScreen = () => {
         <Button
           title="Devam Et"
           onPress={handleNext}
+          fullWidth
         />
       </View>
     </SafeAreaView>

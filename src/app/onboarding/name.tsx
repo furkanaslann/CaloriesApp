@@ -93,7 +93,7 @@ const NameScreen = () => {
     },
     content: {
       paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      paddingTop: theme?.spacing?.['4xl'] || 48,
+      paddingTop: theme?.spacing?.lg || 16,
       paddingBottom: theme?.spacing?.['4xl'] || 48,
     },
     scrollView: {
@@ -165,7 +165,7 @@ const NameScreen = () => {
   const currentStep = getCurrentStep('name');
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />

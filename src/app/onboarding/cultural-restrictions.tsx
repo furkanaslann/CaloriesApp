@@ -3,7 +3,6 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -205,7 +204,7 @@ const CulturalRestrictionsScreen = () => {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
@@ -271,6 +270,7 @@ const CulturalRestrictionsScreen = () => {
         <Button
           title="Devam Et"
           onPress={handleNext}
+          fullWidth
         />
       </View>
     </SafeAreaView>

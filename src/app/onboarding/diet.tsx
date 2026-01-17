@@ -3,7 +3,6 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -69,7 +68,7 @@ const DietScreen = () => {
 
     updateDiet(updatedDiet);
     nextStep();
-    router.push('/onboarding/camera-tutorial');
+    router.push('/onboarding/allergies');
   };
 
   const handlePrevious = () => {
@@ -92,7 +91,7 @@ const DietScreen = () => {
     },
     content: {
       padding: theme.spacing.lg,
-      paddingTop: theme.spacing['4xl'],
+      paddingTop: theme.spacing.lg,
       paddingBottom: theme.spacing['4xl'],
     },
     header: {
@@ -168,7 +167,7 @@ const DietScreen = () => {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
@@ -215,6 +214,7 @@ const DietScreen = () => {
         <Button
           title="Devam Et"
           onPress={handleNext}
+          fullWidth
         />
       </View>
     </SafeAreaView>

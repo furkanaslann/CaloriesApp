@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -52,6 +52,9 @@ const ProfilePhotoScreen = () => {
     },
     borderRadius: BORDER_RADIUS,
     shadows: SHADOWS,
+    coloredShadows: {
+      primary: SHADOWS.md,
+    },
   };
   const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
@@ -147,7 +150,7 @@ const ProfilePhotoScreen = () => {
     },
     content: {
       padding: theme.spacing.lg,
-      paddingTop: theme.spacing['4xl'],
+      paddingTop: theme.spacing.lg,
       paddingBottom: theme.spacing['4xl'],
     },
     header: {
@@ -203,7 +206,7 @@ const ProfilePhotoScreen = () => {
       color: theme.semanticColors.text.tertiary,
       textAlign: 'center',
     },
-    buttonContainer: {
+    actionButtonContainer: {
       gap: theme.spacing.md,
       marginBottom: theme.spacing['3xl'],
     },
@@ -242,18 +245,25 @@ const ProfilePhotoScreen = () => {
       borderWidth: 1,
       borderColor: theme.semanticColors.border.secondary,
     },
-    bottomButtonContainer: {
-      flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+    buttonContainer: {
+      paddingHorizontal: theme.spacing.md,
+      paddingBottom: theme.spacing['4xl'],
+      paddingTop: theme.spacing.xl,
+      backgroundColor: theme.semanticColors.background.primary,
+      borderTopLeftRadius: theme.borderRadius.xl,
+      borderTopRightRadius: theme.borderRadius.xl,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.1,
+      shadowRadius: 15,
+      elevation: 5,
     },
   });
 
   const currentStep = getCurrentStep('profile-photo');
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
@@ -278,7 +288,7 @@ const ProfilePhotoScreen = () => {
             </View>
           </View>
 
-          <View style={styles.buttonContainer}>
+          <View style={styles.actionButtonContainer}>
             <TouchableOpacity style={styles.actionButton} onPress={pickImageFromGallery}>
               <Text style={styles.buttonText}>📷 Galeriden Seç</Text>
             </TouchableOpacity>
@@ -305,15 +315,12 @@ const ProfilePhotoScreen = () => {
         </View>
       </ScrollView>
 
-      <View style={styles.bottomButtonContainer}>
-        <Button
-          title="Atla"
-          onPress={handleNext}
-          variant="secondary"
-        />
+      <View style={styles.buttonContainer}>
         <Button
           title="Devam Et"
           onPress={handleNext}
+          fullWidth
+          style={theme.coloredShadows.primary}
         />
       </View>
     </SafeAreaView>

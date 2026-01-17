@@ -26,11 +26,12 @@ const AccountCreationScreen = () => {
   // Theme object using constants
   const theme = {
     semanticColors: {
-      background: { primary: COLORS.background, surface: COLORS.surfaceAlt },
+      background: { primary: COLORS.background, surface: COLORS.surfaceAlt, tertiary: COLORS.surfaceAlt },
       text: {
         primary: COLORS.textPrimary,
         secondary: COLORS.textSecondary,
         tertiary: COLORS.textTertiary,
+        muted: COLORS.textSecondary,
         onPrimary: '#FFFFFF'
       },
       border: { primary: COLORS.border, secondary: COLORS.border },
@@ -45,6 +46,8 @@ const AccountCreationScreen = () => {
       error: COLORS.error,
     },
     textStyles: {
+      onboardingTitle: { fontSize: TYPOGRAPHY.fontSizes['3xl'], fontWeight: '600' },
+      onboardingSubtitle: { fontSize: TYPOGRAPHY.fontSizes.xl, fontWeight: '500' },
       heading1: { fontSize: TYPOGRAPHY.fontSizes['4xl'], fontWeight: '700' },
       heading2: { fontSize: TYPOGRAPHY.fontSizes['2xl'], fontWeight: '600' },
       heading3: { fontSize: TYPOGRAPHY.fontSizes.xl, fontWeight: '600' },
@@ -80,6 +83,7 @@ const AccountCreationScreen = () => {
     borderRadius: BORDER_RADIUS,
     shadows: SHADOWS,
     coloredShadows: {
+      gradient: SHADOWS.lg,
       primary: SHADOWS.md,
       success: SHADOWS.sm,
       error: SHADOWS.sm,
@@ -317,17 +321,13 @@ const AccountCreationScreen = () => {
             .doc(firebaseUser.uid)
             .get();
 
-          if (verificationDoc.exists) {
-            const savedData = verificationDoc.data();
-            if (savedData?.onboardingCompleted === true) {
-              console.log('✅ VERIFIED: Onboarding data successfully saved to Firestore');
-              console.log('📝 User profile saved:', savedData.profile?.name, savedData.profile?.lastName);
-              console.log('🎯 Goals saved:', savedData.goals?.primaryGoal);
-            } else {
-              console.warn('⚠️ WARNING: onboardingCompleted flag not found in saved data');
-            }
+          const savedData = verificationDoc.data();
+          if (savedData?.onboardingCompleted === true) {
+            console.log('✅ VERIFIED: Onboarding data successfully saved to Firestore');
+            console.log('📝 User profile saved:', savedData.profile?.name, savedData.profile?.lastName);
+            console.log('🎯 Goals saved:', savedData.goals?.primaryGoal);
           } else {
-            console.error('❌ ERROR: No document found after save operation');
+            console.warn('⚠️ WARNING: onboardingCompleted flag not found in saved data');
           }
         } catch (verificationError) {
           console.error('❌ ERROR verifying saved data:', verificationError);
@@ -375,7 +375,7 @@ const AccountCreationScreen = () => {
     },
     content: {
       paddingHorizontal: theme.spacing['2xl'],
-      paddingVertical: theme.spacing['4xl'],
+      paddingVertical: theme.spacing.lg,
     },
     header: {
       alignItems: 'center',
@@ -396,7 +396,7 @@ const AccountCreationScreen = () => {
     },
     title: {
       fontSize: theme.textStyles.onboardingTitle?.fontSize || 30,
-      fontWeight: theme.textStyles.onboardingTitle?.fontWeight || '600',
+      fontWeight: (theme.textStyles.onboardingTitle?.fontWeight || '600') as '600',
       color: theme.semanticColors.text.primary,
       textAlign: 'center',
       marginBottom: theme.spacing.lg,
@@ -404,7 +404,7 @@ const AccountCreationScreen = () => {
     },
     subtitle: {
       fontSize: theme.textStyles.onboardingSubtitle?.fontSize || 20,
-      fontWeight: theme.textStyles.onboardingSubtitle?.fontWeight || '500',
+      fontWeight: (theme.textStyles.onboardingSubtitle?.fontWeight || '500') as '500',
       color: theme.semanticColors.text.secondary,
       textAlign: 'center',
       marginBottom: theme.spacing.lg,
@@ -518,7 +518,7 @@ const AccountCreationScreen = () => {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <View style={styles.header}>
@@ -663,12 +663,6 @@ const AccountCreationScreen = () => {
             disabled={isCreating}
             fullWidth
             style={theme.coloredShadows?.gradient || {}}
-          />
-          <Button
-            title="Geri Dön"
-            onPress={() => router.back()}
-            variant="secondary"
-            fullWidth
           />
         </View>
       </View>

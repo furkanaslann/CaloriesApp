@@ -102,7 +102,7 @@ const IntolerancesScreen = () => {
     },
     content: {
       padding: theme.spacing.lg,
-      paddingTop: theme.spacing['4xl'],
+      paddingTop: theme.spacing.lg,
       paddingBottom: theme.spacing['4xl'],
     },
     header: {
@@ -208,7 +208,7 @@ const IntolerancesScreen = () => {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
@@ -274,6 +274,7 @@ const IntolerancesScreen = () => {
         <Button
           title="Devam Et"
           onPress={handleNext}
+          fullWidth
         />
       </View>
     </SafeAreaView>

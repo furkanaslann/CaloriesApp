@@ -31,9 +31,9 @@ const CameraTutorialScreen = () => {
       body: { fontSize: 16, fontWeight: '400' },
       bodySmall: { fontSize: 14, fontWeight: '400' },
     },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '2xl': 24 },
-    borderRadius: { full: 9999, xl: 16, lg: 12 },
-    shadows: { lg: {}, md: {} },
+    spacing: { sm: 8, lg: 24, md: 16, xl: 32, '3xl': 40, '4xl': 48, '2xl': 24 },
+    borderRadius: { sm: 4, full: 9999, xl: 16, lg: 12 },
+    shadows: { sm: {}, lg: {}, md: {} },
     coloredShadows: { gradient: {} },
   };
   const { nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
@@ -107,7 +107,7 @@ const CameraTutorialScreen = () => {
     },
     content: {
       paddingHorizontal: theme.spacing['2xl'],
-      paddingTop: '15%',
+      paddingTop: theme.spacing.lg,
       paddingBottom: theme.spacing['4xl'],
     },
     scrollView: {
@@ -178,7 +178,7 @@ const CameraTutorialScreen = () => {
       marginBottom: theme.spacing['3xl'],
     },
     tipsContainer: {
-      backgroundColor: theme.semanticColors.surface,
+      backgroundColor: theme.semanticColors.background.surface,
       borderRadius: theme.borderRadius.lg,
       padding: theme.spacing.lg,
       ...(theme.shadows?.sm || {}),
@@ -245,7 +245,7 @@ const CameraTutorialScreen = () => {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           {currentSlideData.hasLogo ? (
@@ -297,17 +297,10 @@ const CameraTutorialScreen = () => {
         </View>
 
         <View style={styles.buttonContainer}>
-          {currentSlide > 0 && (
-            <Button
-              title="Geri"
-              onPress={handlePrevious}
-              variant="secondary"
-            />
-          )}
           <Button
             title={currentSlide < slides.length - 1 ? 'Sonraki' : 'Anladım'}
             onPress={handleNext}
-            fullWidth={currentSlide === 0}
+            fullWidth
           />
         </View>
       </View>

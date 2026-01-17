@@ -87,8 +87,8 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     paddingHorizontal: SPACING[6],
-    paddingTop: SPACING[4],
-    marginTop: SPACING[8],
+    paddingTop: SPACING[3],
+    marginTop: SPACING[4],
     marginBottom: SPACING[6],
   },
   headerRow: {
@@ -97,16 +97,16 @@ const styles = StyleSheet.create({
     gap: SPACING[3],
   },
   backButton: {
-    width: '10%',
-    height: 28,
+    width: '15%',
+    height: 42,
     justifyContent: 'center',
     alignItems: 'center',
   },
   backButtonText: {
-    fontSize: TYPOGRAPHY.fontSizes['2xl'],
+    fontSize: TYPOGRAPHY.fontSizes['3xl'],
     fontWeight: TYPOGRAPHY.fontWeights.semibold,
     color: COLORS.textPrimary,
-    lineHeight: 28,
+    lineHeight: 42,
     textAlignVertical: 'center',
   },
   progressContainer: {
