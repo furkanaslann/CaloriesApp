@@ -106,6 +106,11 @@ const SleepHoursScreen = () => {
     optionCardSelected: {
       borderColor: LightTheme.colors.primary,
       backgroundColor: `${LightTheme.colors.primary}10`,
+      shadowColor: LightTheme.colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
     },
     optionHeader: {
       flexDirection: 'row',

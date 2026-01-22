@@ -387,6 +387,11 @@ const AccountCreationScreen = () => {
     checkboxChecked: {
       backgroundColor: LightTheme.colors.primary,
       borderColor: LightTheme.colors.primary,
+      shadowColor: LightTheme.colors.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 4,
     },
     checkboxText: {
       flex: 1,

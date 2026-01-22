@@ -119,6 +119,11 @@ const ExerciseTypesScreen = () => {
     exerciseTypeButtonSelected: {
       borderColor: LightTheme.colors.primary,
       backgroundColor: LightTheme.colors.primary,
+      shadowColor: LightTheme.colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
     },
     exerciseTypeIcon: {
       fontSize: 16,

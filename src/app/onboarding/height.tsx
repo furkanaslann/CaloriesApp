@@ -144,7 +144,11 @@ const HeightScreen = () => {
     quickSelectButtonSelected: {
       borderColor: LightTheme.colors.primary,
       backgroundColor: LightTheme.colors.primaryLight + '25',
-      ...LightTheme.shadows.lg,
+      shadowColor: LightTheme.colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
     },
     quickSelectText: {
       fontSize: LightTheme.typography.base.fontSize,
