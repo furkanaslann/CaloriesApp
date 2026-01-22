@@ -80,40 +80,34 @@ export const initializeFirebaseEmulators = async () => {
       console.log('🔥 Initializing Firebase Emulators...');
       console.log(`📱 Platform: ${Platform.OS}, Host: ${EMULATOR_CONFIG.host}`);
 
-      // Connect to Auth Emulator - requires full URL
+      // Connect to Auth Emulator
       const authUrl = `http://${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.auth}`;
       console.log('Connecting to Auth Emulator at:', authUrl);
       auth().useEmulator(authUrl);
-
-      // Note: Authentication state is persisted automatically by React Native Firebase.
-      // To clear all users and start fresh, use: firebase emulators:start --clear-data
-      // Or manually sign out users if needed:
-      // const currentUser = auth().currentUser;
-      // if (currentUser) {
-      //   await auth().signOut();
-      //   console.log('🔓 Development: Signed out existing user for clean session');
-      // }
 
       // Connect to Firestore Emulator
       console.log('Connecting to Firestore Emulator at:', `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.firestore}`);
       firestore().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.firestore);
 
+      // --- EKLENEN KISIM BAŞLANGICI ---
+      // Android Emulator'de gRPC hatalarını (unavailable) önlemek için Long Polling zorlanır
+      firestore().settings({ persistence: false });
+      // --- EKLENEN KISIM SONU ---
+
       // Give the emulator connection a moment to stabilize
-      // This delay helps ensure the connection is fully established before any operations
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Connect to Storage Emulator
       console.log('Connecting to Storage Emulator at:', `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.storage}`);
       storage().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.storage);
-      console.log('✅ Storage emulator enabled');
-
-      console.log('✅ Firebase configuration: Auth: Emulator, Firestore: Emulator, Functions: Emulator, Storage: Emulator');
+      
+      console.log('✅ Firebase Emulators initialized successfully');
       emulatorsInitialized = true;
-      return true; // Success
+      return true;
     } catch (error) {
       console.error('❌ Firebase Emulator connection failed:', error);
       emulatorsInitialized = false;
-      return false; // Failed
+      return false;
     }
   }
   return emulatorsInitialized;

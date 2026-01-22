@@ -107,13 +107,13 @@ const AccountCreationScreen = () => {
     },
   };
 
-  const { profile, goals, completeOnboarding, updateAccount } = useOnboarding();
+  const { profile, goals, completeOnboarding, updateAccount, commitment } = useOnboarding();
   const { completeOnboarding: completeUserOnboarding, user: currentUser, refreshUserData } = useUser();
   // Firestore entegrasyonu artık onboarding context içinde otomatik yapılıyor
 
   const [accountData, setAccountData] = useState({
     username: '',
-    email: '',
+    email: commitment.email || '',
     password: '',
     confirmPassword: '',
     agreeToTerms: false,

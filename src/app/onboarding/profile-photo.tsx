@@ -150,11 +150,11 @@ const ProfilePhotoScreen = () => {
     },
     content: {
       padding: theme.spacing.lg,
-      paddingTop: theme.spacing.lg,
-      paddingBottom: theme.spacing['4xl'],
+      paddingTop: theme.spacing.xl,
+      paddingBottom: theme.spacing.xl,
     },
     header: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: theme.spacing.xl,
       alignItems: 'center',
     },
     title: {
@@ -163,19 +163,14 @@ const ProfilePhotoScreen = () => {
       marginBottom: theme.spacing.md,
       marginTop: theme.spacing.sm,
       textAlign: 'center',
+      lineHeight: theme.typography.lineHeight.relaxed,
     },
     subtitle: {
       ...theme.textStyles.body,
-      color: theme.semanticColors.text.primary,
+      color: theme.semanticColors.text.secondary,
       textAlign: 'center',
       lineHeight: theme.typography.lineHeight.relaxed,
-      fontWeight: theme.typography.fontWeights.semibold,
-      fontSize: TYPOGRAPHY.fontSizes.xl,
-      marginTop: theme.spacing.md,
-      marginBottom: theme.spacing.xl,
-      backgroundColor: theme.semanticColors.background.primary,
-      paddingVertical: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg
+      fontSize: TYPOGRAPHY.fontSizes.base,
     },
     photoContainer: {
       alignItems: 'center',
@@ -203,12 +198,12 @@ const ProfilePhotoScreen = () => {
     },
     placeholderText: {
       ...theme.textStyles.bodySmall,
-      color: theme.semanticColors.text.tertiary,
+      color: theme.semanticColors.text.secondary,
       textAlign: 'center',
     },
     actionButtonContainer: {
       gap: theme.spacing.md,
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: theme.spacing.lg,
     },
     actionButton: {
       flexDirection: 'row',
@@ -238,12 +233,7 @@ const ProfilePhotoScreen = () => {
       fontSize: TYPOGRAPHY.fontSizes.base,
       fontWeight: theme.typography.fontWeights.medium,
       lineHeight: theme.typography.lineHeight.relaxed,
-      backgroundColor: theme.semanticColors.background.surface,
-      paddingVertical: theme.spacing.sm,
       paddingHorizontal: theme.spacing.md,
-      borderRadius: theme.borderRadius.md,
-      borderWidth: 1,
-      borderColor: theme.semanticColors.border.secondary,
     },
     buttonContainer: {
       paddingHorizontal: theme.spacing.md,

@@ -109,6 +109,9 @@ const ExerciseFrequencyScreen = () => {
       color: theme.semanticColors.text.secondary,
       lineHeight: theme.typography.lineHeight.relaxed,
     },
+    header: {
+      marginBottom: theme.spacing.xl,
+    },
     section: {
       marginBottom: theme.spacing['3xl'],
     },
