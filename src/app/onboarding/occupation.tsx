@@ -3,6 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -16,30 +17,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
-
-// Theme object moved outside component to prevent re-creation on every render
-const theme = {
-  semanticColors: {
-    background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-    text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
-    border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-  },
-  colors: { primary: '#7C3AED', success: '#10B981', warning: '#F59E0B', info: '#3B82F6' },
-  textStyles: {
-    heading2: { fontSize: 32, fontWeight: '700' },
-    onboardingDescription: { fontSize: 16, fontWeight: '400' },
-    heading4: { fontSize: 20, fontWeight: '600' },
-    body: { fontSize: 16, fontWeight: '400' },
-    bodySmall: { fontSize: 14, fontWeight: '400' },
-    labelLarge: { fontSize: 18, fontWeight: '500' },
-    labelMedium: { fontSize: 15, fontWeight: '500' },
-    caption: { fontSize: 12, fontWeight: '400' },
-  },
-  typography: { lineHeight: { relaxed: 1.75 } },
-  spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8, xs: 4 },
-  borderRadius: { full: 9999, xl: 16, lg: 12, md: 10, sm: 8 },
-  shadows: { lg: {}, md: {}, sm: {} },
-};
 
 const OccupationScreen = () => {
   const { activity, updateActivity, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
@@ -85,11 +62,11 @@ const OccupationScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     content: {
-      padding: theme.spacing.lg,
-      paddingBottom: theme.spacing['4xl'],
+      padding: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing['4xl'],
     },
     scrollView: {
       flex: 1,
@@ -98,65 +75,65 @@ const OccupationScreen = () => {
       flexGrow: 1,
     },
     title: {
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
       lineHeight: 40,
+      fontSize: LightTheme.typography['3xl'].fontSize,
+      fontWeight: '700',
     },
     subtitle: {
-      color: theme.semanticColors.text.secondary,
-      lineHeight: 20
+      color: LightTheme.semanticColors.text.secondary,
+      lineHeight: LightTheme.typography.xl.lineHeight,
+      fontSize: LightTheme.typography.base.fontSize,
     },
     header: {
-      marginBottom: theme.spacing.xl,
+      marginBottom: LightTheme.spacing.xl,
     },
     section: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['6xl'],
     },
     optionGrid: {
-      gap: theme.spacing.md,
+      gap: LightTheme.spacing.md,
     },
     optionCard: {
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.md,
-      padding: theme.spacing.lg,
-      backgroundColor: theme.semanticColors.background.primary,
-      ...theme.shadows.sm,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.md,
+      padding: LightTheme.spacing.lg,
+      backgroundColor: LightTheme.semanticColors.background.primary,
+      ...LightTheme.shadows.sm,
     },
     optionCardSelected: {
-      borderColor: theme.colors.primary,
-      backgroundColor: `${theme.colors.primary}10`,
+      borderColor: LightTheme.colors.primary,
+      backgroundColor: `${LightTheme.colors.primary}10`,
     },
     optionHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: theme.spacing.sm,
+      marginBottom: LightTheme.spacing.sm,
     },
     optionIcon: {
       fontSize: 24,
-      marginRight: theme.spacing.md,
+      marginRight: LightTheme.spacing.md,
     },
     optionLabel: {
-      ...theme.textStyles.labelLarge,
-      color: theme.semanticColors.text.primary,
-      fontWeight: '600',
+      fontSize: LightTheme.typography.lg.fontSize,
+      fontWeight: '500',
+      color: LightTheme.semanticColors.text.primary,
     },
     optionLabelSelected: {
-      color: theme.colors.primary,
+      color: LightTheme.colors.primary,
     },
     optionDescription: {
-      ...theme.textStyles.bodySmall,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.sm.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
       marginLeft: 36,
-      fontSize: 14,
-      fontWeight: '400',
-      lineHeight: 20,
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      gap: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing.xl,
     },
   });
 

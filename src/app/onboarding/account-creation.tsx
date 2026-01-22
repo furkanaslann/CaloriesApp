@@ -4,7 +4,7 @@
  */
 
 import { FIREBASE_CONFIG } from '@/constants/firebase';
-import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
+import { LightTheme } from '@/constants';
 import { firestore } from '@/utils/firebase';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -23,89 +23,6 @@ import { useOnboarding } from '../../context/onboarding-context';
 import { useUser } from '../../context/user-context';
 
 const AccountCreationScreen = () => {
-  // Theme object using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: COLORS.background, surface: COLORS.surfaceAlt, tertiary: COLORS.surfaceAlt },
-      text: {
-        primary: COLORS.textPrimary,
-        secondary: COLORS.textSecondary,
-        tertiary: COLORS.textTertiary,
-        muted: COLORS.textSecondary,
-        onPrimary: '#FFFFFF'
-      },
-      border: { primary: COLORS.border, secondary: COLORS.border },
-      success: { background: COLORS.successLight, text: COLORS.successDark },
-      error: { background: COLORS.errorLight, text: COLORS.errorDark },
-    },
-    colors: {
-      primary: COLORS.primary,
-      gradientStart: COLORS.gradientStart,
-      gradientEnd: COLORS.gradientEnd,
-      success: COLORS.success,
-      error: COLORS.error,
-    },
-    textStyles: {
-      onboardingTitle: { fontSize: TYPOGRAPHY.fontSizes['3xl'], fontWeight: '600' },
-      onboardingSubtitle: { fontSize: TYPOGRAPHY.fontSizes.xl, fontWeight: '500' },
-      heading1: { fontSize: TYPOGRAPHY.fontSizes['4xl'], fontWeight: '700' },
-      heading2: { fontSize: TYPOGRAPHY.fontSizes['2xl'], fontWeight: '600' },
-      heading3: { fontSize: TYPOGRAPHY.fontSizes.xl, fontWeight: '600' },
-      body: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' },
-      bodySmall: { fontSize: TYPOGRAPHY.fontSizes.sm, fontWeight: '400' },
-      button: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '500' },
-      input: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' },
-    },
-    typography: {
-      lineHeight: {
-        tight: TYPOGRAPHY.lineHeights.tight,
-        normal: TYPOGRAPHY.lineHeights.normal,
-        relaxed: TYPOGRAPHY.lineHeights.relaxed,
-      },
-      fontWeight: {
-        regular: TYPOGRAPHY.fontWeights.regular,
-        medium: TYPOGRAPHY.fontWeights.medium,
-        semibold: TYPOGRAPHY.fontWeights.semibold,
-        bold: TYPOGRAPHY.fontWeights.bold,
-      },
-    },
-    spacing: {
-      ...SPACING,
-      xs: SPACING[1],
-      sm: SPACING[2],
-      md: SPACING[3],
-      lg: SPACING[4],
-      xl: SPACING[5],
-      '2xl': SPACING[6],
-      '3xl': SPACING[8],
-      '4xl': SPACING[12],
-    },
-    borderRadius: BORDER_RADIUS,
-    shadows: SHADOWS,
-    coloredShadows: {
-      gradient: SHADOWS.lg,
-      primary: SHADOWS.md,
-      success: SHADOWS.sm,
-      error: SHADOWS.sm,
-    },
-    components: {
-      input: {
-        borderWidth: 1,
-        borderRadius: BORDER_RADIUS.md,
-        paddingHorizontal: SPACING[4],
-        paddingVertical: SPACING[3],
-      },
-      button: {
-        borderRadius: BORDER_RADIUS.md,
-        paddingHorizontal: SPACING[6],
-        paddingVertical: SPACING[3],
-      },
-      card: {
-        borderRadius: BORDER_RADIUS.lg,
-        padding: SPACING[6],
-      },
-    },
-  };
 
   const { profile, goals, completeOnboarding, updateAccount, commitment } = useOnboarding();
   const { completeOnboarding: completeUserOnboarding, user: currentUser, refreshUserData } = useUser();
@@ -368,152 +285,152 @@ const AccountCreationScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
     },
     content: {
-      paddingHorizontal: theme.spacing['2xl'],
-      paddingVertical: theme.spacing.lg,
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingVertical: LightTheme.spacing.lg,
     },
     header: {
       alignItems: 'center',
-      marginBottom: theme.spacing['4xl'],
+      marginBottom: LightTheme.spacing['4xl'],
     },
     iconContainer: {
       width: 80,
       height: 80,
-      borderRadius: theme.borderRadius.full,
-      backgroundColor: `${theme.colors.primary}15`,
+      borderRadius: LightTheme.borderRadius.full,
+      backgroundColor: `${LightTheme.colors.primary}15`,
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: theme.spacing.xl,
-      ...theme.shadows.md,
+      marginBottom: LightTheme.spacing.xl,
+      ...LightTheme.shadows.md,
     },
     icon: {
       fontSize: 40,
     },
     title: {
-      fontSize: theme.textStyles.onboardingTitle?.fontSize || 30,
-      fontWeight: (theme.textStyles.onboardingTitle?.fontWeight || '600') as '600',
-      color: theme.semanticColors.text.primary,
+      fontSize: LightTheme.typography['3xl'].fontSize,
+      fontWeight: '600',
+      color: LightTheme.semanticColors.text.primary,
       textAlign: 'center',
-      marginBottom: theme.spacing.lg,
+      marginBottom: LightTheme.spacing.lg,
       lineHeight: 36,
     },
     subtitle: {
-      fontSize: theme.textStyles.onboardingSubtitle?.fontSize || 20,
-      fontWeight: (theme.textStyles.onboardingSubtitle?.fontWeight || '500') as '500',
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.xl.fontSize,
+      fontWeight: '500',
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      marginBottom: theme.spacing.lg,
+      marginBottom: LightTheme.spacing.lg,
       lineHeight: 28,
     },
     description: {
       fontSize: 16,
       fontWeight: '400',
-      color: theme.semanticColors.text.secondary,
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      paddingHorizontal: theme.spacing.lg,
+      paddingHorizontal: LightTheme.spacing.lg,
       lineHeight: 24,
-      marginBottom: theme.spacing['2xl'],
+      marginBottom: LightTheme.spacing['2xl'],
     },
     form: {
-      gap: theme.spacing.lg,
+      gap: LightTheme.spacing.lg,
     },
     inputGroup: {
-      gap: theme.spacing.sm,
+      gap: LightTheme.spacing.sm,
     },
     label: {
       fontSize: 16,
       fontWeight: '500',
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.xs,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.xs,
     },
     input: {
-      backgroundColor: theme.semanticColors.background.surface,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.lg,
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.md,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.lg,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingVertical: LightTheme.spacing.md,
       fontSize: 16,
-      color: theme.semanticColors.text.primary,
+      color: LightTheme.semanticColors.text.primary,
     },
     passwordContainer: {
       position: 'relative',
     },
     passwordToggle: {
       position: 'absolute',
-      right: theme.spacing.md,
+      right: LightTheme.spacing.md,
       top: '50%',
       transform: [{ translateY: -12 }],
-      color: theme.semanticColors.text.tertiary,
+      color: LightTheme.semanticColors.text.tertiary,
     },
     checkboxContainer: {
       flexDirection: 'row',
       alignItems: 'flex-start',
-      marginBottom: theme.spacing.sm,
+      marginBottom: LightTheme.spacing.sm,
     },
     checkbox: {
       width: 20,
       height: 20,
       borderWidth: 2,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.sm,
-      marginRight: theme.spacing.md,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.sm,
+      marginRight: LightTheme.spacing.md,
       marginTop: 2,
       justifyContent: 'center',
       alignItems: 'center',
     },
     checkboxChecked: {
-      backgroundColor: theme.colors.primary,
-      borderColor: theme.colors.primary,
+      backgroundColor: LightTheme.colors.primary,
+      borderColor: LightTheme.colors.primary,
     },
     checkboxText: {
       flex: 1,
       fontSize: 14,
-      color: theme.semanticColors.text.secondary,
+      color: LightTheme.semanticColors.text.secondary,
       lineHeight: 20,
     },
     linkText: {
-      color: theme.colors.primary,
+      color: LightTheme.colors.primary,
       textDecorationLine: 'underline',
     },
     welcomeCard: {
-      backgroundColor: theme.semanticColors.background.tertiary,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
-      marginTop: theme.spacing.lg,
-      marginBottom: theme.spacing.lg,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
+      borderRadius: LightTheme.borderRadius.lg,
+      padding: LightTheme.spacing.lg,
+      marginTop: LightTheme.spacing.lg,
+      marginBottom: LightTheme.spacing.lg,
     },
     welcomeTitle: {
       fontSize: 16,
       fontWeight: '600',
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.sm,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.sm,
     },
     welcomeText: {
       fontSize: 14,
-      color: theme.semanticColors.text.secondary,
+      color: LightTheme.semanticColors.text.secondary,
       lineHeight: 20,
     },
     userName: {
       fontWeight: '600',
-      color: theme.colors.primary,
+      color: LightTheme.colors.primary,
     },
     footer: {
-      paddingHorizontal: theme.spacing['2xl'],
-      paddingBottom: theme.spacing['4xl'],
-      paddingTop: theme.spacing.xl,
-      backgroundColor: theme.semanticColors.background.primary,
-      borderTopLeftRadius: theme.borderRadius.xl,
-      borderTopRightRadius: theme.borderRadius.xl,
-      ...theme.shadows.lg,
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingBottom: LightTheme.spacing['4xl'],
+      paddingTop: LightTheme.spacing.xl,
+      backgroundColor: LightTheme.semanticColors.background.primary,
+      borderTopLeftRadius: LightTheme.borderRadius.xl,
+      borderTopRightRadius: LightTheme.borderRadius.xl,
+      ...LightTheme.shadows.lg,
     },
     buttonContainer: {
-      gap: theme.spacing.md,
+      gap: LightTheme.spacing.md,
     },
   });
 
@@ -538,7 +455,7 @@ const AccountCreationScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="kullanici_adi"
-                placeholderTextColor={theme.semanticColors.text.muted}
+                placeholderTextColor={LightTheme.semanticColors.text.tertiary}
                 value={accountData.username}
                 onChangeText={(value) => handleInputChange('username', value)}
                 autoCapitalize="none"
@@ -551,7 +468,7 @@ const AccountCreationScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="ornek@email.com"
-                placeholderTextColor={theme.semanticColors.text.muted}
+                placeholderTextColor={LightTheme.semanticColors.text.tertiary}
                 value={accountData.email}
                 onChangeText={(value) => handleInputChange('email', value)}
                 keyboardType="email-address"
@@ -566,7 +483,7 @@ const AccountCreationScreen = () => {
                 <TextInput
                   style={styles.input}
                   placeholder="En az 6 karakter"
-                  placeholderTextColor={theme.semanticColors.text.muted}
+                  placeholderTextColor={LightTheme.semanticColors.text.tertiary}
                   value={accountData.password}
                   onChangeText={(value) => handleInputChange('password', value)}
                   secureTextEntry={!showPassword}
@@ -588,7 +505,7 @@ const AccountCreationScreen = () => {
                 <TextInput
                   style={styles.input}
                   placeholder="Şifrenizi tekrar girin"
-                  placeholderTextColor={theme.semanticColors.text.muted}
+                  placeholderTextColor={LightTheme.semanticColors.text.tertiary}
                   value={accountData.confirmPassword}
                   onChangeText={(value) => handleInputChange('confirmPassword', value)}
                   secureTextEntry={!showConfirmPassword}
@@ -662,7 +579,7 @@ const AccountCreationScreen = () => {
             onPress={handleCreateAccount}
             disabled={isCreating}
             fullWidth
-            style={theme.coloredShadows?.gradient || {}}
+            style={LightTheme.shadows.lg}
           />
         </View>
       </View>

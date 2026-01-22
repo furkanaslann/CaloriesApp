@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -20,30 +20,6 @@ import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const WeeklyGoalScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-    },
-    colors: { primary: '#7C3AED', success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' },
-    textStyles: {
-      onboardingTitle: { fontSize: 30, fontWeight: '600' },
-      onboardingDescription: { fontSize: 16, fontWeight: '400' },
-      heading3: { fontSize: 24, fontWeight: '600' },
-      heading4: { fontSize: 20, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
-      labelLarge: { fontSize: 18, fontWeight: '500' },
-      labelMedium: { fontSize: 15, fontWeight: '500' },
-      caption: { fontSize: 12, fontWeight: '400' },
-    },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10 },
-    shadows: { sm: {}, md: {} },
-    coloredShadows: { primary: {} },
-  };
   const { goals, updateGoals, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [weeklyGoal, setWeeklyGoal] = useState(goals.weeklyGoal?.toString() || '0.5');
@@ -105,21 +81,21 @@ const WeeklyGoalScreen = () => {
       label: 'Yavaş',
       description: 'Haftada 0.25 kg - Sürdürülebilir ve sağlıklı ilerleme',
       icon: '🐢',
-      color: theme.colors.info,
+      color: LightTheme.colors.info,
     },
     {
       value: '0.5',
       label: 'Orta',
       description: 'Haftada 0.5 kg - Dengeli ve etkili ilerleme',
       icon: '🚶',
-      color: theme.colors.primary,
+      color: LightTheme.colors.primary,
     },
     {
       value: '1',
       label: 'Hızlı',
       description: 'Haftada 1 kg - Hızlı sonuçlar için',
       icon: '🏃',
-      color: theme.colors.warning,
+      color: LightTheme.colors.warning,
     },
   ];
 
@@ -138,7 +114,7 @@ const WeeklyGoalScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
@@ -147,100 +123,98 @@ const WeeklyGoalScreen = () => {
       flexGrow: 1,
     },
     content: {
-      padding: theme.spacing.lg,
-      paddingTop: theme.spacing.lg,
-      paddingBottom: theme.spacing['4xl'],
+      padding: LightTheme.spacing.lg,
+      paddingTop: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing['4xl'],
     },
     header: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['3xl'],
       alignItems: 'center',
     },
     title: {
-      ...theme.textStyles.onboardingTitle,
       fontSize: 32,
       fontWeight: '700',
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
-      marginTop: theme.spacing.sm,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
+      marginTop: LightTheme.spacing.sm,
       textAlign: 'center',
       lineHeight: 40,
     },
     subtitle: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.base.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
       lineHeight: 26,
       fontWeight: '400',
-      fontSize: 16,
-      marginTop: theme.spacing.md,
-      marginBottom: theme.spacing.xl,
+      marginTop: LightTheme.spacing.md,
+      marginBottom: LightTheme.spacing.xl,
     },
     section: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['2xl'],
     },
     sectionTitle: {
-      ...theme.textStyles.heading4,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.lg,
+      fontSize: LightTheme.typography.xl.fontSize,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.lg,
     },
     goalContainer: {
-      gap: theme.spacing.md,
+      gap: LightTheme.spacing.md,
     },
     goalOption: {
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.md,
-      padding: theme.spacing.lg,
-      backgroundColor: theme.semanticColors.background.primary,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.md,
+      padding: LightTheme.spacing.lg,
+      backgroundColor: LightTheme.semanticColors.background.primary,
       flexDirection: 'row',
       alignItems: 'center',
-      ...theme.shadows.sm,
+      ...LightTheme.shadows.sm,
     },
     goalOptionSelected: {
-      borderColor: theme.colors.primary,
-      backgroundColor: `${theme.colors.primary}10`,
+      borderColor: LightTheme.colors.primary,
+      backgroundColor: `${LightTheme.colors.primary}10`,
     },
     goalIcon: {
       fontSize: 32,
-      marginRight: theme.spacing.lg,
+      marginRight: LightTheme.spacing.lg,
     },
     goalContent: {
       flex: 1,
     },
     goalLabel: {
-      ...theme.textStyles.labelLarge,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.xs,
+      fontSize: LightTheme.typography.lg.fontSize,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.xs,
     },
     goalLabelSelected: {
-      color: theme.colors.primary,
+      color: LightTheme.colors.primary,
       fontWeight: '600',
     },
     goalDescription: {
-      ...theme.textStyles.bodySmall,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.sm.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
       lineHeight: 20,
     },
     infoCard: {
-      backgroundColor: theme.semanticColors.background.surface,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
-      marginTop: theme.spacing.lg,
-      ...theme.shadows.sm,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.lg,
+      padding: LightTheme.spacing.lg,
+      marginTop: LightTheme.spacing.lg,
+      ...LightTheme.shadows.sm,
     },
     infoText: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.primary,
+      fontSize: LightTheme.typography.base.fontSize,
+      color: LightTheme.semanticColors.text.primary,
       textAlign: 'center',
       fontWeight: '500',
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      gap: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing.xl,
     },
   });
 

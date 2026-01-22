@@ -3,6 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
@@ -18,92 +19,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import { useOnboarding } from '../../context/onboarding-context';
 import { useOnboardingSync } from '../../hooks/use-onboarding-sync';
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 
 const CommitmentScreen = () => {
-  // Theme object using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: COLORS.background, surface: COLORS.surfaceAlt, tertiary: COLORS.surfaceAlt },
-      text: {
-        primary: COLORS.textPrimary,
-        secondary: COLORS.textSecondary,
-        tertiary: COLORS.textTertiary,
-        muted: COLORS.textSecondary,
-        onPrimary: '#FFFFFF'
-      },
-      border: { primary: COLORS.border, secondary: COLORS.border, focus: COLORS.primary },
-      success: { background: COLORS.successLight, text: COLORS.successDark },
-      error: { background: COLORS.errorLight, text: COLORS.errorDark },
-    },
-    colors: {
-      primary: COLORS.primary,
-      gradientStart: COLORS.gradientStart,
-      gradientEnd: COLORS.gradientEnd,
-      success: COLORS.success,
-      error: COLORS.error,
-    },
-    textStyles: {
-      onboardingTitle: { fontSize: TYPOGRAPHY.fontSizes['3xl'], fontWeight: TYPOGRAPHY.fontWeights.semibold },
-      onboardingSubtitle: { fontSize: TYPOGRAPHY.fontSizes.xl, fontWeight: TYPOGRAPHY.fontWeights.medium },
-      heading1: { fontSize: TYPOGRAPHY.fontSizes['4xl'], fontWeight: TYPOGRAPHY.fontWeights.bold },
-      heading2: { fontSize: TYPOGRAPHY.fontSizes['2xl'], fontWeight: TYPOGRAPHY.fontWeights.semibold },
-      heading3: { fontSize: TYPOGRAPHY.fontSizes.xl, fontWeight: TYPOGRAPHY.fontWeights.semibold },
-      body: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: TYPOGRAPHY.fontWeights.regular },
-      bodySmall: { fontSize: TYPOGRAPHY.fontSizes.sm, fontWeight: TYPOGRAPHY.fontWeights.regular },
-      button: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: TYPOGRAPHY.fontWeights.medium },
-      input: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: TYPOGRAPHY.fontWeights.regular },
-    },
-    typography: {
-      lineHeight: {
-        tight: TYPOGRAPHY.lineHeights.tight,
-        normal: TYPOGRAPHY.lineHeights.normal,
-        relaxed: TYPOGRAPHY.lineHeights.relaxed,
-      },
-      fontWeight: {
-        regular: TYPOGRAPHY.fontWeights.regular,
-        medium: TYPOGRAPHY.fontWeights.medium,
-        semibold: TYPOGRAPHY.fontWeights.semibold,
-        bold: TYPOGRAPHY.fontWeights.bold,
-      },
-    },
-    spacing: {
-      ...SPACING,
-      xs: SPACING[1],
-      sm: SPACING[2],
-      md: SPACING[3],
-      lg: SPACING[4],
-      xl: SPACING[5],
-      '2xl': SPACING[6],
-      '3xl': SPACING[8],
-      '4xl': SPACING[12],
-    },
-    borderRadius: BORDER_RADIUS,
-    shadows: SHADOWS,
-    coloredShadows: {
-      gradient: SHADOWS.lg,
-      primary: SHADOWS.md,
-      success: SHADOWS.sm,
-      error: SHADOWS.sm,
-    },
-    components: {
-      input: {
-        borderWidth: 1,
-        borderRadius: BORDER_RADIUS.md,
-        paddingHorizontal: SPACING[4],
-        paddingVertical: SPACING[3],
-      },
-      button: {
-        borderRadius: BORDER_RADIUS.md,
-        paddingHorizontal: SPACING[6],
-        paddingVertical: SPACING[3],
-      },
-      card: {
-        borderRadius: BORDER_RADIUS.lg,
-        padding: SPACING[6],
-      },
-    },
-  };
 
   const { profile, updateProfile, nextStep, calculatedValues, updateCommitment } = useOnboarding();
   const { completeOnboarding, isReadyToComplete } = useOnboardingSync();
@@ -206,129 +123,117 @@ const CommitmentScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
     },
     content: {
-      paddingHorizontal: theme.spacing['2xl'],
-      paddingVertical: theme.spacing.lg,
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingVertical: LightTheme.spacing.lg,
     },
     header: {
       alignItems: 'center',
-      marginBottom: theme.spacing['4xl'],
+      marginBottom: LightTheme.spacing['4xl'],
     },
     iconContainer: {
       width: 80,
       height: 80,
-      borderRadius: theme.borderRadius.full,
-      backgroundColor: `${theme.colors.primary}15`,
+      borderRadius: LightTheme.borderRadius.full,
+      backgroundColor: `${LightTheme.colors.primary}15`,
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: theme.spacing.xl,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.1,
-      shadowRadius: 6,
-      elevation: 3,
+      marginBottom: LightTheme.spacing.xl,
+      ...LightTheme.shadows.lg,
     },
     icon: {
       fontSize: 40,
     },
     title: {
-      fontSize: theme.textStyles.onboardingTitle.fontSize,
-      fontWeight: theme.textStyles.onboardingTitle.fontWeight,
-      color: theme.semanticColors.text.primary,
+      fontSize: LightTheme.typography['3xl'].fontSize,
+      fontWeight: '600',
+      color: LightTheme.semanticColors.text.primary,
       textAlign: 'center',
-      marginBottom: theme.spacing.lg,
+      marginBottom: LightTheme.spacing.lg,
       lineHeight: 36,
     },
     subtitle: {
-      fontSize: theme.textStyles.onboardingSubtitle.fontSize,
-      fontWeight: theme.textStyles.onboardingSubtitle.fontWeight,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.xl.fontSize,
+      fontWeight: '500',
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      marginBottom: theme.spacing.lg,
+      marginBottom: LightTheme.spacing.lg,
       lineHeight: 28,
     },
     description: {
       fontSize: 16,
-      fontWeight: TYPOGRAPHY.fontWeights.regular,
-      color: theme.semanticColors.text.secondary,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      paddingHorizontal: theme.spacing.lg,
+      paddingHorizontal: LightTheme.spacing.lg,
       lineHeight: 24,
-      marginBottom: theme.spacing['2xl'],
+      marginBottom: LightTheme.spacing['2xl'],
     },
     form: {
-      gap: theme.spacing.lg,
+      gap: LightTheme.spacing.lg,
     },
     inputGroup: {
-      gap: theme.spacing.sm,
+      gap: LightTheme.spacing.sm,
     },
     label: {
       fontSize: 16,
-      fontWeight: TYPOGRAPHY.fontWeights.medium,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.xs,
+      fontWeight: '500',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.xs,
     },
     input: {
-      backgroundColor: theme.semanticColors.background.surface,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.lg,
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.md,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.lg,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingVertical: LightTheme.spacing.md,
       fontSize: 16,
-      color: theme.semanticColors.text.primary,
+      color: LightTheme.semanticColors.text.primary,
     },
     inputFocused: {
-      borderColor: theme.semanticColors.border.focus,
+      borderColor: LightTheme.colors.primary,
       borderWidth: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.05,
-      shadowRadius: 2,
-      elevation: 1,
+      ...LightTheme.shadows.sm,
     },
     textArea: {
       height: 100,
       textAlignVertical: 'top',
     },
     commitmentPreview: {
-      backgroundColor: theme.semanticColors.background.tertiary,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
-      marginTop: theme.spacing.lg,
-      marginBottom: theme.spacing.lg,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
+      borderRadius: LightTheme.borderRadius.lg,
+      padding: LightTheme.spacing.lg,
+      marginTop: LightTheme.spacing.lg,
+      marginBottom: LightTheme.spacing.lg,
     },
     previewTitle: {
       fontSize: 14,
-      fontWeight: TYPOGRAPHY.fontWeights.semibold,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.sm,
+      fontWeight: '600',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.sm,
     },
     previewText: {
       fontSize: 14,
-      color: theme.semanticColors.text.secondary,
+      color: LightTheme.semanticColors.text.secondary,
       fontStyle: 'italic' as const,
     },
     footer: {
-      paddingHorizontal: theme.spacing['2xl'],
-      paddingBottom: theme.spacing['4xl'],
-      paddingTop: theme.spacing.xl,
-      backgroundColor: theme.semanticColors.background.primary,
-      borderTopLeftRadius: theme.borderRadius.xl,
-      borderTopRightRadius: theme.borderRadius.xl,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.1,
-      shadowRadius: 15,
-      elevation: 5,
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingBottom: LightTheme.spacing['4xl'],
+      paddingTop: LightTheme.spacing.xl,
+      backgroundColor: LightTheme.semanticColors.background.primary,
+      borderTopLeftRadius: LightTheme.borderRadius.xl,
+      borderTopRightRadius: LightTheme.borderRadius.xl,
+      ...LightTheme.shadows.lg,
     },
     buttonContainer: {
-      gap: theme.spacing.md,
+      gap: LightTheme.spacing.md,
     },
   });
 
@@ -353,7 +258,7 @@ const CommitmentScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Adınızı giriniz"
-                placeholderTextColor={theme.semanticColors.text.muted}
+                placeholderTextColor={LightTheme.semanticColors.text.tertiary}
                 value={commitmentData.firstName}
                 onChangeText={(value) => handleInputChange('firstName', value)}
                 autoCapitalize="words"
@@ -365,7 +270,7 @@ const CommitmentScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Soyadınızı giriniz"
-                placeholderTextColor={theme.semanticColors.text.muted}
+                placeholderTextColor={LightTheme.semanticColors.text.tertiary}
                 value={commitmentData.lastName}
                 onChangeText={(value) => handleInputChange('lastName', value)}
                 autoCapitalize="words"
@@ -377,7 +282,7 @@ const CommitmentScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="ornek@email.com"
-                placeholderTextColor={theme.semanticColors.text.muted}
+                placeholderTextColor={LightTheme.semanticColors.text.tertiary}
                 value={commitmentData.email}
                 onChangeText={(value) => handleInputChange('email', value)}
                 keyboardType="email-address"
@@ -391,7 +296,7 @@ const CommitmentScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="+90 555 123 45 67"
-                placeholderTextColor={theme.semanticColors.text.muted}
+                placeholderTextColor={LightTheme.semanticColors.text.tertiary}
                 value={commitmentData.phone}
                 onChangeText={(value) => handleInputChange('phone', value)}
                 keyboardType="phone-pad"
@@ -403,7 +308,7 @@ const CommitmentScreen = () => {
               <TextInput
                 style={[styles.input, styles.textArea]}
                 placeholder="Kendinize ne taahhüt vermek istersiniz? Örneğin: 'Her gün düzenli olarak beslenme takibi yapacağım' veya 'Sağlıklı yaşam alışkanlıkları kazanacağım'..."
-                placeholderTextColor={theme.semanticColors.text.muted}
+                placeholderTextColor={LightTheme.semanticColors.text.tertiary}
                 value={commitmentData.commitmentStatement}
                 onChangeText={(value) => handleInputChange('commitmentStatement', value)}
                 multiline
@@ -430,7 +335,7 @@ const CommitmentScreen = () => {
             onPress={handleSubmit}
             disabled={isSubmitting}
             fullWidth
-            style={theme.coloredShadows.gradient}
+            style={LightTheme.shadows.lg}
           />
         </View>
       </View>

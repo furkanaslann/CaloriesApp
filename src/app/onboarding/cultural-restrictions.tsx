@@ -3,6 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -19,28 +20,6 @@ import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const CulturalRestrictionsScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-    },
-    colors: { primary: '#7C3AED', success: '#10B981', error: '#EF4444' },
-    textStyles: {
-      heading2: { fontSize: 32, fontWeight: '700' },
-      heading4: { fontSize: 20, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
-      labelLarge: { fontSize: 18, fontWeight: '500' },
-      labelSmall: { fontSize: 14, fontWeight: '400' },
-      caption: { fontSize: 12, fontWeight: '400' },
-    },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8, xs: 4 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10, sm: 8 },
-    shadows: { lg: {}, md: {}, sm: {} },
-  };
-
   const { diet, updateDiet, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [culturalRestrictions, setculturalRestrictions] = useState(diet.culturalRestrictions || []);
@@ -89,11 +68,11 @@ const CulturalRestrictionsScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     content: {
-      padding: theme.spacing.lg,
-      paddingBottom: theme.spacing['4xl'],
+      padding: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing['4xl'],
     },
     scrollView: {
       flex: 1,
@@ -102,104 +81,105 @@ const CulturalRestrictionsScreen = () => {
       flexGrow: 1,
     },
     header: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['3xl'],
     },
     title: {
-      ...theme.textStyles.heading2,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
-      lineHeight: 40,
+      fontSize: LightTheme.typography['3xl'].fontSize,
+      fontWeight: '700',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
+      lineHeight: LightTheme.typography['3xl'].lineHeight,
     },
     subtitle: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.base.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
       lineHeight: 24,
     },
     selectedTagsContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: theme.spacing.sm,
-      marginBottom: theme.spacing.lg,
+      gap: LightTheme.spacing.sm,
+      marginBottom: LightTheme.spacing.lg,
     },
     selectedTag: {
-      backgroundColor: theme.colors.primary,
-      borderRadius: theme.borderRadius.full,
-      paddingHorizontal: theme.spacing.md,
-      paddingVertical: theme.spacing.sm,
+      backgroundColor: LightTheme.colors.primary,
+      borderRadius: LightTheme.borderRadius.full,
+      paddingHorizontal: LightTheme.spacing.md,
+      paddingVertical: LightTheme.spacing.sm,
       flexDirection: 'row',
       alignItems: 'center',
-      gap: theme.spacing.xs,
+      gap: LightTheme.spacing.xs,
     },
     selectedTagText: {
-      ...theme.textStyles.labelSmall,
-      color: theme.semanticColors.text.onPrimary,
+      fontSize: LightTheme.typography.sm.fontSize,
+      color: '#FFFFFF',
     },
     removeTag: {
       fontSize: 16,
-      color: theme.semanticColors.text.onPrimary,
+      color: '#FFFFFF',
     },
     tagContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: theme.spacing.sm,
-      marginBottom: theme.spacing.xl,
+      gap: LightTheme.spacing.sm,
+      marginBottom: LightTheme.spacing.xl,
     },
     tagButton: {
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.full,
-      paddingHorizontal: theme.spacing.md,
-      paddingVertical: theme.spacing.sm,
-      backgroundColor: theme.semanticColors.background.primary,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.full,
+      paddingHorizontal: LightTheme.spacing.md,
+      paddingVertical: LightTheme.spacing.sm,
+      backgroundColor: LightTheme.semanticColors.background.primary,
       flexDirection: 'row',
       alignItems: 'center',
-      gap: theme.spacing.xs,
+      gap: LightTheme.spacing.xs,
     },
     tagButtonSelected: {
-      borderColor: theme.colors.primary,
-      backgroundColor: theme.colors.primary,
+      borderColor: LightTheme.colors.primary,
+      backgroundColor: LightTheme.colors.primary,
     },
     tagIcon: {
       fontSize: 16,
     },
     tagText: {
-      ...theme.textStyles.labelSmall,
-      color: theme.semanticColors.text.primary,
+      fontSize: LightTheme.typography.sm.fontSize,
+      color: LightTheme.semanticColors.text.primary,
     },
     tagTextSelected: {
-      color: theme.semanticColors.text.onPrimary,
+      color: '#FFFFFF',
     },
     customInputContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.sm,
+      gap: LightTheme.spacing.sm,
       alignItems: 'center',
-      marginBottom: theme.spacing.xl,
+      marginBottom: LightTheme.spacing.xl,
     },
     customInput: {
       flex: 1,
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.md,
-      paddingHorizontal: theme.spacing.md,
-      paddingVertical: theme.spacing.sm,
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.primary,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.md,
+      paddingHorizontal: LightTheme.spacing.md,
+      paddingVertical: LightTheme.spacing.sm,
+      fontSize: LightTheme.typography.base.fontSize,
+      color: LightTheme.semanticColors.text.primary,
     },
     addButton: {
-      backgroundColor: theme.colors.primary,
-      borderRadius: theme.borderRadius.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.sm,
+      backgroundColor: LightTheme.colors.primary,
+      borderRadius: LightTheme.borderRadius.md,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingVertical: LightTheme.spacing.sm,
     },
     addButtonText: {
-      ...theme.textStyles.labelSmall,
-      color: theme.semanticColors.text.onPrimary,
+      fontSize: LightTheme.typography.sm.fontSize,
+      color: '#FFFFFF',
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      gap: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing.xl,
     },
   });
 
@@ -257,7 +237,7 @@ const CulturalRestrictionsScreen = () => {
               value={customCulturalRestriction}
               onChangeText={setCustomCulturalRestriction}
               placeholder="Diğer kültürel kısıtlamalar"
-              placeholderTextColor={theme.semanticColors.text.tertiary}
+              placeholderTextColor={LightTheme.semanticColors.text.tertiary}
             />
             <TouchableOpacity style={styles.addButton} onPress={handleAddCustom}>
               <Text style={styles.addButtonText}>Ekle</Text>

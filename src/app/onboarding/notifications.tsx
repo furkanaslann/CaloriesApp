@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { LightTheme } from '@/constants';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -158,99 +158,99 @@ const NotificationsScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: COLORS.background,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
     },
     content: {
-      padding: SPACING[4],
+      padding: LightTheme.spacing.lg,
     },
     header: {
       marginTop: '10%',
-      marginBottom: SPACING[10],
+      marginBottom: 40,
       alignItems: 'center',
     },
     title: {
-      fontSize: TYPOGRAPHY.fontSizes['3xl'],
-      fontWeight: TYPOGRAPHY.fontWeights.bold,
-      color: COLORS.textPrimary,
+      fontSize: LightTheme.typography['3xl'].fontSize,
+      fontWeight: '700',
+      color: LightTheme.semanticColors.text.primary,
       textAlign: 'center',
-      marginBottom: SPACING[4],
-      lineHeight: TYPOGRAPHY.lineHeights.tight * TYPOGRAPHY.fontSizes['3xl'],
+      marginBottom: LightTheme.spacing.lg,
+      lineHeight: LightTheme.typography['3xl'].lineHeight,
     },
     subtitle: {
-      fontSize: TYPOGRAPHY.fontSizes.base,
-      fontWeight: TYPOGRAPHY.fontWeights.regular,
-      color: COLORS.textSecondary,
+      fontSize: LightTheme.typography.base.fontSize,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      lineHeight: TYPOGRAPHY.lineHeights.relaxed * TYPOGRAPHY.fontSizes.base,
-      paddingHorizontal: SPACING[6],
+      lineHeight: LightTheme.typography.base.lineHeight,
+      paddingHorizontal: LightTheme.spacing['2xl'],
     },
     permissionCard: {
-      backgroundColor: COLORS.surfaceAlt,
-      borderRadius: BORDER_RADIUS.lg,
-      padding: SPACING[6],
-      marginBottom: SPACING[6],
+      backgroundColor: LightTheme.semanticColors.background.secondary,
+      borderRadius: LightTheme.borderRadius.lg,
+      padding: LightTheme.spacing['2xl'],
+      marginBottom: LightTheme.spacing['2xl'],
       alignItems: 'center',
-      ...SHADOWS.md,
+      ...LightTheme.shadows.md,
     },
     permissionTitle: {
-      fontSize: TYPOGRAPHY.fontSizes.xl,
-      fontWeight: TYPOGRAPHY.fontWeights.semibold,
-      color: COLORS.textPrimary,
-      marginBottom: SPACING[4],
+      fontSize: LightTheme.typography.xl.fontSize,
+      fontWeight: '600',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.lg,
       textAlign: 'center',
     },
     permissionDescription: {
-      fontSize: TYPOGRAPHY.fontSizes.sm,
-      fontWeight: TYPOGRAPHY.fontWeights.regular,
-      color: COLORS.textSecondary,
+      fontSize: LightTheme.typography.sm.fontSize,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      marginBottom: SPACING[6],
-      lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.sm,
+      marginBottom: LightTheme.spacing['2xl'],
+      lineHeight: 20,
     },
     permissionButton: {
-      backgroundColor: COLORS.primary,
-      paddingHorizontal: SPACING[6],
-      paddingVertical: SPACING[4],
-      borderRadius: BORDER_RADIUS.md,
+      backgroundColor: LightTheme.colors.primary,
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingVertical: LightTheme.spacing.lg,
+      borderRadius: LightTheme.borderRadius.md,
     },
     permissionButtonText: {
-      fontSize: TYPOGRAPHY.fontSizes.lg,
-      fontWeight: TYPOGRAPHY.fontWeights.medium,
-      color: COLORS.background,
+      fontSize: LightTheme.typography.lg.fontSize,
+      fontWeight: '500',
+      color: LightTheme.semanticColors.background.primary,
     },
     permissionStatus: {
-      fontSize: TYPOGRAPHY.fontSizes.xs,
-      fontWeight: TYPOGRAPHY.fontWeights.regular,
-      color: COLORS.textSecondary,
-      marginTop: SPACING[2],
+      fontSize: LightTheme.typography.xs.fontSize,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
+      marginTop: LightTheme.spacing.sm,
     },
     section: {
-      marginBottom: SPACING[10],
+      marginBottom: 40,
     },
     sectionTitle: {
-      fontSize: TYPOGRAPHY.fontSizes.xl,
-      fontWeight: TYPOGRAPHY.fontWeights.semibold,
-      color: COLORS.textPrimary,
-      marginBottom: SPACING[6],
+      fontSize: LightTheme.typography.xl.fontSize,
+      fontWeight: '600',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing['2xl'],
     },
     notificationList: {
-      gap: SPACING[4],
+      gap: LightTheme.spacing.lg,
     },
     notificationCard: {
-      backgroundColor: COLORS.surfaceAlt,
-      borderRadius: BORDER_RADIUS.lg,
-      padding: SPACING[6],
+      backgroundColor: LightTheme.semanticColors.background.secondary,
+      borderRadius: LightTheme.borderRadius.lg,
+      padding: LightTheme.spacing['2xl'],
       flexDirection: 'row',
       alignItems: 'flex-start',
       minHeight: 80,
-      ...SHADOWS.sm,
+      ...LightTheme.shadows.sm,
     },
     notificationIcon: {
       fontSize: 28,
-      marginRight: SPACING[6],
+      marginRight: LightTheme.spacing['2xl'],
       marginTop: 2,
     },
     notificationContent: {
@@ -258,33 +258,33 @@ const NotificationsScreen = () => {
       justifyContent: 'center',
     },
     notificationTitle: {
-      fontSize: TYPOGRAPHY.fontSizes.lg,
-      fontWeight: TYPOGRAPHY.fontWeights.semibold,
-      color: COLORS.textPrimary,
-      marginBottom: SPACING[1],
-      lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.lg,
+      fontSize: LightTheme.typography.lg.fontSize,
+      fontWeight: '600',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.sm,
+      lineHeight: 22,
     },
     notificationDescription: {
-      fontSize: TYPOGRAPHY.fontSizes.xs,
-      fontWeight: TYPOGRAPHY.fontWeights.regular,
-      color: COLORS.textSecondary,
-      marginBottom: SPACING[1],
-      lineHeight: TYPOGRAPHY.lineHeights.normal * TYPOGRAPHY.fontSizes.xs,
+      fontSize: LightTheme.typography.xs.fontSize,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
+      marginBottom: LightTheme.spacing.sm,
+      lineHeight: 16,
       flexWrap: 'wrap',
     },
     notificationTime: {
-      fontSize: TYPOGRAPHY.fontSizes.xs,
-      fontWeight: TYPOGRAPHY.fontWeights.medium,
-      color: COLORS.primary,
+      fontSize: LightTheme.typography.xs.fontSize,
+      fontWeight: '500',
+      color: LightTheme.colors.primary,
     },
     switchContainer: {
-      marginLeft: SPACING[4],
+      marginLeft: LightTheme.spacing.lg,
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: SPACING[4],
-      paddingHorizontal: SPACING[6],
-      paddingBottom: SPACING[8],
+      gap: LightTheme.spacing.lg,
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingBottom: LightTheme.spacing['2xl'],
     },
   });
 
@@ -338,8 +338,8 @@ const NotificationsScreen = () => {
                     <Switch
                       value={formData.notifications[setting.key]}
                       onValueChange={() => handleNotificationToggle(setting.key)}
-                      trackColor={{ false: COLORS.border, true: COLORS.primary }}
-                      thumbColor={COLORS.background}
+                      trackColor={{ false: LightTheme.semanticColors.border.primary, true: LightTheme.colors.primary }}
+                      thumbColor={LightTheme.semanticColors.background.primary}
                     />
                   </View>
                 </View>

@@ -3,6 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -16,33 +17,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding, SCREEN_STEPS } from '../../context/onboarding-context';
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
 
 const ActivityScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-    },
-    colors: { primary: '#7C3AED', success: '#10B981', warning: '#F59E0B', info: '#3B82F6' },
-    textStyles: {
-      onboardingTitle: { fontSize: 30, fontWeight: '600' },
-      onboardingDescription: { fontSize: 16, fontWeight: '400' },
-      heading3: { fontSize: 24, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
-      labelLarge: { fontSize: 18, fontWeight: '500' },
-      labelMedium: { fontSize: 15, fontWeight: '500' },
-      caption: { fontSize: 12, fontWeight: '400' },
-    },
-    typography: { lineHeight: { relaxed: 24 }, fontWeight: { semibold: '600' } },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8, xs: 4 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10, sm: 8 },
-    shadows: { lg: {}, md: {}, sm: {} },
-    coloredShadows: { primary: {} },
-  };
   const { activity, updateActivity, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [level, setLevel] = useState(activity.level || 'sedentary');
@@ -98,7 +74,7 @@ const ActivityScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
@@ -107,80 +83,78 @@ const ActivityScreen = () => {
       flexGrow: 1,
     },
     content: {
-      padding: theme.spacing.lg,
-      paddingTop: theme.spacing.lg,
-      paddingBottom: theme.spacing['4xl'],
+      padding: LightTheme.spacing.lg,
+      paddingTop: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing['4xl'],
     },
     title: {
-      ...theme.textStyles.onboardingTitle,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
-      lineHeight: 40,
-      fontSize: 32,
+      fontSize: LightTheme.typography['3xl'].fontSize,
       fontWeight: '700',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
+      lineHeight: LightTheme.typography['3xl'].lineHeight,
     },
     subtitle: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
-      lineHeight: theme.typography.lineHeight.relaxed,
+      fontSize: LightTheme.typography.base.fontSize,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
+      lineHeight: LightTheme.typography.base.lineHeight,
     },
     header: {
       alignItems: 'center',
-      marginBottom: theme.spacing['4xl'],
+      marginBottom: LightTheme.spacing['4xl'],
     },
     section: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['6xl'],
     },
     optionGrid: {
-      gap: theme.spacing.md,
+      gap: LightTheme.spacing.md,
     },
     optionCard: {
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.md,
-      padding: theme.spacing.lg,
-      backgroundColor: theme.semanticColors.background.primary,
-      ...theme.shadows.sm,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.md,
+      padding: LightTheme.spacing.lg,
+      backgroundColor: LightTheme.semanticColors.background.primary,
+      ...LightTheme.shadows.sm,
     },
     optionCardSelected: {
-      borderColor: theme.colors.primary,
-      backgroundColor: `${theme.colors.primary}10`,
+      borderColor: LightTheme.colors.primary,
+      backgroundColor: `${LightTheme.colors.primary}10`,
     },
     optionHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: theme.spacing.sm,
+      marginBottom: LightTheme.spacing.sm,
     },
     optionIcon: {
       fontSize: 24,
-      marginRight: theme.spacing.md,
+      marginRight: LightTheme.spacing.md,
     },
     optionLabel: {
-      ...theme.textStyles.labelLarge,
-      color: theme.semanticColors.text.primary,
-      fontWeight: theme.typography.fontWeight.semibold,
+      fontSize: LightTheme.typography.lg.fontSize,
+      fontWeight: '500',
+      color: LightTheme.semanticColors.text.primary,
     },
     optionLabelSelected: {
-      color: theme.colors.primary,
+      color: LightTheme.colors.primary,
     },
     optionDescription: {
-      ...(theme?.textStyles?.caption || { fontSize: 12, fontWeight: '400' }),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
-      marginLeft: 36,
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: '400',
-      lineHeight: 20,
+      color: LightTheme.semanticColors.text.secondary,
+      marginLeft: 36,
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing['2xl'],
-      paddingBottom: theme.spacing['4xl'],
-      paddingTop: theme.spacing.xl,
-      backgroundColor: theme.semanticColors.background.primary,
-      borderTopLeftRadius: theme.borderRadius.xl,
-      borderTopRightRadius: theme.borderRadius.xl,
-      ...theme.shadows.lg,
+      gap: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingBottom: LightTheme.spacing['4xl'],
+      paddingTop: LightTheme.spacing.xl,
+      backgroundColor: LightTheme.semanticColors.background.primary,
+      borderTopLeftRadius: LightTheme.borderRadius.xl,
+      borderTopRightRadius: LightTheme.borderRadius.xl,
+      ...LightTheme.shadows.lg,
     },
   });
 
@@ -192,18 +166,7 @@ const ActivityScreen = () => {
 
           <View style={styles.header}>
               <Text style={styles.title}>Aktivite Seviyeniz</Text>
-              <Text
-                style={[
-                  styles.subtitle,
-                  {
-                    ...(theme?.textStyles?.bodySmall || {}),
-                    color: theme?.semanticColors?.text?.secondary || '#475569',
-                    fontSize: 16,
-                    fontWeight: '400',
-                    lineHeight: 24,
-                  }
-                ]}
-              >
+              <Text style={styles.subtitle}>
                 Genel aktivite seviyenizi belirtin. Bu bilgi, günlük kalori ihtiyacınızı hesaplamamıza yardımcı olacaktır.
               </Text>
             </View>
@@ -243,7 +206,7 @@ const ActivityScreen = () => {
           title="Devam Et"
           onPress={handleNext}
           fullWidth
-          style={theme?.coloredShadows?.primary || {}}
+          style={LightTheme.shadows.lg}
         />
       </View>
     </SafeAreaView>

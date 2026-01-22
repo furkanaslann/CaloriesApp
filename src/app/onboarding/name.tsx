@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -20,40 +20,6 @@ import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const NameScreen = () => {
-  // Modern theme system using constants
-
-  // Theme object using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: COLORS.background, surface: COLORS.surfaceAlt, primarySurface: COLORS.primaryLight + '25' },
-      text: {
-        primary: COLORS.textPrimary,
-        secondary: COLORS.textSecondary,
-        tertiary: COLORS.textTertiary,
-        onPrimary: '#FFFFFF'
-      },
-      border: { secondary: COLORS.border },
-    },
-    colors: {
-      primary: COLORS.primary,
-    },
-    textStyles: {
-      onboardingTitle: { fontSize: TYPOGRAPHY.fontSizes['3xl'], fontWeight: '600' },
-      onboardingDescription: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' },
-    },
-    spacing: {
-      ...SPACING,
-      sm: SPACING[2],
-      md: SPACING[3],
-      lg: SPACING[4],
-      xl: SPACING[5],
-      '2xl': SPACING[6],
-      '4xl': SPACING[12],
-    },
-    borderRadius: BORDER_RADIUS,
-    shadows: SHADOWS,
-    coloredShadows: { primary: SHADOWS.lg },
-  };
   const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [name, setName] = useState(profile.name || '');
@@ -89,12 +55,12 @@ const NameScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme?.semanticColors?.background?.primary || '#FFFFFF',
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     content: {
-      paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      paddingTop: theme?.spacing?.lg || 16,
-      paddingBottom: theme?.spacing?.['4xl'] || 48,
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingTop: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing['4xl'],
     },
     scrollView: {
       flex: 1,
@@ -104,61 +70,61 @@ const NameScreen = () => {
     },
     header: {
       marginTop: '10%',
-      marginBottom: theme?.spacing?.['4xl'] || 48,
+      marginBottom: LightTheme.spacing['4xl'],
       alignItems: 'center',
     },
     title: {
-      ...theme.textStyles?.onboardingTitle,
-      color: theme?.semanticColors?.text?.primary || '#1E293B',
-      marginBottom: theme?.spacing?.md || 16,
-      textAlign: 'center',
-      lineHeight: 40,
-      fontSize: 32,
+      fontSize: LightTheme.typography['3xl'].fontSize,
       fontWeight: '700',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
+      textAlign: 'center',
+      lineHeight: LightTheme.typography['3xl'].lineHeight,
     },
     subtitle: {
-      ...(theme?.textStyles?.onboardingDescription || {}),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
+      fontSize: LightTheme.typography.base.fontSize,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      lineHeight: 24,
+      lineHeight: LightTheme.typography.base.lineHeight,
       maxWidth: 300,
     },
     inputContainer: {
-      marginBottom: theme?.spacing?.['4xl'] || 48,
+      marginBottom: LightTheme.spacing['4xl'],
       alignItems: 'center',
     },
     inputWrapper: {
       width: '100%',
       maxWidth: 350,
-      backgroundColor: theme?.semanticColors?.background?.surface || '#F8FAFC',
-      borderRadius: theme?.borderRadius?.lg || 12,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
+      borderRadius: LightTheme.borderRadius.lg,
       borderWidth: 2,
-      borderColor: isFocused ? (theme?.colors?.primary || '#7C3AED') : (theme?.semanticColors?.border?.secondary || '#E2E8F0'),
-      ...(theme?.shadows?.md || {}),
+      borderColor: isFocused ? LightTheme.colors.primary : LightTheme.semanticColors.border.primary,
+      ...LightTheme.shadows.md,
     },
     buttonContainer: {
-      paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      paddingBottom: theme?.spacing?.['4xl'] || 48,
-      paddingTop: theme?.spacing?.xl || 32,
-      backgroundColor: theme?.semanticColors?.background?.primary || '#FFFFFF',
-      borderTopLeftRadius: theme?.borderRadius?.xl || 16,
-      borderTopRightRadius: theme?.borderRadius?.xl || 16,
-      ...(theme?.shadows?.lg || {}),
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingBottom: LightTheme.spacing['4xl'],
+      paddingTop: LightTheme.spacing.xl,
+      backgroundColor: LightTheme.semanticColors.background.primary,
+      borderTopLeftRadius: LightTheme.borderRadius.xl,
+      borderTopRightRadius: LightTheme.borderRadius.xl,
+      ...LightTheme.shadows.lg,
     },
     iconContainer: {
       width: 80,
       height: 80,
-      borderRadius: theme?.borderRadius?.full || 9999,
-      backgroundColor: theme?.semanticColors?.background?.primarySurface || '#EDE9FE',
+      borderRadius: LightTheme.borderRadius.full,
+      backgroundColor: LightTheme.colors.primaryLight + '25',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: theme?.spacing?.['2xl'] || 24,
-      ...(theme?.coloredShadows?.primary || {}),
+      marginBottom: LightTheme.spacing['2xl'],
+      ...LightTheme.shadows.lg,
     },
     iconText: {
       fontSize: 32,
       fontWeight: '700',
-      color: theme?.semanticColors?.text?.onPrimary || '#FFFFFF',
+      color: LightTheme.semanticColors.text.onPrimary,
     },
   });
 
@@ -196,7 +162,7 @@ const NameScreen = () => {
                   backgroundColor: 'transparent',
                   fontSize: 18,
                   fontWeight: '500',
-                  paddingVertical: theme?.spacing?.lg || 24,
+                  paddingVertical: LightTheme.spacing.lg,
                 }}
               />
             </View>
@@ -209,7 +175,7 @@ const NameScreen = () => {
           title="Devam Et"
           onPress={handleNext}
           fullWidth
-          style={theme?.coloredShadows?.primary || {}}
+          style={LightTheme.shadows.lg}
         />
       </View>
     </SafeAreaView>

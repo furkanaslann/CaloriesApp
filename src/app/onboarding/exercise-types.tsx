@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -19,28 +19,6 @@ import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const ExerciseTypesScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-    },
-    colors: { primary: '#7C3AED', success: '#10B981', warning: '#F59E0B', info: '#3B82F6' },
-    textStyles: {
-      heading2: { fontSize: 32, fontWeight: '700' },
-      onboardingDescription: { fontSize: 16, fontWeight: '400' },
-      heading4: { fontSize: 20, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
-      labelLarge: { fontSize: 18, fontWeight: '500' },
-      labelSmall: { fontSize: 13, fontWeight: '500' },
-    },
-    typography: { lineHeight: { relaxed: 1.75 } },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8, xs: 4 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10, sm: 8 },
-    shadows: { lg: {}, md: {}, sm: {} },
-  };
   const { activity, updateActivity, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [exerciseTypes, setExerciseTypes] = useState<string[]>(activity.exerciseTypes || []);
@@ -84,7 +62,7 @@ const ExerciseTypesScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
@@ -93,66 +71,70 @@ const ExerciseTypesScreen = () => {
       flexGrow: 1,
     },
     content: {
-      padding: theme.spacing.lg,
-      paddingTop: theme.spacing.lg,
-      paddingBottom: theme.spacing['4xl'],
+      padding: LightTheme.spacing.lg,
+      paddingTop: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing['4xl'],
+    },
+    header: {
+      marginBottom: LightTheme.spacing.xl,
     },
     title: {
-      ...theme.textStyles.heading2,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
-      lineHeight: 40,
+      fontSize: LightTheme.typography['3xl'].fontSize,
+      fontWeight: '700',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
+      lineHeight: LightTheme.typography['3xl'].lineHeight,
     },
     subtitle: {
-      ...theme.textStyles.onboardingDescription,
-      color: theme.semanticColors.text.secondary,
-      lineHeight: theme.typography.lineHeight.relaxed,
+      fontSize: LightTheme.typography.base.fontSize,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
+      lineHeight: LightTheme.typography.base.lineHeight,
     },
     section: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['2xl'],
     },
     sectionDescription: {
-      ...theme.textStyles.bodySmall,
-      color: theme.semanticColors.text.secondary,
-      marginBottom: theme.spacing.lg,
-      fontSize: 14,
+      fontSize: LightTheme.typography.sm.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
+      marginBottom: LightTheme.spacing.lg,
       lineHeight: 20,
     },
     exerciseTypesContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: theme.spacing.sm,
+      gap: LightTheme.spacing.sm,
     },
     exerciseTypeButton: {
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.full,
-      paddingHorizontal: theme.spacing.md,
-      paddingVertical: theme.spacing.sm,
-      backgroundColor: theme.semanticColors.background.primary,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.full,
+      paddingHorizontal: LightTheme.spacing.md,
+      paddingVertical: LightTheme.spacing.sm,
+      backgroundColor: LightTheme.semanticColors.background.primary,
       flexDirection: 'row',
       alignItems: 'center',
-      gap: theme.spacing.xs,
+      gap: LightTheme.spacing.xs,
     },
     exerciseTypeButtonSelected: {
-      borderColor: theme.colors.primary,
-      backgroundColor: theme.colors.primary,
+      borderColor: LightTheme.colors.primary,
+      backgroundColor: LightTheme.colors.primary,
     },
     exerciseTypeIcon: {
       fontSize: 16,
     },
     exerciseTypeText: {
-      ...theme.textStyles.labelSmall,
-      color: theme.semanticColors.text.primary,
+      fontSize: LightTheme.typography.sm.fontSize,
+      color: LightTheme.semanticColors.text.primary,
     },
     exerciseTypeTextSelected: {
-      color: theme.semanticColors.text.onPrimary,
+      color: '#FFFFFF',
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      gap: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing.xl,
     },
   });
 

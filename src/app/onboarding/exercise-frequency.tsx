@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { LightTheme } from '@/constants';
 import { Alert, router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -19,28 +19,6 @@ import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const ExerciseFrequencyScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-    },
-    colors: { primary: '#7C3AED', success: '#10B981', warning: '#F59E0B', info: '#3B82F6' },
-    textStyles: {
-      heading2: { fontSize: 32, fontWeight: '700' },
-      onboardingDescription: { fontSize: 16, fontWeight: '400' },
-      heading4: { fontSize: 20, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
-      labelLarge: { fontSize: 18, fontWeight: '500' },
-      labelMedium: { fontSize: 15, fontWeight: '500' },
-    },
-    typography: { lineHeight: { relaxed: 1.75 } },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8, xs: 4 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10, sm: 8 },
-    shadows: { lg: {}, md: {}, sm: {} },
-  };
   const { activity, updateActivity, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [exerciseFrequency, setExerciseFrequency] = useState<string>(
@@ -85,7 +63,7 @@ const ExerciseFrequencyScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
@@ -94,70 +72,70 @@ const ExerciseFrequencyScreen = () => {
       flexGrow: 1,
     },
     content: {
-      padding: theme.spacing.lg,
-      paddingTop: theme.spacing.lg,
-      paddingBottom: theme.spacing['4xl'],
+      padding: LightTheme.spacing.lg,
+      paddingTop: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing['4xl'],
     },
     title: {
-      ...theme.textStyles.heading2,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
-      lineHeight: 40,
+      fontSize: LightTheme.typography['3xl'].fontSize,
+      fontWeight: '700',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
+      lineHeight: LightTheme.typography['3xl'].lineHeight,
     },
     subtitle: {
-      ...theme.textStyles.onboardingDescription,
-      color: theme.semanticColors.text.secondary,
-      lineHeight: theme.typography.lineHeight.relaxed,
+      fontSize: LightTheme.typography.base.fontSize,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
+      lineHeight: LightTheme.typography.base.lineHeight,
     },
     header: {
-      marginBottom: theme.spacing.xl,
+      marginBottom: LightTheme.spacing.xl,
     },
     section: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['2xl'],
     },
     inputContainer: {
-      marginBottom: theme.spacing.lg,
+      marginBottom: LightTheme.spacing.lg,
     },
     optionGrid: {
-      gap: theme.spacing.md,
+      gap: LightTheme.spacing.md,
     },
     optionCard: {
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.md,
-      padding: theme.spacing.lg,
-      backgroundColor: theme.semanticColors.background.primary,
-      ...theme.shadows.sm,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.md,
+      padding: LightTheme.spacing.lg,
+      backgroundColor: LightTheme.semanticColors.background.primary,
+      ...LightTheme.shadows.sm,
     },
     optionCardSelected: {
-      borderColor: theme.colors.primary,
-      backgroundColor: `${theme.colors.primary}10`,
+      borderColor: LightTheme.colors.primary,
+      backgroundColor: `${LightTheme.colors.primary}10`,
     },
     optionHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: theme.spacing.sm,
+      marginBottom: LightTheme.spacing.sm,
     },
     optionLabel: {
-      ...theme.textStyles.labelLarge,
-      color: theme.semanticColors.text.primary,
+      fontSize: LightTheme.typography.lg.fontSize,
       fontWeight: '600',
+      color: LightTheme.semanticColors.text.primary,
     },
     optionLabelSelected: {
-      color: theme.colors.primary,
+      color: LightTheme.colors.primary,
     },
     optionDescription: {
-      ...theme.textStyles.bodySmall,
-      color: theme.semanticColors.text.secondary,
-      fontSize: 14,
-      fontWeight: '400',
+      fontSize: LightTheme.typography.sm.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
       lineHeight: 20,
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      gap: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing.xl,
     },
   });
 

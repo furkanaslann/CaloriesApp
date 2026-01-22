@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -21,30 +21,6 @@ import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const MotivationScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-    },
-    colors: { primary: '#7C3AED', success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' },
-    textStyles: {
-      onboardingTitle: { fontSize: 30, fontWeight: '600' },
-      onboardingDescription: { fontSize: 16, fontWeight: '400' },
-      heading3: { fontSize: 24, fontWeight: '600' },
-      heading4: { fontSize: 20, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
-      labelLarge: { fontSize: 18, fontWeight: '500' },
-      labelMedium: { fontSize: 15, fontWeight: '500' },
-      caption: { fontSize: 12, fontWeight: '400' },
-    },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10 },
-    shadows: { lg: {}, md: {} },
-    coloredShadows: { primary: {} },
-  };
   const { goals, updateGoals, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [motivation, setMotivation] = useState(goals.motivation || 7);
@@ -151,7 +127,7 @@ const MotivationScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
@@ -160,55 +136,53 @@ const MotivationScreen = () => {
       flexGrow: 1,
     },
     content: {
-      padding: theme.spacing.lg,
-      paddingTop: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      padding: LightTheme.spacing.lg,
+      paddingTop: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing.xl,
     },
     header: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['3xl'],
       alignItems: 'center',
     },
     title: {
-      ...theme.textStyles.onboardingTitle,
       fontSize: 32,
       fontWeight: '700',
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
-      marginTop: theme.spacing.sm,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
+      marginTop: LightTheme.spacing.sm,
       textAlign: 'center',
       lineHeight: 40,
     },
     subtitle: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.base.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
       lineHeight: 26,
       fontWeight: '400',
-      fontSize: 16,
-      marginTop: theme.spacing.md,
-      marginBottom: theme.spacing.xl,
+      marginTop: LightTheme.spacing.md,
+      marginBottom: LightTheme.spacing.xl,
     },
     sliderContainer: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['3xl'],
     },
     sliderBackground: {
       height: 80,
-      backgroundColor: theme.semanticColors.background.surface,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
       borderRadius: 40,
       justifyContent: 'center',
-      paddingHorizontal: theme.spacing.lg,
-      ...theme.shadows.md,
+      paddingHorizontal: LightTheme.spacing.lg,
+      ...LightTheme.shadows.md,
     },
     sliderBar: {
       height: 16,
-      backgroundColor: theme.semanticColors.border.primary,
+      backgroundColor: LightTheme.semanticColors.border.primary,
       borderRadius: 8,
       position: 'relative',
     },
     sliderBarFill: {
       position: 'absolute',
       height: '100%',
-      backgroundColor: theme.colors.primary,
+      backgroundColor: LightTheme.colors.primary,
       borderRadius: 8,
       left: 0,
     },
@@ -216,13 +190,13 @@ const MotivationScreen = () => {
       position: 'absolute',
       width: 40,
       height: 40,
-      backgroundColor: theme.colors.primary,
+      backgroundColor: LightTheme.colors.primary,
       borderRadius: 20,
       top: '50%',
       transform: [{ translateY: -20 }, { translateX: -20 }],
       justifyContent: 'center',
       alignItems: 'center',
-      ...theme.shadows.lg,
+      ...LightTheme.shadows.lg,
     },
     sliderHandleInner: {
       width: 30,
@@ -235,76 +209,75 @@ const MotivationScreen = () => {
     sliderHandleText: {
       fontSize: 12,
       fontWeight: '600',
-      color: theme.colors.primary,
+      color: LightTheme.colors.primary,
     },
     sliderEmojiContainer: {
       alignItems: 'center',
-      backgroundColor: theme.semanticColors.background.surface,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.xl,
-      ...theme.shadows.sm,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.lg,
+      padding: LightTheme.spacing.xl,
+      ...LightTheme.shadows.sm,
     },
     sliderEmoji: {
       fontSize: 48,
-      marginBottom: theme.spacing.md,
+      marginBottom: LightTheme.spacing.md,
     },
     sliderValue: {
-      ...theme.textStyles.heading3,
-      color: theme.colors.primary,
-      marginBottom: theme.spacing.sm,
       fontSize: 36,
+      color: LightTheme.colors.primary,
+      marginBottom: LightTheme.spacing.sm,
       fontWeight: '700',
     },
     sliderDescription: {
-      ...theme.textStyles.bodySmall,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.sm.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      marginBottom: theme.spacing.lg,
+      marginBottom: LightTheme.spacing.lg,
       lineHeight: 24,
     },
     emojiScale: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginTop: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
+      marginTop: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing.lg,
       position: 'relative',
     },
     emojiItem: {
       alignItems: 'center',
       position: 'absolute',
-      transform: [{ translateX: -20 }], // Center the emoji
+      transform: [{ translateX: -20 }],
       width: 40,
     },
     emojiText: {
       fontSize: 28,
-      marginBottom: theme.spacing.xs,
+      marginBottom: LightTheme.spacing.xs,
     },
     emojiNumber: {
       fontSize: 12,
-      color: theme.semanticColors.text.tertiary,
+      color: LightTheme.semanticColors.text.tertiary,
       fontWeight: '500',
     },
-        infoCard: {
-      backgroundColor: theme.semanticColors.background.surface,
+    infoCard: {
+      backgroundColor: LightTheme.semanticColors.background.secondary,
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
-      marginTop: theme.spacing.lg,
-      ...theme.shadows.sm,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.lg,
+      padding: LightTheme.spacing.lg,
+      marginTop: LightTheme.spacing.lg,
+      ...LightTheme.shadows.sm,
     },
     infoText: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.base.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      gap: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing.xl,
     },
   });
 

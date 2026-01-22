@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
@@ -29,43 +29,6 @@ const WELCOME_ICONS = {
 const { width } = Dimensions.get('window');
 
 const WelcomeScreen = () => {
-  // Create theme object that matches expected structure
-  const theme = {
-    semanticColors: {
-      background: { primary: COLORS.background },
-      text: {
-        primary: COLORS.textPrimary,
-        secondary: COLORS.textSecondary,
-        tertiary: COLORS.textTertiary,
-        onPrimary: '#FFFFFF'
-      },
-      border: { primary: COLORS.border },
-      onPrimary: '#FFFFFF',
-    },
-    colors: {
-      primary: COLORS.primary,
-      gradientStart: COLORS.primary,
-      gradientEnd: '#EC4899',
-    },
-    textStyles: {
-      onboardingHero: { fontSize: TYPOGRAPHY.fontSizes['4xl'] },
-      onboardingTitle: { fontSize: TYPOGRAPHY.fontSizes['3xl'], fontWeight: '600' },
-      onboardingSubtitle: { fontSize: TYPOGRAPHY.fontSizes['xl'], fontWeight: '500' },
-      onboardingDescription: { fontSize: TYPOGRAPHY.fontSizes.base },
-    },
-    spacing: {
-      ...SPACING,
-      sm: SPACING[2],
-      md: SPACING[3],
-      lg: SPACING[4],
-      xl: SPACING[5],
-      '2xl': SPACING[6],
-      '4xl': SPACING[12],
-    },
-    borderRadius: BORDER_RADIUS,
-    shadows: SHADOWS,
-    coloredShadows: { gradient: SHADOWS.lg },
-  };
 
   const { nextStep } = useOnboarding();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -134,7 +97,7 @@ const WelcomeScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
@@ -144,18 +107,18 @@ const WelcomeScreen = () => {
       height: '100%',
       justifyContent: 'flex-start',
       alignItems: 'center',
-      paddingHorizontal: theme.spacing['2xl'],
+      paddingHorizontal: LightTheme.spacing['2xl'],
     },
     iconContainer: {
       width: width * 0.4,
       height: width * 0.4,
       marginTop: '20%',
-      marginBottom: theme.spacing['4xl'],
-      borderRadius: theme.borderRadius.full,
-      backgroundColor: `${theme.colors.primary}15`,
+      marginBottom: LightTheme.spacing['4xl'],
+      borderRadius: LightTheme.borderRadius.full,
+      backgroundColor: `${LightTheme.colors.primary}15`,
       justifyContent: 'center',
       alignItems: 'center',
-      ...theme.shadows.lg,
+      ...LightTheme.shadows.lg,
     },
     icon: {
       fontSize: width * 0.15,
@@ -164,8 +127,8 @@ const WelcomeScreen = () => {
     logo: {
       fontSize: 48,
       fontWeight: '800',
-      color: theme.colors.primary,
-      marginBottom: theme.spacing['4xl'],
+      color: LightTheme.colors.primary,
+      marginBottom: LightTheme.spacing['4xl'],
       marginTop: '20%',
       textAlign: 'center',
       textShadowColor: 'rgba(124, 58, 237, 0.15)',
@@ -175,67 +138,67 @@ const WelcomeScreen = () => {
       lineHeight: 56,
     },
     title: {
-      fontSize: theme.textStyles.onboardingTitle?.fontSize || 30,
-      fontWeight: (theme.textStyles.onboardingTitle?.fontWeight || '600') as TextStyle['fontWeight'],
-      color: theme.semanticColors.text.primary,
+      fontSize: LightTheme.typography['3xl'].fontSize,
+      fontWeight: '600' as TextStyle['fontWeight'],
+      color: LightTheme.semanticColors.text.primary,
       textAlign: 'center',
       marginTop: '10%',
-      marginBottom: theme.spacing.lg,
-      lineHeight: 36,
+      marginBottom: LightTheme.spacing.lg,
+      lineHeight: LightTheme.typography['3xl'].lineHeight,
     },
     subtitle: {
-      fontSize: theme.textStyles.onboardingSubtitle?.fontSize || 20,
-      fontWeight: (theme.textStyles.onboardingSubtitle?.fontWeight || '500') as TextStyle['fontWeight'],
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.xl.fontSize,
+      fontWeight: '500' as TextStyle['fontWeight'],
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      marginBottom: theme.spacing.lg,
-      lineHeight: 28,
+      marginBottom: LightTheme.spacing.lg,
+      lineHeight: LightTheme.typography.xl.lineHeight,
     },
     description: {
-      fontSize: 16,
+      fontSize: LightTheme.typography.base.fontSize,
       fontWeight: '400',
-      color: theme.semanticColors.text.secondary,
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
       maxWidth: width * 0.85,
-      paddingHorizontal: theme.spacing.lg,
-      lineHeight: 24,
+      paddingHorizontal: LightTheme.spacing.lg,
+      lineHeight: LightTheme.typography.base.lineHeight,
       opacity: 1,
     },
     footer: {
-      paddingHorizontal: theme.spacing['2xl'],
-      paddingBottom: theme.spacing['4xl'],
-      paddingTop: theme.spacing.xl,
-      backgroundColor: theme.semanticColors.background.primary,
-      borderTopLeftRadius: theme.borderRadius.xl,
-      borderTopRightRadius: theme.borderRadius.xl,
-      ...theme.shadows.lg,
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingBottom: LightTheme.spacing['4xl'],
+      paddingTop: LightTheme.spacing.xl,
+      backgroundColor: LightTheme.semanticColors.background.primary,
+      borderTopLeftRadius: LightTheme.borderRadius.xl,
+      borderTopRightRadius: LightTheme.borderRadius.xl,
+      ...LightTheme.shadows.lg,
     },
     pagination: {
       flexDirection: 'row',
       justifyContent: 'center',
-      marginBottom: theme.spacing['2xl'],
+      marginBottom: LightTheme.spacing['2xl'],
       alignItems: 'center',
     },
     dot: {
       width: 8,
       height: 8,
-      borderRadius: theme.borderRadius.full,
+      borderRadius: LightTheme.borderRadius.full,
       backgroundColor: '#CBD5E1',
       marginHorizontal: 4,
       opacity: 0.7,
     },
     dotActive: {
-      backgroundColor: theme.colors.primary,
+      backgroundColor: LightTheme.colors.primary,
       width: 32,
       height: 8,
       borderRadius: 4,
       opacity: 1,
     },
     buttonContainer: {
-      gap: theme.spacing.md,
+      gap: LightTheme.spacing.md,
     },
     gradientButton: {
-      backgroundColor: `linear-gradient(135deg, ${theme.colors.gradientStart}, ${theme.colors.gradientEnd})`,
+      backgroundColor: `linear-gradient(135deg, ${LightTheme.colors.primary}, #EC4899)`,
     },
   });
 
@@ -260,11 +223,11 @@ const WelcomeScreen = () => {
               <View>
                 <Text style={styles.logo}>CaloriTrack</Text>
                 <Text style={[styles.subtitle, {
-                  marginBottom: theme.spacing['2xl'],
-                  fontSize: 16,
+                  marginBottom: LightTheme.spacing['2xl'],
+                  fontSize: LightTheme.typography.base.fontSize,
                   fontWeight: '400' as TextStyle['fontWeight'],
                   fontStyle: 'italic',
-                  color: theme.semanticColors.text.tertiary
+                  color: LightTheme.semanticColors.text.tertiary
                 }]}>
                   Minimal. Cool. Aesthetic.
                 </Text>
@@ -299,7 +262,7 @@ const WelcomeScreen = () => {
             title={currentSlide < slides.length - 1 ? 'Devam Et' : 'Hadi Başlayalım!'}
             onPress={handleNext}
             fullWidth
-            style={currentSlide === slides.length - 1 ? theme.coloredShadows?.gradient || {} : {}}
+            style={currentSlide === slides.length - 1 ? LightTheme.shadows.lg : {}}
           />
 
           {currentSlide === 0 && (

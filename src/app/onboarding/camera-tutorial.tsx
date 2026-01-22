@@ -3,6 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -16,26 +17,6 @@ import Button from '../../components/ui/button';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const CameraTutorialScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-    },
-    colors: { primary: '#7C3AED', gradientStart: '#7C3AED', gradientEnd: '#EC4899' },
-    textStyles: {
-      onboardingTitle: { fontSize: 30, fontWeight: '600' },
-      onboardingSubtitle: { fontSize: 20, fontWeight: '500' },
-      onboardingDescription: { fontSize: 16, fontWeight: '400' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
-    },
-    spacing: { sm: 8, lg: 24, md: 16, xl: 32, '3xl': 40, '4xl': 48, '2xl': 24 },
-    borderRadius: { sm: 4, full: 9999, xl: 16, lg: 12 },
-    shadows: { sm: {}, lg: {}, md: {} },
-    coloredShadows: { gradient: {} },
-  };
   const { nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -103,12 +84,12 @@ const CameraTutorialScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     content: {
-      paddingHorizontal: theme.spacing['2xl'],
-      paddingTop: theme.spacing.lg,
-      paddingBottom: theme.spacing['4xl'],
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingTop: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing['4xl'],
     },
     scrollView: {
       flex: 1,
@@ -120,12 +101,12 @@ const CameraTutorialScreen = () => {
       width: 150,
       height: 150,
       borderRadius: 75,
-      backgroundColor: `${theme.colors.primary}15`,
+      backgroundColor: `${LightTheme.colors.primary}15`,
       justifyContent: 'center',
       alignItems: 'center',
       alignSelf: 'center',
-      marginBottom: theme.spacing['4xl'],
-      ...(theme.shadows?.lg || {}),
+      marginBottom: LightTheme.spacing['4xl'],
+      ...LightTheme.shadows.lg,
     },
     icon: {
       fontSize: 60,
@@ -134,8 +115,8 @@ const CameraTutorialScreen = () => {
     logo: {
       fontSize: 48,
       fontWeight: '800',
-      color: theme.colors.primary,
-      marginBottom: theme.spacing.md,
+      color: LightTheme.colors.primary,
+      marginBottom: LightTheme.spacing.md,
       textAlign: 'center',
       textShadowColor: 'rgba(124, 58, 237, 0.15)',
       textShadowOffset: { width: 0, height: 2 },
@@ -144,103 +125,95 @@ const CameraTutorialScreen = () => {
       lineHeight: 56,
     },
     title: {
-      fontSize: theme.textStyles.onboardingTitle?.fontSize || 30,
-      fontWeight:
-        (typeof theme.textStyles.onboardingTitle?.fontWeight === 'number' ||
-          typeof theme.textStyles.onboardingTitle?.fontWeight === 'undefined')
-          ? theme.textStyles.onboardingTitle?.fontWeight ?? '600'
-          : (parseInt(theme.textStyles.onboardingTitle?.fontWeight, 10) as any) ?? '600',
-      color: theme.semanticColors.text.primary,
+      fontSize: 30,
+      fontWeight: '600',
+      color: LightTheme.semanticColors.text.primary,
       textAlign: 'center',
       marginTop: '10%',
-      marginBottom: theme.spacing.lg,
+      marginBottom: LightTheme.spacing.lg,
       lineHeight: 36,
     },
     subtitle: {
-      fontSize: theme.textStyles.onboardingSubtitle?.fontSize || 20,
-      fontWeight:
-        (typeof theme.textStyles.onboardingSubtitle?.fontWeight === 'number' ||
-          typeof theme.textStyles.onboardingSubtitle?.fontWeight === 'undefined')
-          ? theme.textStyles.onboardingSubtitle?.fontWeight ?? '500'
-          : (parseInt(theme.textStyles.onboardingSubtitle?.fontWeight, 10) as any) ?? '500',
-      color: theme.semanticColors.text.secondary,
+      fontSize: 20,
+      fontWeight: '500',
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      marginBottom: theme.spacing.lg,
+      marginBottom: LightTheme.spacing.lg,
       lineHeight: 28,
     },
     description: {
       fontSize: 16,
       fontWeight: '400',
-      color: theme.semanticColors.text.secondary,
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
       lineHeight: 24,
-      paddingHorizontal: theme.spacing.lg,
-      marginBottom: theme.spacing['3xl'],
+      paddingHorizontal: LightTheme.spacing.lg,
+      marginBottom: LightTheme.spacing['3xl'],
     },
     tipsContainer: {
-      backgroundColor: theme.semanticColors.background.surface,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
-      ...(theme.shadows?.sm || {}),
+      backgroundColor: LightTheme.semanticColors.background.secondary,
+      borderRadius: LightTheme.borderRadius.lg,
+      padding: LightTheme.spacing.lg,
+      ...LightTheme.shadows.sm,
     },
     tipsTitle: {
       fontSize: 16,
       fontWeight: '600',
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
       textAlign: 'center',
     },
     tipItem: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: theme.spacing.sm,
+      marginBottom: LightTheme.spacing.sm,
     },
     tipBullet: {
       width: 8,
       height: 8,
-      borderRadius: theme.borderRadius.full,
-      backgroundColor: theme.colors.primary,
-      marginRight: theme.spacing.md,
+      borderRadius: LightTheme.borderRadius.full,
+      backgroundColor: LightTheme.colors.primary,
+      marginRight: LightTheme.spacing.md,
     },
     tipText: {
-      color: theme.semanticColors.text.primary,
+      color: LightTheme.semanticColors.text.primary,
       flex: 1,
       fontSize: 14,
       fontWeight: '400',
       lineHeight: 20,
     },
     footer: {
-      paddingHorizontal: theme.spacing['2xl'],
-      paddingBottom: theme.spacing['4xl'],
-      paddingTop: theme.spacing.xl,
-      backgroundColor: theme.semanticColors.background.primary,
-      borderTopLeftRadius: theme.borderRadius.xl,
-      borderTopRightRadius: theme.borderRadius.xl,
-      ...(theme.shadows?.lg || {}),
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingBottom: LightTheme.spacing['4xl'],
+      paddingTop: LightTheme.spacing.xl,
+      backgroundColor: LightTheme.semanticColors.background.primary,
+      borderTopLeftRadius: LightTheme.borderRadius.xl,
+      borderTopRightRadius: LightTheme.borderRadius.xl,
+      ...LightTheme.shadows.lg,
     },
     progressIndicator: {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: theme.spacing['2xl'],
+      marginBottom: LightTheme.spacing['2xl'],
     },
     dot: {
       width: 8,
       height: 8,
-      borderRadius: theme.borderRadius.full,
+      borderRadius: LightTheme.borderRadius.full,
       backgroundColor: '#CBD5E1',
       marginHorizontal: 4,
       opacity: 0.7,
     },
     dotActive: {
-      backgroundColor: theme.colors.primary,
+      backgroundColor: LightTheme.colors.primary,
       width: 32,
       height: 8,
       borderRadius: 4,
       opacity: 1,
     },
     buttonContainer: {
-      gap: theme.spacing.md,
+      gap: LightTheme.spacing.md,
     },
   });
 
@@ -252,11 +225,11 @@ const CameraTutorialScreen = () => {
             <View>
               <Text style={styles.logo}>CaloriTrack</Text>
               <Text style={[styles.subtitle, {
-                marginBottom: theme.spacing['2xl'],
+                marginBottom: LightTheme.spacing['2xl'],
                 fontSize: 16,
                 fontWeight: '400',
                 fontStyle: 'italic',
-                color: theme.semanticColors.text.tertiary
+                color: LightTheme.semanticColors.text.tertiary
               }]}>
                 Minimal. Cool. Aesthetic.
               </Text>

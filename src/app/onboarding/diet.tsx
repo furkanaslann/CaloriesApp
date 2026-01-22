@@ -3,6 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -18,29 +19,6 @@ import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const DietScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-    },
-    colors: { primary: '#7C3AED', success: '#10B981', error: '#EF4444' },
-    textStyles: {
-      heading2: { fontSize: 32, fontWeight: '700' },
-      heading4: { fontSize: 20, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
-      labelLarge: { fontSize: 18, fontWeight: '500' },
-      labelMedium: { fontSize: 15, fontWeight: '500' },
-      caption: { fontSize: 12, fontWeight: '400' },
-    },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8, xs: 4 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10, sm: 8 },
-    shadows: { lg: {}, md: {}, sm: {} },
-    coloredShadows: { primary: {} },
-  };
-
   const { diet, updateDiet, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [type, setType] = useState(diet.type || '');
@@ -81,7 +59,7 @@ const DietScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
@@ -90,79 +68,76 @@ const DietScreen = () => {
       flexGrow: 1,
     },
     content: {
-      padding: theme.spacing.lg,
-      paddingTop: theme.spacing.lg,
-      paddingBottom: theme.spacing['4xl'],
+      padding: LightTheme.spacing.lg,
+      paddingTop: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing['4xl'],
     },
     header: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['3xl'],
     },
     title: {
-      ...theme.textStyles.heading2,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
-      lineHeight: 40,
-      fontSize: 32,
+      fontSize: LightTheme.typography['3xl'].fontSize,
       fontWeight: '700',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
+      lineHeight: LightTheme.typography['3xl'].lineHeight,
     },
     subtitle: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.base.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
       lineHeight: 24,
     },
     section: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['2xl'],
     },
     sectionTitle: {
-      ...theme.textStyles.heading4,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.lg,
+      fontSize: LightTheme.typography.xl.fontSize,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.lg,
     },
     optionGrid: {
-      gap: theme.spacing.md,
+      gap: LightTheme.spacing.md,
     },
     optionCard: {
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.md,
-      padding: theme.spacing.lg,
-      backgroundColor: theme.semanticColors.background.primary,
-      ...theme.shadows.sm,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.md,
+      padding: LightTheme.spacing.lg,
+      backgroundColor: LightTheme.semanticColors.background.primary,
+      ...LightTheme.shadows.sm,
     },
     optionCardSelected: {
-      borderColor: theme.colors.primary,
-      backgroundColor: `${theme.colors.primary}10`,
+      borderColor: LightTheme.colors.primary,
+      backgroundColor: `${LightTheme.colors.primary}10`,
     },
     optionHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: theme.spacing.sm,
+      marginBottom: LightTheme.spacing.sm,
     },
     optionIcon: {
       fontSize: 24,
-      marginRight: theme.spacing.md,
+      marginRight: LightTheme.spacing.md,
     },
     optionLabel: {
-      ...theme.textStyles.labelLarge,
-      color: theme.semanticColors.text.primary,
+      fontSize: LightTheme.typography.lg.fontSize,
+      color: LightTheme.semanticColors.text.primary,
       fontWeight: '600',
     },
     optionLabelSelected: {
-      color: theme.colors.primary,
+      color: LightTheme.colors.primary,
     },
     optionDescription: {
-      ...(theme?.textStyles?.caption || { fontSize: 12, fontWeight: '400' }),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
+      fontSize: LightTheme.typography.sm.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
       marginLeft: 36,
-      fontSize: 14,
-      fontWeight: '400',
       lineHeight: 20,
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      gap: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing.xl,
     },
   });
 

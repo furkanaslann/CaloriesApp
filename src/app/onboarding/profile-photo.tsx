@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
+import { LightTheme } from '@/constants';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -22,40 +22,6 @@ import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const ProfilePhotoScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: COLORS.background, surface: COLORS.surfaceAlt },
-      text: { primary: COLORS.textPrimary, secondary: COLORS.textSecondary, tertiary: COLORS.textTertiary },
-      border: { primary: COLORS.border, secondary: COLORS.border },
-    },
-    colors: { primary: COLORS.primary, error: COLORS.error },
-    textStyles: {
-      heading2: { fontSize: TYPOGRAPHY.fontSizes['2xl'], fontWeight: '600' as const },
-      onboardingTitle: { fontSize: TYPOGRAPHY.fontSizes['3xl'], fontWeight: '600' as const, lineHeight: TYPOGRAPHY.lineHeights.tight, letterSpacing: -0.5 },
-      body: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '400' as const },
-      bodySmall: { fontSize: TYPOGRAPHY.fontSizes.sm, fontWeight: '400' as const },
-      buttonMedium: { fontSize: TYPOGRAPHY.fontSizes.base, fontWeight: '500' as const },
-    },
-    typography: {
-      fontWeights: TYPOGRAPHY.fontWeights,
-      lineHeight: { relaxed: TYPOGRAPHY.lineHeights.relaxed },
-    },
-    spacing: {
-      ...SPACING,
-      sm: SPACING[2],
-      md: SPACING[3],
-      lg: SPACING[4],
-      xl: SPACING[5],
-      '3xl': SPACING[12],
-      '4xl': SPACING[12],
-    },
-    borderRadius: BORDER_RADIUS,
-    shadows: SHADOWS,
-    coloredShadows: {
-      primary: SHADOWS.md,
-    },
-  };
   const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [profilePhoto, setProfilePhoto] = useState<string | undefined>(profile.profilePhoto);
@@ -140,7 +106,7 @@ const ProfilePhotoScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
@@ -149,43 +115,45 @@ const ProfilePhotoScreen = () => {
       flexGrow: 1,
     },
     content: {
-      padding: theme.spacing.lg,
-      paddingTop: theme.spacing.xl,
-      paddingBottom: theme.spacing.xl,
+      padding: LightTheme.spacing.lg,
+      paddingTop: LightTheme.spacing.xl,
+      paddingBottom: LightTheme.spacing.xl,
     },
     header: {
-      marginBottom: theme.spacing.xl,
+      marginBottom: LightTheme.spacing.xl,
       alignItems: 'center',
     },
     title: {
-      ...theme.textStyles.onboardingTitle,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
-      marginTop: theme.spacing.sm,
+      fontSize: LightTheme.typography['3xl'].fontSize,
+      fontWeight: '600',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
+      marginTop: LightTheme.spacing.sm,
       textAlign: 'center',
-      lineHeight: theme.typography.lineHeight.relaxed,
+      lineHeight: LightTheme.typography.base.lineHeight,
+      letterSpacing: -0.5,
     },
     subtitle: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.base.fontSize,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      lineHeight: theme.typography.lineHeight.relaxed,
-      fontSize: TYPOGRAPHY.fontSizes.base,
+      lineHeight: LightTheme.typography.base.lineHeight,
     },
     photoContainer: {
       alignItems: 'center',
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['6xl'],
     },
     photoWrapper: {
       width: 150,
       height: 150,
       borderRadius: 75,
-      backgroundColor: theme.semanticColors.background.surface,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
       borderWidth: 3,
-      borderColor: theme.semanticColors.border.primary,
+      borderColor: LightTheme.semanticColors.border.primary,
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: theme.spacing.lg,
+      marginBottom: LightTheme.spacing.lg,
       overflow: 'hidden',
     },
     photoImage: {
@@ -194,54 +162,56 @@ const ProfilePhotoScreen = () => {
     },
     placeholderIcon: {
       fontSize: 60,
-      marginBottom: theme.spacing.sm,
+      marginBottom: LightTheme.spacing.sm,
     },
     placeholderText: {
-      ...theme.textStyles.bodySmall,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.sm.fontSize,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
     },
     actionButtonContainer: {
-      gap: theme.spacing.md,
-      marginBottom: theme.spacing.lg,
+      gap: LightTheme.spacing.md,
+      marginBottom: LightTheme.spacing.lg,
     },
     actionButton: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: theme.spacing.md,
+      padding: LightTheme.spacing.md,
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.md,
-      backgroundColor: theme.semanticColors.background.primary,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.md,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     removeButton: {
-      borderColor: theme.colors.error,
+      borderColor: LightTheme.colors.error,
     },
     buttonText: {
-      ...theme.textStyles.buttonMedium,
-      color: theme.semanticColors.text.primary,
-      marginLeft: theme.spacing.sm,
+      fontSize: LightTheme.typography.base.fontSize,
+      fontWeight: '500',
+      color: LightTheme.semanticColors.text.primary,
+      marginLeft: LightTheme.spacing.sm,
     },
     removeButtonText: {
-      color: theme.colors.error,
+      color: LightTheme.colors.error,
     },
     skipText: {
-      color: theme.semanticColors.text.primary,
+      color: LightTheme.semanticColors.text.primary,
       textAlign: 'center',
-      marginTop: theme.spacing.lg,
-      fontSize: TYPOGRAPHY.fontSizes.base,
-      fontWeight: theme.typography.fontWeights.medium,
-      lineHeight: theme.typography.lineHeight.relaxed,
-      paddingHorizontal: theme.spacing.md,
+      marginTop: LightTheme.spacing.lg,
+      fontSize: LightTheme.typography.base.fontSize,
+      fontWeight: '500',
+      lineHeight: LightTheme.typography.base.lineHeight,
+      paddingHorizontal: LightTheme.spacing.md,
     },
     buttonContainer: {
-      paddingHorizontal: theme.spacing.md,
-      paddingBottom: theme.spacing['4xl'],
-      paddingTop: theme.spacing.xl,
-      backgroundColor: theme.semanticColors.background.primary,
-      borderTopLeftRadius: theme.borderRadius.xl,
-      borderTopRightRadius: theme.borderRadius.xl,
+      paddingHorizontal: LightTheme.spacing.md,
+      paddingBottom: LightTheme.spacing['6xl'],
+      paddingTop: LightTheme.spacing.xl,
+      backgroundColor: LightTheme.semanticColors.background.primary,
+      borderTopLeftRadius: LightTheme.borderRadius.xl,
+      borderTopRightRadius: LightTheme.borderRadius.xl,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 10 },
       shadowOpacity: 0.1,
@@ -310,7 +280,7 @@ const ProfilePhotoScreen = () => {
           title="Devam Et"
           onPress={handleNext}
           fullWidth
-          style={theme.coloredShadows.primary}
+          style={LightTheme.shadows.md}
         />
       </View>
     </SafeAreaView>

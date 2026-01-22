@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -21,30 +21,6 @@ import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const TargetWeightScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-      text: { primary: '#1E293B', secondary: '#475569', tertiary: '#64748B', onPrimary: '#FFFFFF' },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-    },
-    colors: { primary: '#7C3AED', success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' },
-    textStyles: {
-      onboardingTitle: { fontSize: 30, fontWeight: '600' },
-      onboardingDescription: { fontSize: 16, fontWeight: '400' },
-      heading3: { fontSize: 24, fontWeight: '600' },
-      heading4: { fontSize: 20, fontWeight: '600' },
-      body: { fontSize: 16, fontWeight: '400' },
-      bodySmall: { fontSize: 14, fontWeight: '400' },
-      labelLarge: { fontSize: 18, fontWeight: '500' },
-      labelMedium: { fontSize: 15, fontWeight: '500' },
-      caption: { fontSize: 12, fontWeight: '400' },
-    },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '3xl': 40, '2xl': 24, sm: 8 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, md: 10 },
-    shadows: { sm: {}, md: {} },
-    coloredShadows: { primary: {} },
-  };
   const { profile, goals, updateGoals, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [targetWeight, setTargetWeight] = useState(goals.targetWeight || 70);
@@ -53,7 +29,7 @@ const TargetWeightScreen = () => {
   const currentStep = getCurrentStep('goals-weight');
 
   const { width: screenWidth } = Dimensions.get('window');
-  const sliderWidth = screenWidth - 64; // Padding'leri çıkarıyoruz
+  const sliderWidth = screenWidth - 64;
   const minWeight = 40;
   const maxWeight = 150;
   const weightRange = maxWeight - minWeight;
@@ -62,7 +38,6 @@ const TargetWeightScreen = () => {
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (_, gestureState) => {
-        // When starting to drag, calculate initial position based on current weight
         if (targetWeight >= minWeight && targetWeight <= maxWeight) {
           const percentage = (targetWeight - minWeight) / weightRange;
           const initialPosition = percentage * sliderWidth;
@@ -70,12 +45,10 @@ const TargetWeightScreen = () => {
         }
       },
       onPanResponderMove: (_, gestureState) => {
-        // Calculate absolute position based on where the user started dragging
         const touchX = gestureState.x0 + gestureState.dx;
-        const newPosition = Math.max(0, Math.min(sliderWidth, touchX - 40)); // 40 = handle radius
+        const newPosition = Math.max(0, Math.min(sliderWidth, touchX - 40));
         setSliderPosition(newPosition);
 
-        // Calculate weight based on position
         const percentage = newPosition / sliderWidth;
         const newWeight = Math.round(minWeight + (percentage * weightRange));
         setTargetWeight(newWeight);
@@ -118,7 +91,6 @@ const TargetWeightScreen = () => {
     router.push('/onboarding/goals-weekly');
   };
 
-  // Initialize slider position based on weight changes
   React.useEffect(() => {
     if (targetWeight >= minWeight && targetWeight <= maxWeight) {
       const percentage = (targetWeight - minWeight) / weightRange;
@@ -135,7 +107,7 @@ const TargetWeightScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
@@ -144,80 +116,71 @@ const TargetWeightScreen = () => {
       flexGrow: 1,
     },
     content: {
-      padding: theme.spacing.lg,
-      paddingTop: theme.spacing.lg,
-      paddingBottom: theme.spacing['4xl'],
+      padding: LightTheme.spacing.lg,
+      paddingTop: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing['4xl'],
     },
     header: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['6xl'],
       alignItems: 'center',
     },
     title: {
-      ...theme.textStyles.onboardingTitle,
-      fontSize: 32,
+      fontSize: LightTheme.typography['3xl'].fontSize,
       fontWeight: '700',
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
-      marginTop: theme.spacing.sm,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
+      marginTop: LightTheme.spacing.sm,
       textAlign: 'center',
-      lineHeight: 40,
+      lineHeight: LightTheme.typography['3xl'].lineHeight,
     },
     subtitle: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.tertiary || '#64748B',
+      fontSize: LightTheme.typography.base.fontSize,
+      fontWeight: '500',
+      color: LightTheme.semanticColors.text.tertiary,
       textAlign: 'center',
       lineHeight: 26,
-      fontWeight: '500',
-      fontSize: 16,
-      marginTop: theme.spacing.md,
-      marginBottom: theme.spacing.xl,
+      marginTop: LightTheme.spacing.md,
+      marginBottom: LightTheme.spacing.xl,
     },
     section: {
-      marginBottom: theme.spacing['2xl'],
-    },
-    sectionTitle: {
-      ...theme.textStyles.labelLarge,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.lg,
-      fontSize: 18,
-      fontWeight: '500',
+      marginBottom: LightTheme.spacing['2xl'],
     },
     weightDisplay: {
       alignItems: 'center',
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['6xl'],
     },
     weightValue: {
       fontSize: 48,
       fontWeight: '700',
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.sm,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.sm,
     },
     weightUnit: {
       fontSize: 18,
-      color: theme.semanticColors.text.secondary,
+      color: LightTheme.semanticColors.text.secondary,
       fontWeight: '500',
     },
     sliderContainer: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['6xl'],
     },
     sliderBackground: {
       height: 60,
-      backgroundColor: theme.semanticColors.background.surface,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
       borderRadius: 30,
       justifyContent: 'center',
-      paddingHorizontal: theme.spacing.lg,
-      ...theme.shadows.md,
+      paddingHorizontal: LightTheme.spacing.lg,
+      ...LightTheme.shadows.md,
     },
     sliderBar: {
       height: 12,
-      backgroundColor: theme.semanticColors.border.primary,
+      backgroundColor: LightTheme.semanticColors.border.primary,
       borderRadius: 6,
       position: 'relative',
     },
     sliderBarFill: {
       position: 'absolute',
       height: '100%',
-      backgroundColor: theme.colors.primary,
+      backgroundColor: LightTheme.colors.primary,
       borderRadius: 6,
       left: 0,
     },
@@ -225,13 +188,13 @@ const TargetWeightScreen = () => {
       position: 'absolute',
       width: 40,
       height: 40,
-      backgroundColor: theme.colors.primary,
+      backgroundColor: LightTheme.colors.primary,
       borderRadius: 20,
       top: '50%',
       transform: [{ translateY: -20 }, { translateX: -20 }],
       justifyContent: 'center',
       alignItems: 'center',
-      ...theme.shadows.lg,
+      ...LightTheme.shadows.lg,
     },
     sliderHandleInner: {
       width: 30,
@@ -241,44 +204,38 @@ const TargetWeightScreen = () => {
       justifyContent: 'center',
       alignItems: 'center',
     },
-    sliderHandleText: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: theme.colors.primary,
-    },
     scaleNumbers: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginTop: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
+      marginTop: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing.lg,
     },
     scaleNumber: {
       fontSize: 14,
-      color: theme.semanticColors.text.tertiary,
+      color: LightTheme.semanticColors.text.tertiary,
       fontWeight: '500',
     },
     infoCard: {
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
-      marginBottom: theme.spacing.lg,
-      ...theme.shadows.sm,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.lg,
+      padding: LightTheme.spacing.lg,
+      marginBottom: LightTheme.spacing.lg,
+      ...LightTheme.shadows.sm,
     },
     infoText: {
-      ...theme.textStyles.body,
-      color: theme.semanticColors.text.primary,
-      textAlign: 'center',
-      fontSize: 16,
+      fontSize: LightTheme.typography.base.fontSize,
       fontWeight: '500',
+      color: LightTheme.semanticColors.text.primary,
+      textAlign: 'center',
       lineHeight: 24,
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      gap: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing.xl,
     },
   });
 

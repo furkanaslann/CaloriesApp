@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING } from '@/constants/theme';
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React from 'react';
 import {
@@ -20,30 +20,6 @@ import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const ProfileScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: COLORS.background, surface: COLORS.surfaceAlt },
-      text: { primary: COLORS.textPrimary, secondary: COLORS.textSecondary, tertiary: COLORS.textTertiary },
-      border: { primary: COLORS.border, secondary: COLORS.border },
-    },
-    colors: { primary: COLORS.primary },
-    textStyles: {
-      heading2: { fontSize: 28, fontWeight: '600' as const },
-      heading3: { fontSize: 24, fontWeight: '600' as const },
-      heading4: { fontSize: 20, fontWeight: '600' as const },
-      body: { fontSize: 16, fontWeight: '400' as const },
-      bodyMedium: { fontSize: 16, fontWeight: '500' as const },
-      labelSmall: { fontSize: 13, fontWeight: '500' as const },
-    },
-    typography: {
-      fontWeights: { regular: '400', medium: '500', semibold: '600' },
-      lineHeight: { relaxed: 24 }
-    },
-    spacing: { lg: 24, md: 16, xl: 32, xs: 4, sm: 8, '3xl': 40 },
-    borderRadius: { sm: 4, md: 10 },
-    shadows: { lg: {}, md: {} },
-  };
   const { profile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const handleNext = () => {
@@ -86,7 +62,7 @@ const ProfileScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.semanticColors.background.primary,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
@@ -95,105 +71,105 @@ const ProfileScreen = () => {
       flexGrow: 1,
     },
     content: {
-      padding: theme.spacing.lg,
+      padding: LightTheme.spacing.lg,
     },
     header: {
       marginTop: 40,
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['3xl'],
     },
     title: {
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
       textAlign: 'center',
       lineHeight: 40,
       fontSize: 32,
-      fontWeight: '700' as const,
+      fontWeight: '700',
     },
     subtitle: {
-      fontSize: theme.textStyles.body.fontSize,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.base.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      lineHeight: theme.typography.lineHeight.relaxed,
+      lineHeight: LightTheme.typography.base.lineHeight,
     },
     profileContainer: {
-      marginBottom: theme.spacing['3xl'],
+      marginBottom: LightTheme.spacing['3xl'],
     },
     profileHeader: {
       alignItems: 'center',
-      marginBottom: theme.spacing.xl,
+      marginBottom: LightTheme.spacing.xl,
     },
     profilePhoto: {
       width: 100,
       height: 100,
       borderRadius: 50,
-      backgroundColor: theme.semanticColors.background.surface,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: theme.spacing.md,
+      marginBottom: LightTheme.spacing.md,
       borderWidth: 2,
-      borderColor: theme.semanticColors.border.primary,
+      borderColor: LightTheme.semanticColors.border.primary,
     },
     profilePhotoPlaceholder: {
       fontSize: 40,
     },
     profileName: {
-      fontSize: theme.textStyles.heading3.fontSize,
-      fontWeight: theme.textStyles.heading3.fontWeight,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.xs,
+      fontSize: LightTheme.typography.xl.fontSize,
+      fontWeight: '600',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.xs,
     },
     profileDetails: {
-      fontSize: theme.textStyles.body.fontSize,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.base.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
     },
     section: {
-      marginBottom: theme.spacing.xl,
+      marginBottom: LightTheme.spacing.xl,
     },
     sectionTitle: {
-      fontSize: theme.textStyles.heading4.fontSize,
-      color: theme.semanticColors.text.primary,
-      marginBottom: theme.spacing.md,
+      fontSize: LightTheme.typography.xl.fontSize,
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
     },
     infoItem: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: theme.spacing.md,
-      backgroundColor: theme.semanticColors.background.surface,
-      borderRadius: theme.borderRadius.md,
-      marginBottom: theme.spacing.sm,
+      padding: LightTheme.spacing.md,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
+      borderRadius: LightTheme.borderRadius.md,
+      marginBottom: LightTheme.spacing.sm,
       borderWidth: 1,
-      borderColor: theme.semanticColors.border.primary,
+      borderColor: LightTheme.semanticColors.border.primary,
     },
     infoLabel: {
-      fontSize: theme.textStyles.body.fontSize,
-      fontWeight: theme.textStyles.body.fontWeight,
-      color: theme.semanticColors.text.secondary,
+      fontSize: LightTheme.typography.base.fontSize,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
       flex: 1,
     },
     infoValue: {
-      fontSize: theme.textStyles.bodyMedium.fontSize,
-      fontWeight: theme.textStyles.bodyMedium.fontWeight,
-      color: theme.semanticColors.text.primary,
+      fontSize: LightTheme.typography.base.fontSize,
+      fontWeight: '500',
+      color: LightTheme.semanticColors.text.primary,
       flex: 2,
       textAlign: 'right',
     },
     editButton: {
-      fontSize: theme.textStyles.labelSmall.fontSize,
-      fontWeight: theme.textStyles.labelSmall.fontWeight,
-      color: theme.colors.primary,
-      textDecorationLine: 'underline' as const,
-      marginLeft: theme.spacing.sm,
+      fontSize: LightTheme.typography.sm.fontSize,
+      fontWeight: '500',
+      color: LightTheme.colors.primary,
+      textDecorationLine: 'underline',
+      marginLeft: LightTheme.spacing.sm,
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
+      gap: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing.xl,
     },
     topBar: {
-      paddingTop: SPACING[4],
-      backgroundColor: theme.semanticColors.background.primary,
+      paddingTop: LightTheme.spacing.lg,
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
   });
 

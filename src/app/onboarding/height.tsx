@@ -3,7 +3,7 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -21,33 +21,6 @@ import ProgressBar from '../../components/ui/progress-bar';
 import { useOnboarding } from '../../context/onboarding-context';
 
 const HeightScreen = () => {
-  // Modern theme system using constants
-  const theme = {
-    semanticColors: {
-      background: { primary: '#FFFFFF', surface: '#F8FAFC', primarySurface: '#EDE9FE' },
-      text: {
-        primary: '#1E293B',
-        secondary: '#475569',
-        tertiary: '#64748B',
-        onPrimary: '#FFFFFF'
-      },
-      border: { primary: '#E2E8F0', secondary: '#E2E8F0' },
-    },
-    colors: {
-      primary: '#7C3AED',
-    },
-    textStyles: {
-      onboardingTitle: { fontSize: 30, fontWeight: '600' },
-      onboardingDescription: { fontSize: 16, fontWeight: '400' },
-      body: { fontSize: 16, fontWeight: '400' },
-      labelLarge: { fontSize: 18, fontWeight: '500' },
-      buttonMedium: { fontSize: 16, fontWeight: '500' },
-    },
-    spacing: { lg: 24, md: 16, xl: 32, '4xl': 48, '2xl': 24, sm: 8 },
-    borderRadius: { full: 9999, xl: 16, lg: 12, sm: 8 },
-    shadows: { lg: {}, md: {}, sm: {} },
-    coloredShadows: { primary: {} },
-  };
   const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [height, setHeight] = useState(profile.height?.toString() || '');
@@ -87,7 +60,7 @@ const HeightScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme?.semanticColors?.background?.primary || '#FFFFFF',
+      backgroundColor: LightTheme.semanticColors.background.primary,
     },
     scrollView: {
       flex: 1,
@@ -96,116 +69,117 @@ const HeightScreen = () => {
       flexGrow: 1,
     },
     content: {
-      paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      paddingTop: theme?.spacing?.lg || 16,
-      paddingBottom: theme?.spacing?.['4xl'] || 48,
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingTop: LightTheme.spacing.lg,
+      paddingBottom: LightTheme.spacing['4xl'],
     },
     header: {
       marginTop: '10%',
-      marginBottom: theme?.spacing?.['4xl'] || 48,
+      marginBottom: LightTheme.spacing['4xl'],
       alignItems: 'center',
     },
     title: {
-      ...(theme?.textStyles?.onboardingTitle || {}),
-      color: theme?.semanticColors?.text?.primary || '#1E293B',
-      marginBottom: theme?.spacing?.md || 16,
-      textAlign: 'center',
-      lineHeight: 40,
-      fontSize: 32,
+      fontSize: LightTheme.typography['3xl'].fontSize,
       fontWeight: '700',
+      color: LightTheme.semanticColors.text.primary,
+      marginBottom: LightTheme.spacing.md,
+      textAlign: 'center',
+      lineHeight: LightTheme.typography['3xl'].lineHeight,
     },
     subtitle: {
-      ...(theme?.textStyles?.onboardingDescription || {}),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
+      fontSize: LightTheme.typography.base.fontSize,
+      fontWeight: '400',
+      color: LightTheme.semanticColors.text.secondary,
       textAlign: 'center',
-      lineHeight: 24,
+      lineHeight: LightTheme.typography.base.lineHeight,
       maxWidth: 300,
     },
     inputContainer: {
-      marginBottom: theme?.spacing?.['2xl'] || 24,
+      marginBottom: LightTheme.spacing['2xl'],
       alignItems: 'center',
     },
     inputWrapper: {
       width: '100%',
       maxWidth: 200,
-      backgroundColor: theme?.semanticColors?.background?.surface || '#F8FAFC',
-      borderRadius: theme?.borderRadius?.lg || 12,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
+      borderRadius: LightTheme.borderRadius.lg,
       borderWidth: 2,
-      borderColor: isFocused ? (theme?.colors?.primary || '#7C3AED') : (theme?.semanticColors?.border?.secondary || '#E2E8F0'),
+      borderColor: isFocused ? LightTheme.colors.primary : LightTheme.semanticColors.border.primary,
       alignItems: 'center',
-      ...(theme?.shadows?.md || {}),
+      ...LightTheme.shadows.md,
     },
     inputSuffix: {
-      ...(theme?.textStyles?.body || {}),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
-      marginLeft: theme?.spacing?.sm || 8,
+      fontSize: LightTheme.typography.base.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
+      marginLeft: LightTheme.spacing.sm,
       fontWeight: '500',
     },
     quickSelectContainer: {
-      marginBottom: theme?.spacing?.['2xl'] || 24,
+      marginBottom: LightTheme.spacing['2xl'],
     },
     quickSelectLabel: {
-      ...(theme?.textStyles?.labelLarge || {}),
-      color: theme?.semanticColors?.text?.secondary || '#475569',
-      marginBottom: theme?.spacing?.lg || 24,
+      fontSize: LightTheme.typography.lg.fontSize,
+      fontWeight: '500',
+      color: LightTheme.semanticColors.text.secondary,
+      marginBottom: LightTheme.spacing.lg,
       textAlign: 'center',
     },
     quickSelectGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       justifyContent: 'center',
-      gap: theme?.spacing?.sm || 8,
+      gap: LightTheme.spacing.sm,
     },
     quickSelectButton: {
-      paddingHorizontal: theme?.spacing?.lg || 24,
-      paddingVertical: theme?.spacing?.md || 16,
+      paddingHorizontal: LightTheme.spacing.lg,
+      paddingVertical: LightTheme.spacing.md,
       borderWidth: 2,
-      borderColor: theme?.semanticColors?.border?.secondary || '#E2E8F0',
-      borderRadius: theme?.borderRadius?.lg || 12,
-      backgroundColor: theme?.semanticColors?.background?.surface || '#F8FAFC',
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: LightTheme.borderRadius.lg,
+      backgroundColor: LightTheme.semanticColors.background.secondary,
       minWidth: 70,
       alignItems: 'center',
-      ...(theme?.shadows?.sm || {}),
+      ...LightTheme.shadows.sm,
     },
     quickSelectButtonSelected: {
-      borderColor: theme?.colors?.primary || '#7C3AED',
-      backgroundColor: theme?.semanticColors?.background?.primarySurface || '#EDE9FE',
-      ...(theme?.coloredShadows?.primary || {}),
+      borderColor: LightTheme.colors.primary,
+      backgroundColor: LightTheme.colors.primaryLight + '25',
+      ...LightTheme.shadows.lg,
     },
     quickSelectText: {
-      ...(theme?.textStyles?.buttonMedium || {}),
-      color: theme?.semanticColors?.text?.primary || '#1E293B',
+      fontSize: LightTheme.typography.base.fontSize,
       fontWeight: '500',
+      color: LightTheme.semanticColors.text.primary,
     },
     quickSelectTextSelected: {
-      color: theme?.semanticColors?.text?.onPrimary || '#FFFFFF',
+      color: LightTheme.semanticColors.text.onPrimary,
       fontWeight: '600',
     },
     buttonContainer: {
       flexDirection: 'row',
-      gap: theme?.spacing?.md || 16,
-      paddingHorizontal: theme?.spacing?.['2xl'] || 24,
-      paddingBottom: theme?.spacing?.['4xl'] || 48,
-      paddingTop: theme?.spacing?.xl || 32,
-      backgroundColor: theme?.semanticColors?.background?.primary || '#FFFFFF',
-      borderTopLeftRadius: theme?.borderRadius?.xl || 16,
-      borderTopRightRadius: theme?.borderRadius?.xl || 16,
-      ...(theme?.shadows?.lg || {}),
+      gap: LightTheme.spacing.md,
+      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingBottom: LightTheme.spacing['4xl'],
+      paddingTop: LightTheme.spacing.xl,
+      backgroundColor: LightTheme.semanticColors.background.primary,
+      borderTopLeftRadius: LightTheme.borderRadius.xl,
+      borderTopRightRadius: LightTheme.borderRadius.xl,
+      ...LightTheme.shadows.lg,
     },
     iconContainer: {
       width: 80,
       height: 80,
-      borderRadius: theme?.borderRadius?.full || 9999,
-      backgroundColor: theme?.semanticColors?.background?.primarySurface || '#EDE9FE',
+      borderRadius: LightTheme.borderRadius.full,
+      backgroundColor: LightTheme.colors.primaryLight + '25',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: theme?.spacing?.['2xl'] || 24,
-      ...(theme?.coloredShadows?.primary || {}),
+      marginBottom: LightTheme.spacing['2xl'],
+      ...LightTheme.shadows.lg,
     },
     iconText: {
       fontSize: 32,
       fontWeight: '700',
-      color: theme?.semanticColors?.text?.onPrimary || '#FFFFFF',
+      color: LightTheme.semanticColors.text.onPrimary,
     },
   });
 
@@ -283,7 +257,7 @@ const HeightScreen = () => {
           title="Devam Et"
           onPress={handleNext}
           fullWidth
-          style={theme?.coloredShadows?.primary || {}}
+          style={LightTheme.shadows.lg}
         />
       </View>
     </SafeAreaView>
