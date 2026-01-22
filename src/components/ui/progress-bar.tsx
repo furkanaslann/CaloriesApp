@@ -3,9 +3,10 @@
  * Minimal. Cool. Aesthetic.
  */
 
+import { COLORS, SPACING, TYPOGRAPHY } from '@/constants/theme';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Animated, TouchableOpacity, Text } from 'react-native';
-import { COLORS, BORDER_RADIUS, SPACING, TYPOGRAPHY } from '@/constants/theme';
+import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface ProgressBarProps {
   currentStep: number;
@@ -45,38 +46,36 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerRow}>
-        {showBackButton && onBack && (
-          <TouchableOpacity onPress={onBack} style={styles.backButton} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Text style={styles.backButtonText}>←</Text>
-          </TouchableOpacity>
-        )}
-        <View style={styles.progressContainer}>
-          <View
+      {showBackButton && onBack && (
+        <TouchableOpacity onPress={onBack} style={styles.backButton} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Ionicons name="chevron-back-sharp" size={28} color={COLORS.textPrimary} />
+        </TouchableOpacity>
+      )}
+      <View style={styles.progressContainer}>
+        <View
+          style={[
+            styles.track,
+            {
+              backgroundColor,
+              height,
+              borderRadius: height / 2,
+            },
+          ]}
+        >
+          <Animated.View
             style={[
-              styles.track,
+              styles.fill,
               {
-                backgroundColor,
+                backgroundColor: color,
                 height,
                 borderRadius: height / 2,
+                width: animatedWidth.interpolate({
+                  inputRange: [0, 100],
+                  outputRange: ['0%', '100%'],
+                }),
               },
             ]}
-          >
-            <Animated.View
-              style={[
-                styles.fill,
-                {
-                  backgroundColor: color,
-                  height,
-                  borderRadius: height / 2,
-                  width: animatedWidth.interpolate({
-                    inputRange: [0, 100],
-                    outputRange: ['0%', '100%'],
-                  }),
-                },
-              ]}
-            />
-          </View>
+          />
         </View>
       </View>
     </View>
@@ -86,7 +85,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    paddingHorizontal: SPACING[6],
     paddingTop: SPACING[3],
     marginTop: SPACING[4],
     marginBottom: SPACING[6],
@@ -94,23 +92,17 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING[3],
+    gap: SPACING[4],
   },
   backButton: {
-    width: '15%',
-    height: 42,
+    alignSelf: 'flex-start',
+    height: 72,
+    fontSize: TYPOGRAPHY.fontSizes['sm'],
     justifyContent: 'center',
     alignItems: 'center',
   },
-  backButtonText: {
-    fontSize: TYPOGRAPHY.fontSizes['3xl'],
-    fontWeight: TYPOGRAPHY.fontWeights.semibold,
-    color: COLORS.textPrimary,
-    lineHeight: 42,
-    textAlignVertical: 'center',
-  },
   progressContainer: {
-    width: '90%',
+    width: '100%',
   },
   track: {
     width: '100%',
