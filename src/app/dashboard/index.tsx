@@ -6,6 +6,9 @@
 
 import StreakCard from '@/components/dashboard/streak-card';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
+import { AIRecommendationsCard } from '@/components/recipes';
+import { useRevenueCat } from '@/context/revenuecat-context';
+import { useRecipes } from '@/hooks/use-recipes';
 import { FIREBASE_CONFIG } from '@/constants/firebase';
 import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
 import { useUser } from '@/context/user-context';
@@ -38,8 +41,12 @@ const FIGMA_IMAGES = {
 const DashboardIndexScreen = () => {
   const router = useRouter();
   const { userData, user, isLoading: userLoading, isOnboardingCompleted, refreshUserData } = useUser();
+  const { isPremium } = useRevenueCat();
   const [isLoading, setIsLoading] = useState(true);
   const [waterCount, setWaterCount] = useState(0); // Su sayacı için state
+
+  // Recipe hook for AI recommendations
+  const { getAIRecommendations } = useRecipes(user?.uid);
 
   // Hızlı ekle yiyecekleri
   const quickFoods = [
@@ -830,6 +837,18 @@ const DashboardIndexScreen = () => {
               onPress={() => router.push('/dashboard/progress')}
             />
           </View>
+
+          {/* AI Recipe Recommendations - Premium Feature */}
+          <AIRecommendationsCard
+            userGoals={{
+              calories: userData?.calculatedValues?.dailyCalorieGoal || 2000,
+              protein: userData?.calculatedValues?.macros?.protein || 120,
+              carbohydrates: userData?.calculatedValues?.macros?.carbs || 250,
+              fats: userData?.calculatedValues?.macros?.fats || 65,
+            }}
+            dietaryRestrictions={userData?.dietaryRestrictions || []}
+            onSelectRecipe={(recipe) => router.push(`/recipes/${recipe.id}`)}
+          />
 
           {/* Summary Card - Modern progress card */}
           <View style={styles.summarySection}>

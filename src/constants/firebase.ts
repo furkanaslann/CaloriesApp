@@ -7,6 +7,7 @@ export const FIREBASE_CONFIG = {
     users: 'users',
     meals: 'meals',
     foodLogs: 'foodLogs',
+    recipes: 'recipes',
   },
   storageKeys: {
     onboarding: '@caloriesApp:onboarding',

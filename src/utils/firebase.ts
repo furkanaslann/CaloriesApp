@@ -146,40 +146,71 @@ export const signIn = async (email: string, password: string) => {
 /**
  * Convert anonymous user to permanent account with email and password
  * This preserves the user ID and all associated data
+ *
+ * If the anonymous user is no longer valid, creates a new account instead
  */
 export const linkAnonymousToEmailPassword = async (email: string, password: string) => {
+  const currentUser = auth().currentUser;
+
+  if (!currentUser) {
+    console.log('⚠️ No anonymous user found, creating new account instead');
+    return await signUp(email, password);
+  }
+
+  if (!currentUser.isAnonymous) {
+    console.log('User is already a permanent account, signing in instead');
+    return await signIn(email, password);
+  }
+
+  console.log('🔗 Linking anonymous user to email/password:', currentUser.uid);
+
+  // Store the anonymous UID for potential data migration
+  const anonymousUid = currentUser.uid;
+
   try {
-    const currentUser = auth().currentUser;
-    
-    if (!currentUser) {
-      throw new Error('No authenticated user found');
-    }
-
-    if (!currentUser.isAnonymous) {
-      console.log('User is already a permanent account, signing in instead');
-      return await signIn(email, password);
-    }
-
-    console.log('🔗 Linking anonymous user to email/password:', currentUser.uid);
-    
     // Create email/password credential
     const credential = auth.EmailAuthProvider.credential(email, password);
-    
+
     // Link the credential to the anonymous user
     const userCredential = await currentUser.linkWithCredential(credential);
-    
+
     console.log('✅ Successfully linked anonymous user to email/password');
     return userCredential.user;
   } catch (error: any) {
     console.error('❌ Error linking anonymous user:', error);
-    
-    // If the email is already in use, sign in instead
+
+    // Handle specific error codes
     if (error.code === 'auth/email-already-in-use') {
       console.log('Email already in use, signing in instead');
       return await signIn(email, password);
     }
-    
-    throw new Error(error.message);
+
+    // If the anonymous user is no longer valid (user-not-found, invalid-user-token, etc.)
+    // create a new account and note that data migration may be needed
+    if (
+      error.code === 'auth/user-not-found' ||
+      error.code === 'auth/user-disabled' ||
+      error.code === 'auth/invalid-user-token' ||
+      error.code === 'auth/user-token-expired' ||
+      error.code === 'auth/invalid-credential'
+    ) {
+      console.log('⚠️ Anonymous user is no longer valid, creating new account');
+      console.log('📝 Note: Anonymous UID was:', anonymousUid, '- manual data migration may be needed');
+
+      // Create a new account
+      const newUser = await signUp(email, password);
+      return newUser;
+    }
+
+    // For other errors, still try to create a new account as fallback
+    console.log('⚠️ Unexpected linking error, creating new account as fallback');
+    try {
+      const newUser = await signUp(email, password);
+      return newUser;
+    } catch (signupError: any) {
+      console.error('❌ Failed to create new account after linking failed:', signupError);
+      throw new Error(`Account creation failed: ${signupError.message}`);
+    }
   }
 };
 

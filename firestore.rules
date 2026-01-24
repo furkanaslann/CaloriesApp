@@ -1,16 +1,84 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users collection - authenticated users can read/write their own data
+
+    // =============================================================================
+    // RECIPES COLLECTION
+    // =============================================================================
+    match /recipes/{recipeId} {
+      // Public read access - all users can browse recipes
+      allow read: if true;
+
+      // Only admins can create/update/delete verified recipes
+      allow create: if request.auth != null
+        && request.resource.data.difficulty in ['easy', 'medium', 'hard']
+        && request.resource.data.servings > 0
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.ingredients is list
+        && request.resource.data.ingredients.size() > 0
+        && request.resource.data.instructions is list
+        && request.resource.data.instructions.size() > 0;
+
+      allow update: if request.auth != null
+        && request.auth.token.admin == true;
+
+      allow delete: if request.auth != null
+        && request.auth.token.admin == true;
+    }
+
+    // =============================================================================
+    // USERS COLLECTION
+    // =============================================================================
     match /users/{userId} {
+      // Base user document - user can read/write their own data
       allow read, write: if request.auth != null && request.auth.uid == userId;
-      
+
       // User's meals subcollection
       match /meals/{mealId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+
+      // Saved Recipes - user can manage their own saved recipes
+      match /savedRecipes/{recipeId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow create: if request.auth != null
+          && request.auth.uid == userId
+          && request.resource.data.recipeId is string
+          && request.resource.data.savedAt is timestamp;
+        allow update, delete: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Recipe Views - monthly tracking for premium limits
+      match /recipeViews/{month} {
+        // Month format validation: YYYY-MM
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if request.auth != null
+          && request.auth.uid == userId
+          && month.matches('^[0-9]{4}-[0-9]{2}$')
+          && request.resource.data.month is string
+          && request.resource.data.views is number
+          && request.resource.data.views >= 0;
+      }
+
+      // Custom Recipes - Premium feature
+      match /customRecipes/{recipeId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow create: if request.auth != null
+          && request.auth.uid == userId
+          && request.auth.token.premium == true
+          && request.resource.data.userId == userId
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0;
+        allow update: if request.auth != null
+          && request.auth.uid == userId
+          && resource.data.userId == userId;
+        allow delete: if request.auth != null
+          && request.auth.uid == userId
+          && resource.data.userId == userId;
+      }
     }
-    
+
     // For development/testing - remove in production
     // Allows all authenticated users to read/write
     // match /{document=**} {

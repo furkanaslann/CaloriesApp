@@ -268,10 +268,10 @@ const AccountCreationScreen = () => {
       
       // Small delay to ensure context is fully updated and state propagated
       await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Navigate to dashboard after Firebase data is confirmed saved and context refreshed
-      console.log('✅ Navigation to dashboard - onboarding completed successfully');
-      router.replace('/dashboard');
+
+      // Navigate to paywall after onboarding completed
+      console.log('✅ Navigation to paywall - onboarding completed successfully');
+      router.replace('/paywall');
       
       // Turn off loading state after navigation
       setIsCreating(false);

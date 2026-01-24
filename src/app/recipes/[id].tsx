@@ -6,8 +6,10 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   Dimensions,
   Image,
   Modal,
@@ -20,6 +22,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
+import { GroceryListGenerator } from '@/components/recipes';
+import { RecipeLimitPrompt } from '@/components/premium/RecipeLimitPrompt';
+import { recipeService } from '@/services/recipe-service';
+import { useRevenueCat } from '@/context/revenuecat-context';
+import type { Recipe } from '@/types/recipe';
 
 const { width } = Dimensions.get('window');
 

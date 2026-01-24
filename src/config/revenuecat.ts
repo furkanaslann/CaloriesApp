@@ -13,7 +13,7 @@ export const REVENUECAT_CONFIG = {
 
     // Android API Key - starts with 'goog_'
     // Get from: https://app.revenuecat.com/settings/api-keys
-    android: 'goog_YOUR_ANDROID_KEY_HERE',
+    android: 'goog_knChSDjWXVTjKBfcYilWPpfqLxv',
   },
 
   // Entitlement identifiers

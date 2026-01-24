@@ -4,7 +4,12 @@
  */
 
 import BottomNavigation from '@/components/navigation/BottomNavigation';
+import { RecipeCard } from '@/components/recipes';
+import { useRecipes } from '@/hooks/use-recipes';
+import { useRevenueCat } from '@/context/revenuecat-context';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '@/constants/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Dimensions,
@@ -14,14 +19,22 @@ import {
   TextStyle,
   View,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  Modal,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
 const PlanDashboardScreen = () => {
+  const router = useRouter();
+  const { isPremium } = useRevenueCat();
+  const { recipes, searchRecipes, canViewRecipe } = useRecipes();
+
   const [selectedDay, setSelectedDay] = useState('2024-01-15');
+  const [showRecipeModal, setShowRecipeModal] = useState(false);
+  const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
 
   // Create theme object that matches expected structure
   const theme = {
@@ -350,6 +363,31 @@ const PlanDashboardScreen = () => {
     secondaryButtonText: {
       color: theme.semanticColors.text.primary,
     },
+
+    // Section Header
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.spacing.lg,
+    },
+    seeAllText: {
+      fontSize: 14,
+      color: theme.colors.primary,
+      fontWeight: '600' as TextStyle['fontWeight'],
+    },
+
+    // Recipe Suggestions
+    recipesScroll: {
+      gap: theme.spacing.md,
+      paddingRight: theme.spacing['2xl'],
+    },
+    recipeCardWrapper: {
+      width: 280,
+    },
+    recipeCard: {
+      width: 280,
+    },
   });
 
   const calculateMacroPercentage = (current, goal) => (current / goal) * 100;
@@ -471,12 +509,47 @@ const PlanDashboardScreen = () => {
 
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>📝 Planı Düzenle</Text>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => {
+                setSelectedMealType(null);
+                setShowRecipeModal(true);
+              }}
+            >
+              <Text style={styles.actionButtonText}>🍽️ Tarif Ekle</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
               <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>📅 Haftalık Gör</Text>
             </TouchableOpacity>
+          </View>
+
+          {/* Recipe Suggestions Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Tarif Önerileri</Text>
+              <TouchableOpacity onPress={() => setShowRecipeModal(true)}>
+                <Text style={styles.seeAllText}>Tümünü Gör →</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.recipesScroll}
+            >
+              {recipes.slice(0, 5).map(recipe => (
+                <View key={recipe.id} style={styles.recipeCardWrapper}>
+                  <RecipeCard
+                    recipe={recipe}
+                    onPress={() => {
+                      if (canViewRecipe(recipe.id)) {
+                        router.push(`/recipes/${recipe.id}`);
+                      }
+                    }}
+                    containerStyle={styles.recipeCard}
+                  />
+                </View>
+              ))}
+            </ScrollView>
           </View>
         </View>
       </ScrollView>

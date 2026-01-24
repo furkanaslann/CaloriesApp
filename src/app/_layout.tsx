@@ -7,6 +7,7 @@ import 'react-native-reanimated';
 
 import { FIREBASE_CONFIG } from '@/constants/firebase';
 import { OnboardingProvider } from '@/context/onboarding-context';
+import { RevenueCatProvider } from '@/context/revenuecat-context';
 import { ThemeProvider as CustomThemeProvider } from '@/context/theme-context';
 import { UserProvider, useUser } from '@/context/user-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -80,6 +81,7 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
   const { isLoading, user, createAnonymousUser, userData } = useUser();
   const router = useRouter();
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [currentRoute, setCurrentRoute] = useState<string | null>(null);
 
   // Initialize user and check onboarding status - determine initial routing
   useEffect(() => {
@@ -149,14 +151,24 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
           }
         }
 
-        // Route based on onboarding status - only if not already initialized
-        if (!hasInitialized) {
+        // Route based on onboarding status
+        // Check if user is on onboarding screens and needs routing
+        const isOnOnboarding = currentRoute?.startsWith('/onboarding');
+        const isOnPaywall = currentRoute === '/paywall';
+        const isOnDashboard = currentRoute === '/dashboard' || currentRoute === '/(tabs)';
+
+        // Route if: not initialized OR user just completed onboarding and still on onboarding screens
+        const shouldRoute = !hasInitialized || (shouldShowDashboard && isOnOnboarding);
+
+        if (shouldRoute) {
           if (shouldShowDashboard) {
-            console.log('🎯 App: ROUTING TO DASHBOARD - user has completed onboarding');
-            router.replace('/dashboard');
+            console.log('🎯 App: ROUTING TO PAYWALL - first time after onboarding');
+            router.replace('/paywall');
+            setCurrentRoute('/paywall');
           } else {
             console.log('🎯 App: ROUTING TO ONBOARDING - user needs to complete onboarding');
             router.replace('/onboarding/welcome');
+            setCurrentRoute('/onboarding/welcome');
           }
           setHasInitialized(true);
         }
@@ -176,12 +188,13 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
     if (isLoading === false && !hasInitialized) {
       initializeApp();
     }
-  }, [isLoading, user, userData, hasInitialized]); // Added hasInitialized to dependencies
+  }, [isLoading, user, userData, hasInitialized, currentRoute]); // Added currentRoute to dependencies
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+        <Stack.Screen name="paywall" options={{ headerShown: false }} />
         <Stack.Screen
           name="onboarding"
           options={{ headerShown: false }}
@@ -229,9 +242,11 @@ export default function RootLayout() {
   return (
     <CustomThemeProvider defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}>
       <UserProvider>
-        <OnboardingProvider>
-          <RootLayoutNav />
-        </OnboardingProvider>
+        <RevenueCatProvider>
+          <OnboardingProvider>
+            <RootLayoutNav />
+          </OnboardingProvider>
+        </RevenueCatProvider>
       </UserProvider>
     </CustomThemeProvider>
   );
