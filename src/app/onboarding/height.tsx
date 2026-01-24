@@ -143,12 +143,6 @@ const HeightScreen = () => {
     },
     quickSelectButtonSelected: {
       borderColor: LightTheme.colors.primary,
-      backgroundColor: LightTheme.colors.primaryLight + '25',
-      shadowColor: LightTheme.colors.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 8,
     },
     quickSelectText: {
       fontSize: LightTheme.typography.base.fontSize,
@@ -156,7 +150,7 @@ const HeightScreen = () => {
       color: LightTheme.semanticColors.text.primary,
     },
     quickSelectTextSelected: {
-      color: LightTheme.semanticColors.text.onPrimary,
+      color: LightTheme.colors.primary,
       fontWeight: '600',
     },
     buttonContainer: {

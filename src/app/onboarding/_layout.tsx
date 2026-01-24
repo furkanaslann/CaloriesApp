@@ -11,6 +11,7 @@ export default function OnboardingLayout() {
       <Stack.Screen name="height" options={{ headerShown: false }} />
       <Stack.Screen name="weight" options={{ headerShown: false }} />
       <Stack.Screen name="profile-photo" options={{ headerShown: false }} />
+      <Stack.Screen name="profile" options={{ headerShown: false }} />
       <Stack.Screen name="goals-primary" options={{ headerShown: false }} />
       <Stack.Screen name="goals-weight" options={{ headerShown: false }} />
       <Stack.Screen name="goals-weekly" options={{ headerShown: false }} />
@@ -33,7 +34,6 @@ export default function OnboardingLayout() {
       <Stack.Screen name="commitment" options={{ headerShown: false }} />
       <Stack.Screen name="account-creation" options={{ headerShown: false }} />
       <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="profile" options={{ headerShown: false }} />
     </Stack>
   );
 }

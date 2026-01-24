@@ -98,7 +98,6 @@ const GenderScreen = () => {
     },
     genderOptionSelected: {
       borderColor: LightTheme.colors.primary,
-      elevation: 8,
     },
     genderIcon: {
       fontSize: 32,

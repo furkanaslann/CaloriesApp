@@ -105,6 +105,7 @@ const CameraTutorialScreen = () => {
       justifyContent: 'center',
       alignItems: 'center',
       alignSelf: 'center',
+      marginTop: '15%',
       marginBottom: LightTheme.spacing['4xl'],
       ...LightTheme.shadows.lg,
     },

@@ -7,6 +7,7 @@ import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
 import React from 'react';
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -112,6 +113,11 @@ const ProfileScreen = () => {
     profilePhotoPlaceholder: {
       fontSize: 40,
     },
+    profilePhotoImage: {
+      width: '100%',
+      height: '100%',
+      borderRadius: 50,
+    },
     profileName: {
       fontSize: LightTheme.typography.xl.fontSize,
       fontWeight: '600',
@@ -205,7 +211,7 @@ const ProfileScreen = () => {
             <View style={styles.profileHeader}>
               <View style={styles.profilePhoto}>
                 {profile.profilePhoto ? (
-                  <></> // Image component would go here
+                  <Image source={{ uri: profile.profilePhoto }} style={styles.profilePhotoImage} />
                 ) : (
                   <Text style={styles.profilePhotoPlaceholder}>👤</Text>
                 )}
