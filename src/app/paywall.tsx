@@ -359,7 +359,7 @@ const PaywallScreen = () => {
                     </Text>
                     {pkg.product.introPrice && (
                       <Text style={styles.pricingIntro}>
-                        İlk ay {pkg.product.introPriceString}
+                        İlk ay {pkg.product.introPrice.priceString}
                       </Text>
                     )}
                   </View>

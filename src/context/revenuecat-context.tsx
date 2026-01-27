@@ -11,6 +11,7 @@ import Purchases, {
   LOG_LEVEL,
   PurchasesOffering,
 } from 'react-native-purchases';
+import auth from '@react-native-firebase/auth';
 import { REVENUECAT_CONFIG } from '@/config/revenuecat';
 
 // Types
@@ -42,52 +43,85 @@ export const RevenueCatProvider: React.FC<RevenueCatProviderProps> = ({ children
 
   // Initialize RevenueCat SDK
   useEffect(() => {
+    let isMounted = true;
+
     const initializeRevenueCat = async () => {
       try {
-        console.log('💰 RevenueCat: Initializing...');
+        console.log('💰 RevenueCat: Waiting for Firebase auth state...');
 
-        // Get API key based on platform
-        const apiKey = Platform.OS === 'ios'
-          ? REVENUECAT_CONFIG.apiKeys.ios
-          : REVENUECAT_CONFIG.apiKeys.android;
+        // Wait for Firebase auth state
+        const unsubscribeAuth = auth().onAuthStateChanged(async (firebaseUser) => {
+          if (!isMounted) return;
 
-        // Check if using placeholder keys
-        if (apiKey.includes('YOUR_')) {
-          console.warn('⚠️ RevenueCat: Using placeholder API keys. Please add actual keys to src/config/revenuecat.ts');
-        }
+          try {
+            console.log('💰 RevenueCat: Firebase auth state changed:', firebaseUser?.uid || 'no user');
 
-        // Configure Purchases
-        Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-        await Purchases.configure({ apiKey });
+            if (!firebaseUser) {
+              console.log('⏳ RevenueCat: No Firebase user yet, waiting...');
+              setIsLoading(false);
+              return;
+            }
 
-        console.log('✅ RevenueCat: SDK initialized successfully');
+            console.log('💰 RevenueCat: Initializing with Firebase user ID:', firebaseUser.uid);
 
-        // Get customer info (this works even without billing)
-        const info = await Purchases.getCustomerInfo();
-        setCustomerInfo(info);
-        updatePremiumStatus(info);
+            // Get API key based on platform
+            const apiKey = Platform.OS === 'ios'
+              ? REVENUECAT_CONFIG.apiKeys.ios
+              : REVENUECAT_CONFIG.apiKeys.android;
 
-        // Try to get offerings - may fail in emulator without billing
-        try {
-          const offerings = await Purchases.getOfferings();
-          if (offerings.current) {
-            console.log('✅ RevenueCat: Current offering loaded', offerings.current.identifier);
-            setCurrentOffering(offerings.current);
-          } else {
-            console.warn('⚠️ RevenueCat: No current offering available');
+            // Check if using placeholder keys
+            if (apiKey.includes('YOUR_')) {
+              console.warn('⚠️ RevenueCat: Using placeholder API keys. Please add actual keys to src/config/revenuecat.ts');
+            }
+
+            // Configure Purchases with Firebase user ID
+            Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+            await Purchases.configure({
+              apiKey,
+              appUserID: firebaseUser.uid, // ✅ Use Firebase ID to prevent ID mismatch
+            });
+
+            console.log('✅ RevenueCat: SDK initialized successfully with Firebase ID:', firebaseUser.uid);
+
+            // Get customer info (this works even without billing)
+            const info = await Purchases.getCustomerInfo();
+            setCustomerInfo(info);
+            updatePremiumStatus(info);
+
+            // Try to get offerings - may fail in emulator without billing
+            try {
+              const offerings = await Purchases.getOfferings();
+              if (offerings.current) {
+                console.log('✅ RevenueCat: Current offering loaded', offerings.current.identifier);
+                setCurrentOffering(offerings.current);
+              } else {
+                console.warn('⚠️ RevenueCat: No current offering available');
+              }
+            } catch (offeringsError) {
+              // Billing unavailable is expected in emulator
+              console.warn('⚠️ RevenueCat: Could not fetch offerings (expected in emulator)', offeringsError);
+            }
+
+            setIsInitialized(true);
+            setIsLoading(false);
+
+          } catch (error) {
+            console.error('❌ RevenueCat: Initialization failed', error);
+            // Still mark as initialized to prevent blocking the app
+            setIsInitialized(true);
+            setIsLoading(false);
           }
-        } catch (offeringsError) {
-          // Billing unavailable is expected in emulator
-          console.warn('⚠️ RevenueCat: Could not fetch offerings (expected in emulator)', offeringsError);
-        }
+        });
 
-        setIsInitialized(true);
-        setIsLoading(false);
+        // Store auth unsubscribe for cleanup
+        return () => {
+          if (unsubscribeAuth) {
+            unsubscribeAuth();
+          }
+        };
 
       } catch (error) {
-        console.error('❌ RevenueCat: Initialization failed', error);
-        // Still mark as initialized to prevent blocking the app
-        setIsInitialized(true);
+        console.error('❌ RevenueCat: Auth listener setup failed', error);
         setIsLoading(false);
       }
     };
@@ -102,6 +136,7 @@ export const RevenueCatProvider: React.FC<RevenueCatProviderProps> = ({ children
     });
 
     return () => {
+      isMounted = false;
       // Only call remove if listener exists
       if (customerInfoListener) {
         customerInfoListener.remove();

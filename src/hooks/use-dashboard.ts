@@ -197,8 +197,32 @@ export const useDashboard = (): UseDashboardReturn => {
     }
 
     try {
-      // Clean undefined values from mealData before sending to Firestore
-      const cleanedMealData = JSON.parse(JSON.stringify(mealData));
+      // Recursive function to remove undefined values from nested objects
+      const cleanUndefined = (obj: any): any => {
+        if (obj === null || obj === undefined) {
+          return null;
+        }
+        if (typeof obj !== 'object') {
+          return obj;
+        }
+        if (Array.isArray(obj)) {
+          return obj.map(cleanUndefined).filter(item => item !== null && item !== undefined);
+        }
+        const cleaned: any = {};
+        for (const key in obj) {
+          if (obj.hasOwnProperty(key)) {
+            const value = cleanUndefined(obj[key]);
+            if (value !== null && value !== undefined) {
+              cleaned[key] = value;
+            }
+          }
+        }
+        return cleaned;
+      };
+
+      const cleanedMealData = cleanUndefined(mealData);
+
+      console.log('📤 Sending meal data to Firestore:', JSON.stringify(cleanedMealData, null, 2));
 
       const db = firestore();
       const docRef = await db

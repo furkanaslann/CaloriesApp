@@ -15,6 +15,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firestore from '@react-native-firebase/firestore';
 import { FIREBASE_CONFIG } from '@/constants/firebase';
+import { APP_CONFIG } from '@/config/app';
 import type {
   Recipe,
   RecipeFilters,
@@ -128,6 +129,12 @@ class RecipeService {
     filters?: RecipeFilters,
     pagination?: PaginationParams
   ): Promise<PaginatedRecipes> {
+    // Use mock recipes in development mode
+    if (APP_CONFIG.useMockRecipes) {
+      return this.getMockRecipes(filters, pagination);
+    }
+
+    // Production: Use Firestore
     try {
       const cacheKey = `${RECIPE_CACHE_KEYS.RECIPES_LIST}_${JSON.stringify(filters)}_${JSON.stringify(pagination)}`;
       const cached = await this.getCached<PaginatedRecipes>(cacheKey);
@@ -188,6 +195,30 @@ class RecipeService {
       console.error('Error getting recipes:', error);
       throw new Error('Failed to fetch recipes');
     }
+  }
+
+  /**
+   * Get mock recipes (development mode)
+   */
+  private async getMockRecipes(
+    filters?: RecipeFilters,
+    pagination?: PaginationParams
+  ): Promise<PaginatedRecipes> {
+    const { MOCK_RECIPES } = await import('@/data/recipes');
+
+    let filtered = this.applyClientSideFilters(MOCK_RECIPES, filters);
+
+    const limit = pagination?.limit || 20;
+    const page = pagination?.page || 1;
+    const start = (page - 1) * limit;
+
+    return {
+      recipes: filtered.slice(start, start + limit),
+      total: filtered.length,
+      page,
+      limit,
+      hasMore: start + limit < filtered.length,
+    };
   }
 
   /**
@@ -265,6 +296,14 @@ class RecipeService {
    * Get a single recipe by ID
    */
   async getRecipeById(id: string): Promise<Recipe | null> {
+    // Check mock recipes first in development mode
+    if (APP_CONFIG.useMockRecipes) {
+      const { MOCK_RECIPES } = await import('@/data/recipes');
+      const recipe = MOCK_RECIPES.find(r => r.id === id);
+      return recipe || null;
+    }
+
+    // Production: Use Firestore
     try {
       const cacheKey = `${RECIPE_CACHE_KEYS.RECIPE_DETAIL_PREFIX}${id}`;
       const cached = await this.getCached<Recipe>(cacheKey);

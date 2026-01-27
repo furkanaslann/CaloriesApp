@@ -17,10 +17,13 @@ import { Ionicons } from '@expo/vector-icons';
 import firestore from '@react-native-firebase/firestore';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { Asset } from 'expo-asset';
+import * as FileSystem from 'expo-file-system/legacy';
 import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  Image,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -50,11 +53,11 @@ const DashboardIndexScreen = () => {
 
   // Hızlı ekle yiyecekleri
   const quickFoods = [
-    { name: 'Elma', emoji: '🍎', calories: 52, protein: 0.3, carbs: 14, fats: 0.2 },
-    { name: 'Salata', emoji: '🥗', calories: 30, protein: 2, carbs: 5, fats: 0.5 },
-    { name: 'Tavuk', emoji: '🍗', calories: 165, protein: 31, carbs: 0, fats: 3.6 },
-    { name: 'Yoğurt', emoji: '🥛', calories: 100, protein: 10, carbs: 3, fats: 5 },
-    { name: 'Muz', emoji: '🍌', calories: 89, protein: 1.1, carbs: 23, fats: 0.3 },
+    { name: 'Elma', emoji: '🍎', calories: 52, protein: 0.3, carbs: 14, fats: 0.2, image: require('../../../assets/images/elma.png') },
+    { name: 'Salata', emoji: '🥗', calories: 30, protein: 2, carbs: 5, fats: 0.5, image: null },
+    { name: 'Tavuk', emoji: '🍗', calories: 165, protein: 31, carbs: 0, fats: 3.6, image: require('../../../assets/images/tavuk.png') },
+    { name: 'Yoğurt', emoji: '🥛', calories: 100, protein: 10, carbs: 3, fats: 5, image: null },
+    { name: 'Muz', emoji: '🍌', calories: 89, protein: 1.1, carbs: 23, fats: 0.3, image: null },
   ];
 
   // Function to get fresh user data directly from Firestore
@@ -173,7 +176,24 @@ const DashboardIndexScreen = () => {
         snack: 'Atıştırmalık',
       };
 
-      await addMeal({
+      // Resim varsa, base64 formatına çevir
+      let imageBase64: string | undefined;
+      if (food.image) {
+        try {
+          console.log('🖼️ Resim çevriliyor:', food.name);
+          const asset = Asset.fromModule(food.image);
+          await asset.downloadAsync();
+          const uri = asset.localUri || asset.uri;
+          console.log('📁 Asset URI:', uri);
+          const base64 = await assetToBase64(uri);
+          imageBase64 = base64;
+          console.log('✅ Resim base64 uzunluğu:', base64.length);
+        } catch (imgError) {
+          console.error('❌ Resim yüklenemedi:', imgError);
+        }
+      }
+
+      const mealData: any = {
         name: food.name,
         calories: food.calories,
         nutrition: {
@@ -186,15 +206,38 @@ const DashboardIndexScreen = () => {
           unit: 'porsiyon',
         },
         type: mealType,
+        date: new Date().toISOString().split('T')[0], // Bugünün tarihi
         time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
         method: 'quickadd',
         confidence: 100,
-      });
+      };
+
+      // Sadece resim varsa ekle
+      if (imageBase64) {
+        mealData.imageBase64 = imageBase64;
+      }
+
+      await addMeal(mealData);
 
       Alert.alert('✅ Başarılı', `${food.name} (${food.calories} kcal) eklendi!`);
     } catch (error) {
       console.error('Quick add error:', error);
       Alert.alert('❌ Hata', 'Yemek eklenirken bir hata oluştu');
+    }
+  };
+
+  // Asset'i base64'e çevirme yardımcı fonksiyonu
+  const assetToBase64 = async (uri: string): Promise<string> => {
+    try {
+      console.log('🔄 Base64 çevrimi başlıyor:', uri);
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: 'base64',
+      });
+      console.log('✅ Base64 başarıyla oluşturuldu');
+      return base64;
+    } catch (error) {
+      console.error('❌ Base64 çevrim hatası:', error);
+      throw error;
     }
   };
 
@@ -645,6 +688,12 @@ const DashboardIndexScreen = () => {
       justifyContent: 'center',
       alignItems: 'center',
       marginRight: 16,
+      overflow: 'hidden',
+    },
+    mealImage: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
     },
     mealContent: {
       flex: 1,
@@ -746,6 +795,13 @@ const DashboardIndexScreen = () => {
     quickAddEmoji: {
       fontSize: 24,
       marginBottom: 8,
+    },
+    quickAddImage: {
+      width: 48,
+      height: 48,
+      borderRadius: 8,
+      marginBottom: 8,
+      resizeMode: 'cover',
     },
     quickAddName: {
       fontSize: 12,
@@ -1110,11 +1166,23 @@ const DashboardIndexScreen = () => {
               recentMeals.map((meal) => (
                 <TouchableOpacity key={meal.id} style={styles.mealCard}>
                   <View style={styles.mealIconContainer}>
-                    <Ionicons
-                      name={meal.type === 'Kahvaltı' ? 'sunny-outline' : meal.type === 'Öğle Yemeği' ? 'partly-sunny-outline' : meal.type === 'Akşam Yemeği' ? 'moon-outline' : 'nutrition-outline'}
-                      size={24}
-                      color="#F59E0B"
-                    />
+                    {meal.imageBase64 ? (
+                      <Image
+                        source={{ uri: `data:image/jpeg;base64,${meal.imageBase64}` }}
+                        style={styles.mealImage}
+                      />
+                    ) : meal.imageUrl ? (
+                      <Image
+                        source={{ uri: meal.imageUrl }}
+                        style={styles.mealImage}
+                      />
+                    ) : (
+                      <Ionicons
+                        name={meal.type === 'Kahvaltı' ? 'sunny-outline' : meal.type === 'Öğle Yemeği' ? 'partly-sunny-outline' : meal.type === 'Akşam Yemeği' ? 'moon-outline' : 'nutrition-outline'}
+                        size={24}
+                        color="#F59E0B"
+                      />
+                    )}
                   </View>
                   <View style={styles.mealContent}>
                     <Text style={styles.mealName}>{meal.name}</Text>
@@ -1159,7 +1227,11 @@ const DashboardIndexScreen = () => {
                     style={styles.quickAddItem}
                     onPress={() => quickAddMeal(food)}
                   >
-                    <Text style={styles.quickAddEmoji}>{food.emoji}</Text>
+                    {food.image ? (
+                      <Image source={food.image} style={styles.quickAddImage} />
+                    ) : (
+                      <Text style={styles.quickAddEmoji}>{food.emoji}</Text>
+                    )}
                     <Text style={styles.quickAddName}>{food.name}</Text>
                   </TouchableOpacity>
                 ))}

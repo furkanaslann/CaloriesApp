@@ -17,8 +17,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
+import PhoneInput from '../../components/ui/phone-input';
 import { useOnboarding } from '../../context/onboarding-context';
 import { useOnboardingSync } from '../../hooks/use-onboarding-sync';
+import { PhoneInputValue } from '@/types/ui';
 
 const CommitmentScreen = () => {
 
@@ -29,13 +31,17 @@ const CommitmentScreen = () => {
     firstName: profile.name || '',
     lastName: profile.lastName || '',
     email: '',
-    phone: '',
-    commitmentStatement: '',
+    phone: {
+      countryCode: 'TR',
+      dialCode: '+90',
+      phoneNumber: '',
+    } as PhoneInputValue,
+    isCommitmentAccepted: false,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean | PhoneInputValue) => {
     setCommitmentData(prev => ({
       ...prev,
       [field]: value,
@@ -57,8 +63,8 @@ const CommitmentScreen = () => {
       Alert.alert('Hata', 'Lütfen e-posta adresinizi giriniz.');
       return false;
     }
-    if (!commitmentData.commitmentStatement.trim()) {
-      Alert.alert('Hata', 'Lütfen taahhüt bildiriminizi giriniz.');
+    if (!commitmentData.isCommitmentAccepted) {
+      Alert.alert('Hata', 'Lütfen taahhüdü onaylayınız.');
       return false;
     }
     // Basic email validation
@@ -98,8 +104,10 @@ const CommitmentScreen = () => {
         firstName: commitmentData.firstName,
         lastName: commitmentData.lastName,
         email: commitmentData.email,
-        phone: commitmentData.phone,
-        commitmentStatement: commitmentData.commitmentStatement,
+        phone: commitmentData.phone.phoneNumber
+          ? `${commitmentData.phone.dialCode} ${commitmentData.phone.phoneNumber}`
+          : '',
+        commitmentStatement: commitmentData.isCommitmentAccepted ? 'Okudum, onaylıyorum' : '',
         timestamp: new Date().toISOString(),
       };
 
@@ -205,27 +213,54 @@ const CommitmentScreen = () => {
       shadowRadius: 8,
       elevation: 8,
     },
-    textArea: {
-      height: 100,
-      textAlignVertical: 'top',
-    },
-    commitmentPreview: {
+    checkboxContainer: {
       backgroundColor: LightTheme.semanticColors.background.secondary,
+      borderWidth: 2,
+      borderColor: LightTheme.semanticColors.border.primary,
       borderRadius: LightTheme.borderRadius.lg,
       padding: LightTheme.spacing.lg,
-      marginTop: LightTheme.spacing.lg,
-      marginBottom: LightTheme.spacing.lg,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: LightTheme.spacing.md,
     },
-    previewTitle: {
-      fontSize: 14,
-      fontWeight: '600',
+    checkboxContainerChecked: {
+      borderColor: LightTheme.colors.primary,
+      backgroundColor: `${LightTheme.colors.primary}10`,
+    },
+    checkbox: {
+      width: 28,
+      height: 28,
+      borderWidth: 2,
+      borderColor: LightTheme.semanticColors.border.primary,
+      borderRadius: 6,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    checkboxChecked: {
+      borderColor: LightTheme.colors.primary,
+      backgroundColor: LightTheme.colors.primary,
+    },
+    checkmark: {
+      color: '#FFFFFF',
+      fontSize: 18,
+      fontWeight: '700',
+      lineHeight: 20,
+    },
+    checkboxLabel: {
+      flex: 1,
+      fontSize: 16,
+      fontWeight: '500',
       color: LightTheme.semanticColors.text.primary,
-      marginBottom: LightTheme.spacing.sm,
     },
-    previewText: {
+    checkboxLabelChecked: {
+      color: LightTheme.colors.primary,
+      fontWeight: '600',
+    },
+    checkboxHint: {
       fontSize: 14,
       color: LightTheme.semanticColors.text.secondary,
-      fontStyle: 'italic' as const,
+      marginTop: LightTheme.spacing.sm,
+      lineHeight: 20,
     },
     footer: {
       paddingHorizontal: LightTheme.spacing['2xl'],
@@ -243,7 +278,11 @@ const CommitmentScreen = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="always"
+      >
         <View style={styles.content}>
           <View style={styles.header}>
             <View style={styles.iconContainer}>
@@ -296,38 +335,44 @@ const CommitmentScreen = () => {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Telefon (İsteğe Bağlı)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="+90 555 123 45 67"
-                placeholderTextColor={LightTheme.semanticColors.text.tertiary}
+              <PhoneInput
                 value={commitmentData.phone}
-                onChangeText={(value) => handleInputChange('phone', value)}
-                keyboardType="phone-pad"
+                onChange={(value) => handleInputChange('phone', value)}
+                label="Telefon (İsteğe Bağlı)"
+                placeholder="555 123 45 67"
+                defaultCountry="TR"
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Taahhüt Bildiriminiz *</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Kendinize ne taahhüt vermek istersiniz? Örneğin: 'Her gün düzenli olarak beslenme takibi yapacağım' veya 'Sağlıklı yaşam alışkanlıkları kazanacağım'..."
-                placeholderTextColor={LightTheme.semanticColors.text.tertiary}
-                value={commitmentData.commitmentStatement}
-                onChangeText={(value) => handleInputChange('commitmentStatement', value)}
-                multiline
-                textAlignVertical="top"
-              />
-            </View>
-
-            {commitmentData.commitmentStatement && (
-              <View style={styles.commitmentPreview}>
-                <Text style={styles.previewTitle}>Taahhüdünüz:</Text>
-                <Text style={styles.previewText}>
-                  "{commitmentData.commitmentStatement}"
+              <Text style={styles.label}>Taahhüt *</Text>
+              <TouchableOpacity
+                style={[
+                  styles.checkboxContainer,
+                  commitmentData.isCommitmentAccepted && styles.checkboxContainerChecked,
+                ]}
+                onPress={() => handleInputChange('isCommitmentAccepted', !commitmentData.isCommitmentAccepted)}
+                activeOpacity={0.7}
+              >
+                <View style={[
+                  styles.checkbox,
+                  commitmentData.isCommitmentAccepted && styles.checkboxChecked,
+                ]}>
+                  {commitmentData.isCommitmentAccepted && (
+                    <Text style={styles.checkmark}>✓</Text>
+                  )}
+                </View>
+                <Text style={[
+                  styles.checkboxLabel,
+                  commitmentData.isCommitmentAccepted && styles.checkboxLabelChecked,
+                ]}>
+                  Taahhüt bildirimini okudum, onaylıyorum
                 </Text>
-              </View>
-            )}
+              </TouchableOpacity>
+              <Text style={styles.checkboxHint}>
+                Bu onay ile sağlık hedeflerinize ulaşmak için CaloriTrack uygulamasını düzenli kullanacağınızı taahhüt etmiş olursunuz.
+              </Text>
+            </View>
           </View>
         </View>
       </ScrollView>

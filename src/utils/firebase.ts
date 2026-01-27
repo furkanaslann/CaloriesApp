@@ -13,6 +13,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { FIREBASE_CONFIG } from '@/constants/firebase';
 
@@ -79,6 +80,21 @@ export const initializeFirebaseEmulators = async () => {
     try {
       console.log('🔥 Initializing Firebase Emulators...');
       console.log(`📱 Platform: ${Platform.OS}, Host: ${EMULATOR_CONFIG.host}`);
+
+      // 🔧 AsyncStorage conflict prevention for development
+      // Clear Firebase auth/firestore cached data to prevent ID mismatch with RevenueCat
+      try {
+        const keysToRemove = [
+          '@ReactNativeFirebase:auth',
+          '@ReactNativeFirebase:firestore',
+          'com.techmodern.caloriesapp.android', // RevenueCat cache key
+        ];
+        await AsyncStorage.multiRemove(keysToRemove);
+        console.log('🧹 Cleared Firebase/RevenueCat AsyncStorage cache to prevent ID conflict');
+      } catch (clearError) {
+        console.warn('⚠️ Failed to clear AsyncStorage cache:', clearError);
+        // Continue anyway, this is not critical
+      }
 
       // Connect to Auth Emulator
       const authUrl = `http://${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.auth}`;

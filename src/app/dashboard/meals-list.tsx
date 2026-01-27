@@ -6,8 +6,9 @@
 import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
 import { useUser } from '@/context/user-context';
 import { useDashboard } from '@/hooks/use-dashboard';
+import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -404,45 +405,6 @@ const MealsListScreen = () => {
       borderWidth: 1,
       borderColor: '#FCD34D',
     },
-
-    // Bottom Navigation - Modern style
-    bottomNav: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 90,
-      backgroundColor: '#FFFFFF',
-      borderTopWidth: 1,
-      borderTopColor: '#E2E8F0',
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-      paddingBottom: 30,
-      paddingHorizontal: 24,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: -2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      elevation: 5,
-    },
-    navItem: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      flex: 1,
-      paddingVertical: 8,
-    },
-    navIcon: {
-      marginBottom: 4,
-    },
-    navLabel: {
-      fontSize: 12,
-      color: '#94A3B8',
-      fontWeight: '500',
-    },
-    navLabelActive: {
-      color: '#7C3AED',
-    },
     // Edit mode styles
     editButton: {
       paddingHorizontal: theme.spacing.md,
@@ -663,9 +625,12 @@ const MealsListScreen = () => {
     }
   }, [user, getRecentMeals]);
 
-  useEffect(() => {
-    loadMeals();
-  }, [loadMeals]);
+  // Ekran her odaklandığında yemekleri yenile
+  useFocusEffect(
+    useCallback(() => {
+      loadMeals();
+    }, [loadMeals])
+  );
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -1293,25 +1258,8 @@ const MealsListScreen = () => {
         />
       )}
 
-      {/* Bottom Navigation - Modern style */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.replace('/dashboard')}>
-          <Ionicons name="home-outline" size={24} color="#94A3B8" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Ana Sayfa</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/camera')}>
-          <Ionicons name="camera" size={24} color="#94A3B8" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Kamera</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/recipes')}>
-          <Ionicons name="restaurant-outline" size={24} color="#94A3B8" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Tarifler</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dashboard/profile')}>
-          <Ionicons name="person-outline" size={24} color="#94A3B8" style={styles.navIcon} />
-          <Text style={styles.navLabel}>Profil</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Bottom Navigation */}
+      <BottomNavigation />
 
       {/* Delete Confirmation Modal */}
       <Modal
