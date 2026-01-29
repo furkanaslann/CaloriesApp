@@ -4,7 +4,7 @@ import axios from 'axios';
 
 admin.initializeApp();
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 // Get Gemini API key from Firebase Secrets Manager
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
@@ -148,7 +148,7 @@ function createResponse(success: boolean, data?: any, error?: string, statusCode
 }
 
 /**
- * Gemini 2.0 Flash API ile yiyecek analizi yapan Firebase Function
+ * Gemini 2.5 Flash API ile yiyecek analizi yapan Firebase Function
  * POST /analyzeFood
  * Body: { imageBase64: string, userPrompt?: string, userId?: string }
  */

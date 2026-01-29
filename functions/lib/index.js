@@ -41,7 +41,7 @@ const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const axios_1 = __importDefault(require("axios"));
 admin.initializeApp();
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 // Get Gemini API key from Firebase Secrets Manager
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 // Debug için API key durumunu logla
@@ -68,7 +68,7 @@ function createResponse(success, data, error, statusCode = 200) {
     };
 }
 /**
- * Gemini 2.0 Flash API ile yiyecek analizi yapan Firebase Function
+ * Gemini 2.5 Flash API ile yiyecek analizi yapan Firebase Function
  * POST /analyzeFood
  * Body: { imageBase64: string, userPrompt?: string, userId?: string }
  */

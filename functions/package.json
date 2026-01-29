@@ -25,7 +25,7 @@
   ],
   "author": "",
   "license": "ISC",
-  "description": "Firebase Functions for CaloriTrack app with Gemini 2.0 Flash API integration",
+  "description": "Firebase Functions for CaloriTrack app with Gemini 2.5 Flash API integration",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "axios": "^1.13.2",

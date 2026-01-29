@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 /**
- * Gemini 2.0 Flash API ile yiyecek analizi yapan Firebase Function
+ * Gemini 2.5 Flash API ile yiyecek analizi yapan Firebase Function
  * POST /analyzeFood
  * Body: { imageBase64: string, userPrompt?: string, userId?: string }
  */
