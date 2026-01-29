@@ -339,7 +339,6 @@ const CommitmentScreen = () => {
                 value={commitmentData.phone}
                 onChange={(value) => handleInputChange('phone', value)}
                 label="Telefon (İsteğe Bağlı)"
-                placeholder="555 123 45 67"
                 defaultCountry="TR"
               />
             </View>

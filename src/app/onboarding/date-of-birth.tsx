@@ -3,10 +3,10 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { LightTheme } from '@/constants';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { LightTheme } from "@/constants";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { router } from "expo-router";
+import React, { useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -14,27 +14,38 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Button from '../../components/ui/button';
-import Input from '../../components/ui/input';
-import ProgressBar from '../../components/ui/progress-bar';
-import { useOnboarding } from '../../context/onboarding-context';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Button from "../../components/ui/button";
+import Input from "../../components/ui/input";
+import ProgressBar from "../../components/ui/progress-bar";
+import { useOnboarding } from "../../context/onboarding-context";
 
 const DateOfBirthScreen = () => {
-  const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
+  const {
+    profile,
+    updateProfile,
+    nextStep,
+    previousStep,
+    totalSteps,
+    getCurrentStep,
+  } = useOnboarding();
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState(
-    profile.dateOfBirth ? new Date(profile.dateOfBirth) : new Date()
+    profile.dateOfBirth ? new Date(profile.dateOfBirth) : new Date(),
   );
+  const [isFocused, setIsFocused] = useState(false);
 
   const calculateAge = (birthDate: Date): number => {
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
 
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
 
@@ -45,12 +56,12 @@ const DateOfBirthScreen = () => {
     const age = calculateAge(dateOfBirth);
 
     if (age < 14) {
-      Alert.alert('Hata', 'Yaşınız en az 14 olmalıdır.');
+      Alert.alert("Hata", "Yaşınız en az 14 olmalıdır.");
       return false;
     }
 
     if (age > 100) {
-      Alert.alert('Hata', 'Lütfen geçerli bir doğum tarihi girin.');
+      Alert.alert("Hata", "Lütfen geçerli bir doğum tarihi girin.");
       return false;
     }
 
@@ -69,11 +80,11 @@ const DateOfBirthScreen = () => {
 
     const age = calculateAge(dateOfBirth);
     updateProfile({
-      dateOfBirth: dateOfBirth.toISOString().split('T')[0],
-      age: age
+      dateOfBirth: dateOfBirth.toISOString().split("T")[0],
+      age: age,
     });
     nextStep();
-    router.push('/onboarding/gender');
+    router.push("/onboarding/gender");
   };
 
   const handlePrevious = () => {
@@ -93,40 +104,40 @@ const DateOfBirthScreen = () => {
       flexGrow: 1,
     },
     content: {
-      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingHorizontal: LightTheme.spacing["2xl"],
       paddingTop: LightTheme.spacing.lg,
-      paddingBottom: LightTheme.spacing['4xl'],
+      paddingBottom: LightTheme.spacing["4xl"],
     },
     header: {
-      marginTop: '10%',
-      marginBottom: LightTheme.spacing['4xl'],
-      alignItems: 'center',
+      marginTop: "10%",
+      marginBottom: LightTheme.spacing["4xl"],
+      alignItems: "center",
     },
     title: {
-      fontSize: LightTheme.typography['3xl'].fontSize,
-      fontWeight: '700',
+      fontSize: LightTheme.typography["3xl"].fontSize,
+      fontWeight: "700",
       color: LightTheme.semanticColors.text.primary,
       marginBottom: LightTheme.spacing.md,
-      textAlign: 'center',
-      lineHeight: LightTheme.typography['3xl'].lineHeight,
+      textAlign: "center",
+      lineHeight: LightTheme.typography["3xl"].lineHeight,
     },
     subtitle: {
       fontSize: LightTheme.typography.base.fontSize,
-      fontWeight: '400',
+      fontWeight: "400",
       color: LightTheme.semanticColors.text.secondary,
-      textAlign: 'center',
+      textAlign: "center",
       lineHeight: LightTheme.typography.base.lineHeight,
       maxWidth: 300,
     },
     inputContainer: {
-      marginBottom: LightTheme.spacing['4xl'],
-      alignItems: 'center',
+      marginBottom: LightTheme.spacing["4xl"],
+      alignItems: "center",
     },
     buttonContainer: {
-      flexDirection: 'row',
+      flexDirection: "row",
       gap: LightTheme.spacing.md,
-      paddingHorizontal: LightTheme.spacing['2xl'],
-      paddingBottom: LightTheme.spacing['4xl'],
+      paddingHorizontal: LightTheme.spacing["2xl"],
+      paddingBottom: LightTheme.spacing["4xl"],
       paddingTop: LightTheme.spacing.xl,
       backgroundColor: LightTheme.semanticColors.background.primary,
       borderTopLeftRadius: LightTheme.borderRadius.xl,
@@ -137,48 +148,58 @@ const DateOfBirthScreen = () => {
       width: 80,
       height: 80,
       borderRadius: LightTheme.borderRadius.full,
-      backgroundColor: LightTheme.colors.primaryLight + '25',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: LightTheme.spacing['2xl'],
+      backgroundColor: LightTheme.colors.primaryLight + "25",
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: LightTheme.spacing["2xl"],
       ...LightTheme.shadows.lg,
     },
     iconText: {
       fontSize: 32,
-      fontWeight: '700',
+      fontWeight: "700",
       color: LightTheme.semanticColors.text.onPrimary,
     },
     dateButton: {
-      width: '100%',
+      width: "100%",
       maxWidth: 350,
       backgroundColor: LightTheme.semanticColors.background.secondary,
       borderRadius: LightTheme.borderRadius.lg,
       borderWidth: 2,
-      borderColor: LightTheme.semanticColors.border.primary,
+      borderColor: isFocused
+        ? LightTheme.colors.primary
+        : LightTheme.semanticColors.border.primary,
       ...LightTheme.shadows.md,
     },
     ageText: {
       fontSize: LightTheme.typography.base.fontSize,
-      fontWeight: '400',
+      fontWeight: "400",
       color: LightTheme.semanticColors.text.secondary,
-      textAlign: 'center',
+      textAlign: "center",
       marginTop: LightTheme.spacing.md,
     },
     ageNumber: {
       fontSize: LightTheme.typography.xl.fontSize,
       color: LightTheme.colors.primary,
-      fontWeight: '600',
+      fontWeight: "600",
     },
   });
 
-  const currentStep = getCurrentStep('date-of-birth');
+  const currentStep = getCurrentStep("date-of-birth");
   const age = calculateAge(dateOfBirth);
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.content}>
-          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+          <ProgressBar
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            onBack={handlePrevious}
+          />
 
           <View style={styles.header}>
             <View style={styles.iconContainer}>
@@ -197,14 +218,17 @@ const DateOfBirthScreen = () => {
             >
               <Input
                 label=""
-                value={dateOfBirth.toLocaleDateString('tr-TR')}
+                value={dateOfBirth.toLocaleDateString("tr-TR")}
                 placeholder="Doğum tarihinizi seçin"
                 editable={false}
+                autoFocus
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
                 style={{
                   borderWidth: 0,
-                  backgroundColor: 'transparent',
+                  backgroundColor: "transparent",
                   fontSize: 18,
-                  fontWeight: '500',
+                  fontWeight: "500",
                   paddingVertical: LightTheme.spacing.lg,
                 }}
               />

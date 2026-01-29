@@ -5,8 +5,11 @@
 
 import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
+  Dimensions,
+  Easing,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,49 +19,66 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
 import { useOnboarding } from '../../context/onboarding-context';
 
+// Camera tutorial slides data
+const slides = [
+  {
+    title: 'Akıllı Fotoğraf',
+    subtitle: 'Yemeklerinizi anında analiz edin',
+    description: 'Yemeklerinizi çekin, yapay zeka destekli sistemimiz kalorileri otomatik olarak hesaplasın',
+    icon: '📸',
+    hasLogo: false,
+    tips: [
+      'Iyi aydınlatılmış ortamda çekin',
+      'Yemeğin tamamını görünür yapın',
+      'Referans objesi ekleyin (çatal, kaşık)'
+    ]
+  },
+  {
+    title: 'Otomatik Analiz',
+    subtitle: 'Hızlı ve doğru sonuçlar',
+    description: 'Yapay zeka, yemeğinizin kalori ve besin değerlerini otomatik olarak hesaplar',
+    icon: '🧮',
+    hasLogo: false,
+    tips: [
+      'Porsiyon boyutunu belirtin',
+      'Malzemeleri düzenleyin',
+      'Yemek türünü doğrulayın'
+    ]
+  },
+  {
+    title: 'Günlük Takip',
+    subtitle: 'İlerlemenizi izleyin',
+    description: 'Tüm öğünlerinizi kolayca takip edin ve günlük hedeflerinize ulaşın',
+    icon: '📊',
+    hasLogo: false,
+    tips: [
+      'Öğün zamanlarını kaydedin',
+      'Su tüketimini ekleyin',
+      'Açlık/notlar ekleyin'
+    ]
+  }
+];
+
 const CameraTutorialScreen = () => {
   const { nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const slides = [
-    {
-      title: 'Akıllı Fotoğraf',
-      subtitle: 'Yemeklerinizi anında analiz edin',
-      description: 'Yemeklerinizi çekin, yapay zeka destekli sistemimiz kalorileri otomatik olarak hesaplasın',
-      icon: '📸',
-      hasLogo: false,
-      tips: [
-        'Iyi aydınlatılmış ortamda çekin',
-        'Yemeğin tamamını görünür yapın',
-        'Referans objesi ekleyin (çatal, kaşık)'
-      ]
-    },
-    {
-      title: 'Otomatik Analiz',
-      subtitle: 'Hızlı ve doğru sonuçlar',
-      description: 'Yapay zeka, yemeğinizin kalori ve besin değerlerini otomatik olarak hesaplar',
-      icon: '🧮',
-      hasLogo: false,
-      tips: [
-        'Porsiyon boyutunu belirtin',
-        'Malzemeleri düzenleyin',
-        'Yemek türünü doğrulayın'
-      ]
-    },
-    {
-      title: 'Günlük Takip',
-      subtitle: 'İlerlemenizi izleyin',
-      description: 'Tüm öğünlerinizi kolayca takip edin ve günlük hedeflerinize ulaşın',
-      icon: '📊',
-      hasLogo: false,
-      tips: [
-        'Öğün zamanlarını kaydedin',
-        'Su tüketimini ekleyin',
-        'Açlık/notlar ekleyin'
-      ]
-    }
-  ];
+  // Animation refs for pagination dots
+  const dotWidths = useRef(slides.map(() => new Animated.Value(8))).current;
+
+  // Animate dots when currentSlide changes
+  useEffect(() => {
+    dotWidths.forEach((animatedWidth, index) => {
+      const targetWidth = index === currentSlide ? 32 : 8;
+      Animated.timing(animatedWidth, {
+        toValue: targetWidth,
+        duration: 300,
+        easing: Easing.bezier(0.4, 0, 0.2, 1),
+        useNativeDriver: false,
+      }).start();
+    });
+  }, [currentSlide, dotWidths]);
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
@@ -208,7 +228,6 @@ const CameraTutorialScreen = () => {
     },
     dotActive: {
       backgroundColor: LightTheme.colors.primary,
-      width: 32,
       height: 8,
       borderRadius: 4,
       opacity: 1,
@@ -260,11 +279,12 @@ const CameraTutorialScreen = () => {
       <View style={styles.footer}>
         <View style={styles.progressIndicator}>
           {slides.map((_, index) => (
-            <View
+            <Animated.View
               key={index}
               style={[
                 styles.dot,
                 index === currentSlide && styles.dotActive,
+                { width: dotWidths[index] },
               ]}
             />
           ))}

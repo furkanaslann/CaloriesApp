@@ -39,6 +39,12 @@ export const formatPhoneNumber = (input: string, countryCode: string): string =>
   // Sadece rakamları al
   const digits = input.replace(/\D/g, '');
 
+  // Boş input için boş string döndür (parantez karakterini gösterme!)
+  // Bu, focus'ta cursor pozisyonu sorununu çözer
+  if (digits.length === 0) {
+    return '';
+  }
+
   // Max length kontrolü
   if (country.maxLength && digits.length > country.maxLength) {
     return digits.substring(0, country.maxLength);

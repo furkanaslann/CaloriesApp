@@ -4,22 +4,22 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import { LightTheme } from "@/constants";
+import { COUNTRY_CODES } from "@/constants/country-codes";
+import { PhoneInputProps } from "@/types/ui";
+import { formatPhoneNumber, getCountryByCode, getPhonePlaceholder } from "@/utils/phone-format";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
-  View,
-  Text,
   StyleSheet,
+  Text,
   TextInput,
-  TouchableOpacity,
   TextStyle,
+  TouchableOpacity,
+  View,
   ViewStyle,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { LightTheme } from '@/constants';
-import { PhoneInputProps } from '@/types/ui';
-import { CountryCodeModal } from './country-code-modal';
-import { getCountryByCode, formatPhoneNumber } from '@/utils/phone-format';
-import { COUNTRY_CODES } from '@/constants/country-codes';
+} from "react-native";
+import { CountryCodeModal } from "./country-code-modal";
 
 export const PhoneInput: React.FC<PhoneInputProps> = ({
   value,
@@ -27,82 +27,70 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   error,
   label,
   placeholder,
-  defaultCountry = 'TR',
+  defaultCountry = "TR",
   disabled = false,
   containerStyle,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  // Local editing state - focus'tayken kullanıcı girişi için
-  const [editingValue, setEditingValue] = useState('');
   const textInputRef = useRef<TextInput>(null);
 
   // Ülke bilgisi
-  const country = getCountryByCode(value.countryCode) || getCountryByCode(defaultCountry);
+  const country =
+    getCountryByCode(value.countryCode) || getCountryByCode(defaultCountry);
 
-  // Display value - focus'taysa editingValue, değilse formatlanmış value
-  const displayValue = isFocused
-    ? editingValue
-    : formatPhoneNumber(value.phoneNumber, value.countryCode);
-
-  // Prop value değiştiğinde (focus'ta değilse) editingValue'yi sıfırla
-  useEffect(() => {
-    if (!isFocused) {
-      setEditingValue('');
-    }
-  }, [value.phoneNumber, value.countryCode, isFocused]);
+  // Display value - her zaman parent value'dan al, editingValue sadece internal state
+  // Focus'ta bile direkt parent value'yu kullan, bu race condition'ı önler
+  const displayValue = useMemo(() => {
+    return formatPhoneNumber(value.phoneNumber, value.countryCode);
+  }, [value.phoneNumber, value.countryCode]);
 
   // Ülke kodu butonuna basıldığında
-  const handleCountryPress = () => {
+  const handleCountryPress = useCallback(() => {
     if (disabled) return;
     setIsModalVisible(true);
     // Modal açıldığında focus'u kaybet ki formatlansın
     textInputRef.current?.blur();
-  };
+  }, [disabled]);
 
   // Ülke seçildiğinde
-  const handleSelectCountry = (selectedCountry: typeof COUNTRY_CODES[0]) => {
+  const handleSelectCountry = useCallback((selectedCountry: (typeof COUNTRY_CODES)[0]) => {
     onChange({
       countryCode: selectedCountry.code,
       dialCode: selectedCountry.dialCode,
       phoneNumber: value.phoneNumber,
     });
-  };
+  }, [onChange, value.phoneNumber]);
 
-  // Focus olayı - editingValue'yi mevcut değerle başlat
-  const handleFocus = () => {
+  // Focus olayı - sadece state güncelle, cursor positioning yok
+  const handleFocus = useCallback(() => {
     setIsFocused(true);
-    setEditingValue(formatPhoneNumber(value.phoneNumber, value.countryCode));
-  };
+  }, []);
 
-  // Blur olayı - editingValue'yi temizle
-  const handleBlur = () => {
+  // Blur olayı - focus state'ini güncelle
+  const handleBlur = useCallback(() => {
     setIsFocused(false);
-    setEditingValue('');
-  };
+  }, []);
 
   // Telefon girişi değiştiğinde
-  const handlePhoneChange = (text: string) => {
+  const handlePhoneChange = useCallback((text: string) => {
     // Sadece rakamları al
-    const digits = text.replace(/\D/g, '');
+    const digits = text.replace(/\D/g, "");
 
     // Max length kontrolü
     if (country?.maxLength && digits.length > country.maxLength) {
       return;
     }
 
-    // Local editing state'i formatlanmış değerle güncelle
-    setEditingValue(formatPhoneNumber(digits, value.countryCode));
-
     // Parent'ı güncelle (raw digits ile)
     onChange({
       ...value,
       phoneNumber: digits,
     });
-  };
+  }, [country?.maxLength, value.countryCode, value, onChange]);
 
-  // Focus styles
-  const getInputGroupStyle = (): ViewStyle => {
+  // Focus styles - useCallback ile stabilize edildi
+  const getInputGroupStyle = useCallback((): ViewStyle => {
     const baseStyle: ViewStyle = {
       ...styles.inputGroup,
     };
@@ -124,22 +112,25 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
     }
 
     if (disabled) {
-      baseStyle.backgroundColor = LightTheme.semanticColors.background.secondary;
+      baseStyle.backgroundColor =
+        LightTheme.semanticColors.background.secondary;
       baseStyle.opacity = 0.6;
     }
 
     return baseStyle;
-  };
+  }, [error, isFocused, disabled]);
 
-  const getLabelStyle = (): TextStyle => ({
+  const getLabelStyle = useCallback((): TextStyle => ({
     ...styles.label,
-    color: error ? LightTheme.colors.error : LightTheme.semanticColors.text.primary,
-  });
+    color: error
+      ? LightTheme.colors.error
+      : LightTheme.semanticColors.text.primary,
+  }), [error]);
 
-  const getErrorStyle = (): TextStyle => ({
+  const getErrorStyle = useCallback((): TextStyle => ({
     ...styles.errorText,
     color: LightTheme.colors.error,
-  });
+  }), []);
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -153,8 +144,8 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
           disabled={disabled}
           activeOpacity={0.7}
         >
-          <Text style={styles.flag}>{country?.flag || '🌍'}</Text>
-          <Text style={styles.dialCode}>{country?.dialCode || '+90'}</Text>
+          <Text style={styles.flag}>{country?.flag || "🌍"}</Text>
+          <Text style={styles.dialCode}>{country?.dialCode || "+90"}</Text>
           {!disabled && (
             <Ionicons
               name="chevron-down"
@@ -171,7 +162,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
         <TextInput
           ref={textInputRef}
           style={styles.phoneInput}
-          placeholder={placeholder || getPlaceholder()}
+          placeholder={placeholder || getPhonePlaceholder(value.countryCode)}
           placeholderTextColor={LightTheme.semanticColors.text.tertiary}
           value={displayValue}
           onChangeText={handlePhoneChange}
@@ -206,29 +197,26 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   );
 };
 
-// Placeholder helper
-const getPlaceholder = () => '555 123 45 67';
-
 const styles = StyleSheet.create({
   container: {
     marginBottom: LightTheme.spacing.lg,
   },
   label: {
     fontSize: LightTheme.typography.base.fontSize,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: LightTheme.spacing.sm,
   },
   inputGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: LightTheme.semanticColors.background.primary,
     borderRadius: LightTheme.borderRadius.lg,
     paddingHorizontal: LightTheme.spacing.md,
     minHeight: 52,
   },
   countryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: LightTheme.spacing.xs,
     paddingRight: LightTheme.spacing.md,
     paddingVertical: LightTheme.spacing.sm,
@@ -239,7 +227,7 @@ const styles = StyleSheet.create({
   },
   dialCode: {
     fontSize: LightTheme.typography.base.fontSize,
-    fontWeight: '500',
+    fontWeight: "500",
     color: LightTheme.semanticColors.text.primary,
   },
   separator: {

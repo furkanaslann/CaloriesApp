@@ -5,9 +5,11 @@
 
 import { LightTheme } from '@/constants';
 import { router } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   Dimensions,
+  Easing,
   ScrollView,
   StyleSheet,
   Text,
@@ -28,50 +30,66 @@ const WELCOME_ICONS = {
 
 const { width } = Dimensions.get('window');
 
+// Welcome slides data based on Figma design - modern onboarding flow
+const slides = [
+  {
+    title: 'Hoş Geldiniz!',
+    subtitle: 'CaloriTrack',
+    description: 'Sağlıklı yaşam yolculuğunuza başlayın',
+    icon: null,
+    hasLogo: true,
+  },
+  {
+    title: 'Akıllı Fotoğraf',
+    subtitle: 'Yemeklerinizi anında analiz edin',
+    description: 'Yemeklerinizi çekin, yapay zeka destekli sistemimiz kalorileri otomatik olarak hesaplasın',
+    icon: WELCOME_ICONS.camera,
+    hasLogo: false,
+  },
+  {
+    title: 'Kişisel Planlar',
+    subtitle: 'Size özel hedefler belirlenir',
+    description: 'Yaşam tarzınıza, hedeflerinize ve tercihlerinize uygun beslenme planları oluşturun',
+    icon: WELCOME_ICONS.plan,
+    hasLogo: false,
+  },
+  {
+    title: 'Detaylı Analiz',
+    subtitle: 'İlerlemenizi takip edin',
+    description: 'Günlük, haftalık ve aylık raporlarla beslenme alışkanlıklarınızı analiz edin',
+    icon: WELCOME_ICONS.progress,
+    hasLogo: false,
+  },
+  {
+    title: 'Sosyal Destek',
+    subtitle: 'Topluluğa katılın',
+    description: 'Benzer hedeflere sahip kullanıcılarla deneyimlerinizi paylaşın ve birbirinize destek olun',
+    icon: WELCOME_ICONS.community,
+    hasLogo: false,
+  },
+];
+
 const WelcomeScreen = () => {
 
   const { nextStep } = useOnboarding();
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Welcome slides data based on Figma design - modern onboarding flow
-  const slides = [
-    {
-      title: 'Hoş Geldiniz!',
-      subtitle: 'CaloriTrack',
-      description: 'Sağlıklı yaşam yolculuğunuza başlayın',
-      icon: null,
-      hasLogo: true,
-    },
-    {
-      title: 'Akıllı Fotoğraf',
-      subtitle: 'Yemeklerinizi anında analiz edin',
-      description: 'Yemeklerinizi çekin, yapay zeka destekli sistemimiz kalorileri otomatik olarak hesaplasın',
-      icon: WELCOME_ICONS.camera,
-      hasLogo: false,
-    },
-    {
-      title: 'Kişisel Planlar',
-      subtitle: 'Size özel hedefler belirlenir',
-      description: 'Yaşam tarzınıza, hedeflerinize ve tercihlerinize uygun beslenme planları oluşturun',
-      icon: WELCOME_ICONS.plan,
-      hasLogo: false,
-    },
-    {
-      title: 'Detaylı Analiz',
-      subtitle: 'İlerlemenizi takip edin',
-      description: 'Günlük, haftalık ve aylık raporlarla beslenme alışkanlıklarınızı analiz edin',
-      icon: WELCOME_ICONS.progress,
-      hasLogo: false,
-    },
-    {
-      title: 'Sosyal Destek',
-      subtitle: 'Topluluğa katılın',
-      description: 'Benzer hedeflere sahip kullanıcılarla deneyimlerinizi paylaşın ve birbirinize destek olun',
-      icon: WELCOME_ICONS.community,
-      hasLogo: false,
-    },
-  ];
+  // Animation refs for pagination dots
+  const dotWidths = useRef(slides.map(() => new Animated.Value(8))).current;
+
+  // Animate dots when currentSlide changes
+  useEffect(() => {
+    dotWidths.forEach((animatedWidth, index) => {
+      const targetWidth = index === currentSlide ? 32 : 8;
+      Animated.timing(animatedWidth, {
+        toValue: targetWidth,
+        duration: 300,
+        easing: Easing.bezier(0.4, 0, 0.2, 1),
+        useNativeDriver: false,
+      }).start();
+    });
+  }, [currentSlide, dotWidths]);
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
@@ -189,7 +207,6 @@ const WelcomeScreen = () => {
     },
     dotActive: {
       backgroundColor: LightTheme.colors.primary,
-      width: 32,
       height: 8,
       borderRadius: 4,
       opacity: 1,
@@ -247,11 +264,12 @@ const WelcomeScreen = () => {
       <View style={styles.footer}>
         <View style={styles.pagination}>
           {slides.map((_, index) => (
-            <View
+            <Animated.View
               key={index}
               style={[
                 styles.dot,
                 index === currentSlide && styles.dotActive,
+                { width: dotWidths[index] },
               ]}
             />
           ))}

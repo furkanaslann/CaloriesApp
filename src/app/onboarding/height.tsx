@@ -3,9 +3,9 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import { LightTheme } from '@/constants';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { LightTheme } from "@/constants";
+import { router } from "expo-router";
+import React, { useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -13,29 +13,36 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Button from '../../components/ui/button';
-import Input from '../../components/ui/input';
-import ProgressBar from '../../components/ui/progress-bar';
-import { useOnboarding } from '../../context/onboarding-context';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Button from "../../components/ui/button";
+import Input from "../../components/ui/input";
+import ProgressBar from "../../components/ui/progress-bar";
+import { useOnboarding } from "../../context/onboarding-context";
 
 const HeightScreen = () => {
-  const { profile, updateProfile, nextStep, previousStep, totalSteps, getCurrentStep } = useOnboarding();
+  const {
+    profile,
+    updateProfile,
+    nextStep,
+    previousStep,
+    totalSteps,
+    getCurrentStep,
+  } = useOnboarding();
 
-  const [height, setHeight] = useState(profile.height?.toString() || '');
+  const [height, setHeight] = useState(profile.height?.toString() || "");
   const [isFocused, setIsFocused] = useState(false);
 
   const validateHeight = (): boolean => {
     const heightValue = parseFloat(height);
 
     if (!height || isNaN(heightValue)) {
-      Alert.alert('Hata', 'Lütfen geçerli bir boy değeri girin.');
+      Alert.alert("Hata", "Lütfen geçerli bir boy değeri girin.");
       return false;
     }
 
     if (heightValue < 100 || heightValue > 250) {
-      Alert.alert('Hata', 'Boy değeri 100-250 cm aralığında olmalıdır.');
+      Alert.alert("Hata", "Boy değeri 100-250 cm aralığında olmalıdır.");
       return false;
     }
 
@@ -47,7 +54,7 @@ const HeightScreen = () => {
 
     updateProfile({ height: parseFloat(height) });
     nextStep();
-    router.push('/onboarding/weight');
+    router.push("/onboarding/weight");
   };
 
   const handlePrevious = () => {
@@ -69,65 +76,67 @@ const HeightScreen = () => {
       flexGrow: 1,
     },
     content: {
-      paddingHorizontal: LightTheme.spacing['2xl'],
+      paddingHorizontal: LightTheme.spacing["2xl"],
       paddingTop: LightTheme.spacing.lg,
-      paddingBottom: LightTheme.spacing['4xl'],
+      paddingBottom: LightTheme.spacing["4xl"],
     },
     header: {
-      marginTop: '10%',
-      marginBottom: LightTheme.spacing['4xl'],
-      alignItems: 'center',
+      marginTop: "10%",
+      marginBottom: LightTheme.spacing["4xl"],
+      alignItems: "center",
     },
     title: {
-      fontSize: LightTheme.typography['3xl'].fontSize,
-      fontWeight: '700',
+      fontSize: LightTheme.typography["3xl"].fontSize,
+      fontWeight: "700",
       color: LightTheme.semanticColors.text.primary,
       marginBottom: LightTheme.spacing.md,
-      textAlign: 'center',
-      lineHeight: LightTheme.typography['3xl'].lineHeight,
+      textAlign: "center",
+      lineHeight: LightTheme.typography["3xl"].lineHeight,
     },
     subtitle: {
       fontSize: LightTheme.typography.base.fontSize,
-      fontWeight: '400',
+      fontWeight: "400",
       color: LightTheme.semanticColors.text.secondary,
-      textAlign: 'center',
+      textAlign: "center",
       lineHeight: LightTheme.typography.base.lineHeight,
       maxWidth: 300,
     },
     inputContainer: {
-      marginBottom: LightTheme.spacing['2xl'],
-      alignItems: 'center',
+      marginBottom: LightTheme.spacing["2xl"],
+      alignItems: "center",
     },
     inputWrapper: {
-      width: '100%',
+      width: "30%",
       maxWidth: 200,
       backgroundColor: LightTheme.semanticColors.background.secondary,
       borderRadius: LightTheme.borderRadius.lg,
       borderWidth: 2,
-      borderColor: isFocused ? LightTheme.colors.primary : LightTheme.semanticColors.border.primary,
-      alignItems: 'center',
+      borderColor: isFocused
+        ? LightTheme.colors.primary
+        : LightTheme.semanticColors.border.primary,
+      alignItems: "center",
       ...LightTheme.shadows.md,
     },
     inputSuffix: {
       fontSize: LightTheme.typography.base.fontSize,
       color: LightTheme.semanticColors.text.secondary,
       marginLeft: LightTheme.spacing.sm,
-      fontWeight: '500',
+      fontWeight: "500",
     },
     quickSelectContainer: {
-      marginBottom: LightTheme.spacing['2xl'],
+      marginBottom: LightTheme.spacing["2xl"],
     },
     quickSelectLabel: {
       fontSize: LightTheme.typography.lg.fontSize,
-      fontWeight: '500',
+      fontWeight: "500",
       color: LightTheme.semanticColors.text.secondary,
       marginBottom: LightTheme.spacing.lg,
-      textAlign: 'center',
+      textAlign: "center",
     },
     quickSelectGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "center",
       gap: LightTheme.spacing.sm,
     },
     quickSelectButton: {
@@ -138,7 +147,7 @@ const HeightScreen = () => {
       borderRadius: LightTheme.borderRadius.lg,
       backgroundColor: LightTheme.semanticColors.background.secondary,
       minWidth: 70,
-      alignItems: 'center',
+      alignItems: "center",
       ...LightTheme.shadows.sm,
     },
     quickSelectButtonSelected: {
@@ -146,18 +155,18 @@ const HeightScreen = () => {
     },
     quickSelectText: {
       fontSize: LightTheme.typography.base.fontSize,
-      fontWeight: '500',
+      fontWeight: "500",
       color: LightTheme.semanticColors.text.primary,
     },
     quickSelectTextSelected: {
       color: LightTheme.colors.primary,
-      fontWeight: '600',
+      fontWeight: "600",
     },
     buttonContainer: {
-      flexDirection: 'row',
+      flexDirection: "row",
       gap: LightTheme.spacing.md,
-      paddingHorizontal: LightTheme.spacing['2xl'],
-      paddingBottom: LightTheme.spacing['4xl'],
+      paddingHorizontal: LightTheme.spacing["2xl"],
+      paddingBottom: LightTheme.spacing["4xl"],
       paddingTop: LightTheme.spacing.xl,
       backgroundColor: LightTheme.semanticColors.background.primary,
       borderTopLeftRadius: LightTheme.borderRadius.xl,
@@ -168,26 +177,34 @@ const HeightScreen = () => {
       width: 80,
       height: 80,
       borderRadius: LightTheme.borderRadius.full,
-      backgroundColor: LightTheme.colors.primaryLight + '25',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: LightTheme.spacing['2xl'],
+      backgroundColor: LightTheme.colors.primaryLight + "25",
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: LightTheme.spacing["2xl"],
       ...LightTheme.shadows.lg,
     },
     iconText: {
       fontSize: 32,
-      fontWeight: '700',
+      fontWeight: "700",
       color: LightTheme.semanticColors.text.onPrimary,
     },
   });
 
-  const currentStep = getCurrentStep('height');
+  const currentStep = getCurrentStep("height");
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.content}>
-          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} onBack={handlePrevious} />
+          <ProgressBar
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            onBack={handlePrevious}
+          />
 
           <View style={styles.header}>
             <View style={styles.iconContainer}>
@@ -195,7 +212,8 @@ const HeightScreen = () => {
             </View>
             <Text style={styles.title}>Boyunuz</Text>
             <Text style={styles.subtitle}>
-              Boyunuzu girerek kişisel hedeflerinizi daha doğru belirleyebiliriz.
+              Boyunuzu girerek kişisel hedeflerinizi daha doğru
+              belirleyebiliriz.
             </Text>
           </View>
 
@@ -210,16 +228,17 @@ const HeightScreen = () => {
                 autoFocus
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                style={{
+                inputStyle={{
                   borderWidth: 0,
-                  backgroundColor: 'transparent',
-                  fontSize: 24,
-                  fontWeight: '600',
-                  textAlign: 'center',
-                  minWidth: 100,
+                  backgroundColor: "transparent",
+                  fontSize: 18,
+                  fontWeight: "500",
+                  textAlign: "center",
+                  paddingTop: 20,
+                  paddingVertical: 0,
+                  height: "auto",
                 }}
               />
-              <Text style={styles.inputSuffix}>cm</Text>
             </View>
           </View>
 
