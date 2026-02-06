@@ -1,21 +1,34 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, LogBox, StyleSheet, Text, View } from 'react-native';
-import 'react-native-reanimated';
+import {
+    DarkTheme,
+    DefaultTheme,
+    ThemeProvider,
+} from "@react-navigation/native";
+import { Stack, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    LogBox,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
+import "react-native-reanimated";
 
-import { FIREBASE_CONFIG } from '@/constants/firebase';
-import { OnboardingProvider } from '@/context/onboarding-context';
-import { RevenueCatProvider } from '@/context/revenuecat-context';
-import { ThemeProvider as CustomThemeProvider } from '@/context/theme-context';
-import { UserProvider, useUser } from '@/context/user-context';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { initializeFirebaseEmulators, retryWithBackoff } from '@/utils/firebase';
-import firestore from '@react-native-firebase/firestore';
+import { FIREBASE_CONFIG } from "@/constants/firebase";
+import { OnboardingProvider } from "@/context/onboarding-context";
+import { RevenueCatProvider } from "@/context/revenuecat-context";
+import { ThemeProvider as CustomThemeProvider } from "@/context/theme-context";
+import { UserProvider, useUser } from "@/context/user-context";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import {
+    initializeFirebaseEmulators,
+    retryWithBackoff,
+} from "@/utils/firebase";
+import firestore from "@react-native-firebase/firestore";
 
 export const unstable_settings = {
-  anchor: 'dashboard',
+  anchor: "dashboard",
 };
 
 // Loading overlay component
@@ -30,22 +43,22 @@ const LoadingOverlay = ({ message }: { message: string }) => {
 
 const styles = StyleSheet.create({
   loadingOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 9999,
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    fontWeight: '500',
-    color: '#1E293B',
-    textAlign: 'center',
+    fontWeight: "500",
+    color: "#1E293B",
+    textAlign: "center",
   },
 });
 
@@ -56,10 +69,10 @@ const styles = StyleSheet.create({
 const originalWarn = console.warn;
 console.warn = (...args) => {
   // Filter out Firebase deprecated warnings
-  const message = args.join(' ');
+  const message = args.join(" ");
   if (
-    message.includes('This method is deprecated') &&
-    message.includes('React Native Firebase namespaced API')
+    message.includes("This method is deprecated") &&
+    message.includes("React Native Firebase namespaced API")
   ) {
     return; // Suppress Firebase deprecation warnings
   }
@@ -73,7 +86,7 @@ LogBox.ignoreLogs([
   /Please use.*instead/,
   /rnfirebase\.io\/migrating-to-v22/,
   /deprecated/,
-  'deprecated',
+  "deprecated",
 ]);
 
 function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
@@ -89,22 +102,25 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
       try {
         // If still loading, wait
         if (isLoading) {
-          console.log('⏳ App: Still loading user data...');
+          console.log("⏳ App: Still loading user data...");
           return;
         }
 
         // Create anonymous user if no user exists
         if (!user) {
-          console.log('👤 App: No user found, creating anonymous user...');
+          console.log("👤 App: No user found, creating anonymous user...");
           await createAnonymousUser();
           return;
         }
 
-        console.log('🚀 App: User authenticated - checking onboarding status:', user.uid);
-        console.log('📊 App: userData state:', { 
-          exists: !!userData, 
+        console.log(
+          "🚀 App: User authenticated - checking onboarding status:",
+          user.uid,
+        );
+        console.log("📊 App: userData state:", {
+          exists: !!userData,
           onboardingCompleted: userData?.onboardingCompleted,
-          hasInitialized 
+          hasInitialized,
         });
 
         // Check if user has completed onboarding
@@ -112,40 +128,51 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
 
         // Primary check: User context data (this should be reliable once loaded)
         if (userData?.onboardingCompleted === true) {
-          console.log('✅ App: User context confirms onboarding completed');
+          console.log("✅ App: User context confirms onboarding completed");
           shouldShowDashboard = true;
         }
         // If userData doesn't show onboarding completed, do a direct Firestore check as fallback
         // This helps with emulator timing issues
         else if (!shouldShowDashboard && !hasInitialized) {
           try {
-            console.log('🔎 App: Doing direct Firestore check for onboarding status...');
-            const doc = await retryWithBackoff(async () => {
-              return await firestore()
-                .collection(FIREBASE_CONFIG.collections.users)
-                .doc(user.uid)
-                .get();
-            }, 3, 1000); // 3 retries with exponential backoff starting at 1s
+            console.log(
+              "🔎 App: Doing direct Firestore check for onboarding status...",
+            );
+            const doc = await retryWithBackoff(
+              async () => {
+                return await firestore()
+                  .collection(FIREBASE_CONFIG.collections.users)
+                  .doc(user.uid)
+                  .get();
+              },
+              5,
+              2000,
+            ); // 5 retries with exponential backoff starting at 2s
 
             if (doc.exists()) {
               const data = doc.data();
-              console.log('📄 App: Firestore data:', { 
+              console.log("📄 App: Firestore data:", {
                 onboardingCompleted: data?.onboardingCompleted,
                 hasProfile: !!data?.profile,
-                hasGoals: !!data?.goals 
+                hasGoals: !!data?.goals,
               });
-              
+
               if (data?.onboardingCompleted === true) {
-                console.log('✅ App: Firestore confirms onboarding completed');
+                console.log("✅ App: Firestore confirms onboarding completed");
                 shouldShowDashboard = true;
               } else {
-                console.log('❌ App: Onboarding not completed in Firestore');
+                console.log("❌ App: Onboarding not completed in Firestore");
               }
             } else {
-              console.log('⚠️ App: No user document found in Firestore yet - routing to onboarding');
+              console.log(
+                "⚠️ App: No user document found in Firestore yet - routing to onboarding",
+              );
             }
           } catch (error) {
-            console.warn('⚠️ App: Error checking Firestore after retries:', error);
+            console.warn(
+              "⚠️ App: Error checking Firestore after retries:",
+              error,
+            );
             // If Firestore is unavailable, we'll route to onboarding as a safe default
             // The user can complete onboarding and data will sync when Firestore is available
           }
@@ -153,31 +180,36 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
 
         // Route based on onboarding status
         // Check if user is on onboarding screens and needs routing
-        const isOnOnboarding = currentRoute?.startsWith('/onboarding');
-        const isOnPaywall = currentRoute === '/paywall';
-        const isOnDashboard = currentRoute === '/dashboard' || currentRoute === '/(tabs)';
+        const isOnOnboarding = currentRoute?.startsWith("/onboarding");
+        const isOnPaywall = currentRoute === "/paywall";
+        const isOnDashboard =
+          currentRoute === "/dashboard" || currentRoute === "/(tabs)";
 
         // Route if: not initialized OR user just completed onboarding and still on onboarding screens
-        const shouldRoute = !hasInitialized || (shouldShowDashboard && isOnOnboarding);
+        const shouldRoute =
+          !hasInitialized || (shouldShowDashboard && isOnOnboarding);
 
         if (shouldRoute) {
           if (shouldShowDashboard) {
-            console.log('🎯 App: ROUTING TO PAYWALL - first time after onboarding');
-            router.replace('/paywall');
-            setCurrentRoute('/paywall');
+            console.log(
+              "🎯 App: ROUTING TO PAYWALL - first time after onboarding",
+            );
+            router.replace("/paywall");
+            setCurrentRoute("/paywall");
           } else {
-            console.log('🎯 App: ROUTING TO ONBOARDING - user needs to complete onboarding');
-            router.replace('/onboarding/welcome');
-            setCurrentRoute('/onboarding/welcome');
+            console.log(
+              "🎯 App: ROUTING TO ONBOARDING - user needs to complete onboarding",
+            );
+            router.replace("/onboarding/welcome");
+            setCurrentRoute("/onboarding/welcome");
           }
           setHasInitialized(true);
         }
-
       } catch (error) {
-        console.error('❌ App: Error during initialization:', error);
+        console.error("❌ App: Error during initialization:", error);
         // Safe fallback to onboarding
         if (!hasInitialized) {
-          router.replace('/onboarding/welcome');
+          router.replace("/onboarding/welcome");
           setHasInitialized(true);
         }
       }
@@ -191,24 +223,23 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
   }, [isLoading, user, userData, hasInitialized, currentRoute]); // Added currentRoute to dependencies
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="dashboard" options={{ headerShown: false }} />
         <Stack.Screen name="paywall" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="onboarding"
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen
+          name="modal"
+          options={{ presentation: "modal", title: "Modal" }}
+        />
         <Stack.Screen
           name="loading"
-          options={{ headerShown: false, presentation: 'modal' }}
+          options={{ headerShown: false, presentation: "modal" }}
         />
         <Stack.Screen name="recipes" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
-
     </ThemeProvider>
   );
 }
@@ -223,16 +254,23 @@ export default function RootLayout() {
       await initializeFirebaseEmulators();
       setFirebaseReady(true);
     };
-    
+
     initializeFirebase();
   }, []);
 
   // Wait for Firebase to be ready before rendering providers
   if (!firebaseReady) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#FFFFFF",
+        }}
+      >
         <ActivityIndicator size="large" color="#7C3AED" />
-        <Text style={{ marginTop: 16, fontSize: 16, color: '#64748B' }}>
+        <Text style={{ marginTop: 16, fontSize: 16, color: "#64748B" }}>
           Firebase Başlatılıyor...
         </Text>
       </View>
@@ -240,7 +278,9 @@ export default function RootLayout() {
   }
 
   return (
-    <CustomThemeProvider defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}>
+    <CustomThemeProvider
+      defaultTheme={colorScheme === "dark" ? "dark" : "light"}
+    >
       <UserProvider>
         <RevenueCatProvider>
           <OnboardingProvider>

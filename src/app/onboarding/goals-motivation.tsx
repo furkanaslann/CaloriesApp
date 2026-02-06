@@ -174,7 +174,7 @@ const MotivationScreen = () => {
     },
     sliderContainer: {
       marginBottom: LightTheme.spacing["3xl"],
-      height: 100,
+      height: 150,
     },
     sliderBackground: {
       height: 80,
@@ -235,6 +235,7 @@ const MotivationScreen = () => {
     sliderEmoji: {
       fontSize: 48,
       marginBottom: LightTheme.spacing.md,
+      paddingTop: LightTheme.spacing.xl,
     },
     sliderValue: {
       fontSize: 36,
@@ -248,6 +249,7 @@ const MotivationScreen = () => {
       textAlign: "center",
       marginBottom: LightTheme.spacing.lg,
       lineHeight: 24,
+      height: 100,
     },
     emojiScale: {
       flexDirection: "row",

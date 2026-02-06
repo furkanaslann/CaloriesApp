@@ -210,20 +210,3 @@ export interface ChipProps {
   style?: ViewStyle;
 }
 
-// Phone Input Component Props
-export interface PhoneInputValue {
-  countryCode: string;  // 'TR'
-  dialCode: string;     // '+90'
-  phoneNumber: string;  // '5551234567' (raw digits only)
-}
-
-export interface PhoneInputProps {
-  value: PhoneInputValue;
-  onChange: (value: PhoneInputValue) => void;
-  error?: string;
-  label?: string;
-  placeholder?: string;
-  defaultCountry?: string;
-  disabled?: boolean;
-  containerStyle?: ViewStyle;
-}

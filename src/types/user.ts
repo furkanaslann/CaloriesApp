@@ -58,7 +58,6 @@ export interface Commitment {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
   commitmentStatement: string;
   timestamp: string;
 }

@@ -9,23 +9,23 @@
  * No manual initialization is required.
  */
 
-import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
-import { Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
+import storage from "@react-native-firebase/storage";
+import { Platform } from "react-native";
 
-import { FIREBASE_CONFIG } from '@/constants/firebase';
+import { FIREBASE_CONFIG } from "@/constants/firebase";
 
 // Firebase Emulator Configuration for Development
 const IS_DEV = __DEV__;
 const getEmulatorHost = () => {
-  if (Platform.OS === 'android') {
-    return '10.0.2.2';
-  } else if (Platform.OS === 'ios') {
-    return 'localhost';
+  if (Platform.OS === "android") {
+    return "10.0.2.2";
+  } else if (Platform.OS === "ios") {
+    return "localhost";
   }
-  return 'localhost'; // Default for web/other platforms
+  return "localhost"; // Default for web/other platforms
 };
 
 const EMULATOR_CONFIG = {
@@ -49,79 +49,167 @@ let emulatorsInitialized = false;
 const retryWithBackoff = async <T>(
   operation: () => Promise<T>,
   maxRetries: number = 3,
-  initialDelay: number = 1000
+  initialDelay: number = 1000,
 ): Promise<T> => {
   let lastError: Error | null = null;
-  
+
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await operation();
     } catch (error: any) {
       lastError = error;
-      const isUnavailableError = error?.code === 'firestore/unavailable' || 
-                                  error?.message?.includes('unavailable') ||
-                                  error?.message?.includes('transient');
-      
+      // More robust error checking - handle cases where error might be undefined or null
+      const errorCode = error?.code || error?.message || '';
+      const errorString = String(errorCode).toLowerCase();
+
+      const isUnavailableError =
+        errorString.includes("firestore/unavailable") ||
+        errorString.includes("unavailable") ||
+        errorString.includes("transient");
+
       if (!isUnavailableError || attempt === maxRetries - 1) {
         throw error;
       }
-      
+
       const delay = initialDelay * Math.pow(2, attempt);
-      console.log(`⚠️ Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      console.log(
+        `⚠️ Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms...`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
-  
-  throw lastError || new Error('Operation failed after retries');
+
+  throw lastError || new Error("Operation failed after retries");
+};
+
+/**
+ * Verify that Firestore native module is actually ready
+ * This is critical for New Architecture where native bridge may lag behind JS initialization
+ */
+const verifyFirestoreNativeReady = async (
+  maxRetries = 10,
+  delayMs = 500,
+): Promise<boolean> => {
+  console.log("🔍 Verifying Firestore native module readiness...");
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // Try a simple Firestore operation to verify native module is ready
+      // We don't need the collection to exist, we just need the native call to not throw unavailable
+      const testRef = firestore().collection("_health_check").doc("_test");
+
+      // This will fail if native module isn't ready with "unavailable" error
+      // We don't care if it succeeds or fails with other errors (permission, etc)
+      await testRef.get();
+
+      console.log(
+        `✅ Firestore native module ready (attempt ${attempt}/${maxRetries})`,
+      );
+      return true;
+    } catch (error: any) {
+      // More robust error checking - handle cases where error might be undefined or null
+      const errorCode = error?.code || error?.message || '';
+      const errorString = String(errorCode).toLowerCase();
+
+      const isUnavailableError =
+        errorString.includes("firestore/unavailable") ||
+        errorString.includes("unavailable");
+
+      if (isUnavailableError) {
+        console.log(
+          `⏳ Firestore native module not ready yet (attempt ${attempt}/${maxRetries}), retrying...`,
+        );
+
+        if (attempt < maxRetries) {
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+          continue;
+        } else {
+          console.error(
+            "❌ Firestore native module failed to become ready after all retries",
+          );
+          return false;
+        }
+      } else {
+        // Any other error means native module is responding (even if with an error)
+        // This is actually OK - it means the native bridge is working
+        console.log(
+          `✅ Firestore native module responding (attempt ${attempt}/${maxRetries})`,
+        );
+        return true;
+      }
+    }
+  }
+
+  return false;
 };
 
 export const initializeFirebaseEmulators = async () => {
   if (IS_DEV && !emulatorsInitialized) {
     try {
-      console.log('🔥 Initializing Firebase Emulators...');
+      console.log("🔥 Initializing Firebase Emulators...");
       console.log(`📱 Platform: ${Platform.OS}, Host: ${EMULATOR_CONFIG.host}`);
 
       // 🔧 AsyncStorage conflict prevention for development
       // Clear Firebase auth/firestore cached data to prevent ID mismatch with RevenueCat
       try {
         const keysToRemove = [
-          '@ReactNativeFirebase:auth',
-          '@ReactNativeFirebase:firestore',
-          'com.techmodern.caloriesapp.android', // RevenueCat cache key
+          "@ReactNativeFirebase:auth",
+          "@ReactNativeFirebase:firestore",
+          "com.techmodern.caloriesapp.android", // RevenueCat cache key
         ];
         await AsyncStorage.multiRemove(keysToRemove);
-        console.log('🧹 Cleared Firebase/RevenueCat AsyncStorage cache to prevent ID conflict');
+        console.log(
+          "🧹 Cleared Firebase/RevenueCat AsyncStorage cache to prevent ID conflict",
+        );
       } catch (clearError) {
-        console.warn('⚠️ Failed to clear AsyncStorage cache:', clearError);
+        console.warn("⚠️ Failed to clear AsyncStorage cache:", clearError);
         // Continue anyway, this is not critical
       }
 
       // Connect to Auth Emulator
       const authUrl = `http://${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.auth}`;
-      console.log('Connecting to Auth Emulator at:', authUrl);
+      console.log("Connecting to Auth Emulator at:", authUrl);
       auth().useEmulator(authUrl);
 
       // Connect to Firestore Emulator
-      console.log('Connecting to Firestore Emulator at:', `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.firestore}`);
-      firestore().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.firestore);
+      console.log(
+        "Connecting to Firestore Emulator at:",
+        `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.firestore}`,
+      );
+      firestore().useEmulator(
+        EMULATOR_CONFIG.host,
+        EMULATOR_CONFIG.ports.firestore,
+      );
 
-      // --- EKLENEN KISIM BAŞLANGICI ---
-      // Android Emulator'de gRPC hatalarını (unavailable) önlemek için Long Polling zorlanır
+      // Android Emulator'de gRPC hatalarını (unavailable) önlemek için persistence kapatılır
       firestore().settings({ persistence: false });
-      // --- EKLENEN KISIM SONU ---
 
-      // Give the emulator connection a moment to stabilize
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 🚨 CRITICAL FOR NEW ARCHITECTURE: Wait for native module to be truly ready
+      // This prevents "firestore/unavailable" errors on first app start
+      console.log("⏳ Waiting for Firestore native module to be ready...");
+      const isNativeReady = await verifyFirestoreNativeReady(10, 500);
+
+      if (!isNativeReady) {
+        console.warn(
+          "⚠️ Firestore native module verification failed, but continuing anyway",
+        );
+      }
 
       // Connect to Storage Emulator
-      console.log('Connecting to Storage Emulator at:', `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.storage}`);
-      storage().useEmulator(EMULATOR_CONFIG.host, EMULATOR_CONFIG.ports.storage);
-      
-      console.log('✅ Firebase Emulators initialized successfully');
+      console.log(
+        "Connecting to Storage Emulator at:",
+        `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.storage}`,
+      );
+      storage().useEmulator(
+        EMULATOR_CONFIG.host,
+        EMULATOR_CONFIG.ports.storage,
+      );
+
+      console.log("✅ Firebase Emulators initialized successfully");
       emulatorsInitialized = true;
       return true;
     } catch (error) {
-      console.error('❌ Firebase Emulator connection failed:', error);
+      console.error("❌ Firebase Emulator connection failed:", error);
       emulatorsInitialized = false;
       return false;
     }
@@ -138,10 +226,13 @@ export const initializeFirebaseEmulators = async () => {
  */
 export const signUp = async (email: string, password: string) => {
   try {
-    const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+    const userCredential = await auth().createUserWithEmailAndPassword(
+      email,
+      password,
+    );
     return userCredential.user;
   } catch (error: any) {
-    console.error('Sign up error:', error);
+    console.error("Sign up error:", error);
     throw new Error(error.message);
   }
 };
@@ -151,10 +242,13 @@ export const signUp = async (email: string, password: string) => {
  */
 export const signIn = async (email: string, password: string) => {
   try {
-    const userCredential = await auth().signInWithEmailAndPassword(email, password);
+    const userCredential = await auth().signInWithEmailAndPassword(
+      email,
+      password,
+    );
     return userCredential.user;
   } catch (error: any) {
-    console.error('Sign in error:', error);
+    console.error("Sign in error:", error);
     throw new Error(error.message);
   }
 };
@@ -165,20 +259,23 @@ export const signIn = async (email: string, password: string) => {
  *
  * If the anonymous user is no longer valid, creates a new account instead
  */
-export const linkAnonymousToEmailPassword = async (email: string, password: string) => {
+export const linkAnonymousToEmailPassword = async (
+  email: string,
+  password: string,
+) => {
   const currentUser = auth().currentUser;
 
   if (!currentUser) {
-    console.log('⚠️ No anonymous user found, creating new account instead');
+    console.log("⚠️ No anonymous user found, creating new account instead");
     return await signUp(email, password);
   }
 
   if (!currentUser.isAnonymous) {
-    console.log('User is already a permanent account, signing in instead');
+    console.log("User is already a permanent account, signing in instead");
     return await signIn(email, password);
   }
 
-  console.log('🔗 Linking anonymous user to email/password:', currentUser.uid);
+  console.log("🔗 Linking anonymous user to email/password:", currentUser.uid);
 
   // Store the anonymous UID for potential data migration
   const anonymousUid = currentUser.uid;
@@ -190,28 +287,32 @@ export const linkAnonymousToEmailPassword = async (email: string, password: stri
     // Link the credential to the anonymous user
     const userCredential = await currentUser.linkWithCredential(credential);
 
-    console.log('✅ Successfully linked anonymous user to email/password');
+    console.log("✅ Successfully linked anonymous user to email/password");
     return userCredential.user;
   } catch (error: any) {
-    console.error('❌ Error linking anonymous user:', error);
+    console.error("❌ Error linking anonymous user:", error);
 
     // Handle specific error codes
-    if (error.code === 'auth/email-already-in-use') {
-      console.log('Email already in use, signing in instead');
+    if (error.code === "auth/email-already-in-use") {
+      console.log("Email already in use, signing in instead");
       return await signIn(email, password);
     }
 
     // If the anonymous user is no longer valid (user-not-found, invalid-user-token, etc.)
     // create a new account and note that data migration may be needed
     if (
-      error.code === 'auth/user-not-found' ||
-      error.code === 'auth/user-disabled' ||
-      error.code === 'auth/invalid-user-token' ||
-      error.code === 'auth/user-token-expired' ||
-      error.code === 'auth/invalid-credential'
+      error.code === "auth/user-not-found" ||
+      error.code === "auth/user-disabled" ||
+      error.code === "auth/invalid-user-token" ||
+      error.code === "auth/user-token-expired" ||
+      error.code === "auth/invalid-credential"
     ) {
-      console.log('⚠️ Anonymous user is no longer valid, creating new account');
-      console.log('📝 Note: Anonymous UID was:', anonymousUid, '- manual data migration may be needed');
+      console.log("⚠️ Anonymous user is no longer valid, creating new account");
+      console.log(
+        "📝 Note: Anonymous UID was:",
+        anonymousUid,
+        "- manual data migration may be needed",
+      );
 
       // Create a new account
       const newUser = await signUp(email, password);
@@ -219,12 +320,17 @@ export const linkAnonymousToEmailPassword = async (email: string, password: stri
     }
 
     // For other errors, still try to create a new account as fallback
-    console.log('⚠️ Unexpected linking error, creating new account as fallback');
+    console.log(
+      "⚠️ Unexpected linking error, creating new account as fallback",
+    );
     try {
       const newUser = await signUp(email, password);
       return newUser;
     } catch (signupError: any) {
-      console.error('❌ Failed to create new account after linking failed:', signupError);
+      console.error(
+        "❌ Failed to create new account after linking failed:",
+        signupError,
+      );
       throw new Error(`Account creation failed: ${signupError.message}`);
     }
   }
@@ -237,7 +343,7 @@ export const signOut = async () => {
   try {
     await auth().signOut();
   } catch (error: any) {
-    console.error('Sign out error:', error);
+    console.error("Sign out error:", error);
     throw new Error(error.message);
   }
 };
@@ -264,7 +370,7 @@ export const resetPassword = async (email: string) => {
   try {
     await auth().sendPasswordResetEmail(email);
   } catch (error: any) {
-    console.error('Password reset error:', error);
+    console.error("Password reset error:", error);
     throw new Error(error.message);
   }
 };
@@ -272,17 +378,20 @@ export const resetPassword = async (email: string) => {
 /**
  * Update user profile
  */
-export const updateUserProfile = async (displayName: string, photoURL?: string) => {
+export const updateUserProfile = async (
+  displayName: string,
+  photoURL?: string,
+) => {
   try {
     const user = auth().currentUser;
-    if (!user) throw new Error('No user signed in');
+    if (!user) throw new Error("No user signed in");
 
     await user.updateProfile({
       displayName,
       photoURL,
     });
   } catch (error: any) {
-    console.error('Update profile error:', error);
+    console.error("Update profile error:", error);
     throw new Error(error.message);
   }
 };
@@ -294,25 +403,31 @@ export const updateUserProfile = async (displayName: string, photoURL?: string) 
 /**
  * Create or update user profile in Firestore
  */
-export const saveUserProfile = async (userId: string, userData: {
-  name: string;
-  email: string;
-  dailyCalorieGoal?: number;
-  weight?: number;
-  height?: number;
-  age?: number;
-  gender?: string;
-}) => {
+export const saveUserProfile = async (
+  userId: string,
+  userData: {
+    name: string;
+    email: string;
+    dailyCalorieGoal?: number;
+    weight?: number;
+    height?: number;
+    age?: number;
+    gender?: string;
+  },
+) => {
   try {
     await firestore()
       .collection(FIREBASE_CONFIG.collections.users)
       .doc(userId)
-      .set({
-        ...userData,
-        updatedAt: firestore.FieldValue.serverTimestamp(),
-      }, { merge: true });
+      .set(
+        {
+          ...userData,
+          updatedAt: firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true },
+      );
   } catch (error: any) {
-    console.error('Error saving user profile:', error);
+    console.error("Error saving user profile:", error);
     throw new Error(error.message);
   }
 };
@@ -338,7 +453,7 @@ export const getUserProfile = async (userId: string) => {
       ...doc.data(),
     };
   } catch (error: any) {
-    console.error('Error getting user profile:', error);
+    console.error("Error getting user profile:", error);
     throw new Error(error.message);
   }
 };
@@ -347,7 +462,10 @@ export const getUserProfile = async (userId: string) => {
  * Listen to user profile changes in real-time
  * Returns an unsubscribe function
  */
-export const onUserProfileChanged = (userId: string, callback: (profile: any) => void) => {
+export const onUserProfileChanged = (
+  userId: string,
+  callback: (profile: any) => void,
+) => {
   return firestore()
     .collection(FIREBASE_CONFIG.collections.users)
     .doc(userId)
@@ -360,8 +478,8 @@ export const onUserProfileChanged = (userId: string, callback: (profile: any) =>
         }
       },
       (error) => {
-        console.error('Error listening to user profile:', error);
-      }
+        console.error("Error listening to user profile:", error);
+      },
     );
 };
 
@@ -372,15 +490,18 @@ export const onUserProfileChanged = (userId: string, callback: (profile: any) =>
 /**
  * Add a meal entry to Firestore
  */
-export const addMeal = async (userId: string, mealData: {
-  name: string;
-  calories: number;
-  protein?: number;
-  carbs?: number;
-  fat?: number;
-  imageUrl?: string;
-  mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
-}) => {
+export const addMeal = async (
+  userId: string,
+  mealData: {
+    name: string;
+    calories: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+    imageUrl?: string;
+    mealType?: "breakfast" | "lunch" | "dinner" | "snack";
+  },
+) => {
   try {
     const docRef = await firestore()
       .collection(FIREBASE_CONFIG.collections.users)
@@ -392,7 +513,7 @@ export const addMeal = async (userId: string, mealData: {
       });
     return docRef.id;
   } catch (error: any) {
-    console.error('Error adding meal:', error);
+    console.error("Error adding meal:", error);
     throw new Error(error.message);
   }
 };
@@ -406,16 +527,16 @@ export const getUserMeals = async (userId: string, limit: number = 50) => {
       .collection(FIREBASE_CONFIG.collections.users)
       .doc(userId)
       .collection(FIREBASE_CONFIG.collections.meals)
-      .orderBy('createdAt', 'desc')
+      .orderBy("createdAt", "desc")
       .limit(limit)
       .get();
-    
-    return snapshot.docs.map(doc => ({
+
+    return snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
   } catch (error: any) {
-    console.error('Error getting meals:', error);
+    console.error("Error getting meals:", error);
     throw new Error(error.message);
   }
 };
@@ -427,25 +548,25 @@ export const getMealsByDate = async (userId: string, date: Date) => {
   try {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
-    
+
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
-    
+
     const snapshot = await firestore()
       .collection(FIREBASE_CONFIG.collections.users)
       .doc(userId)
       .collection(FIREBASE_CONFIG.collections.meals)
-      .where('createdAt', '>=', firestore.Timestamp.fromDate(startOfDay))
-      .where('createdAt', '<=', firestore.Timestamp.fromDate(endOfDay))
-      .orderBy('createdAt', 'desc')
+      .where("createdAt", ">=", firestore.Timestamp.fromDate(startOfDay))
+      .where("createdAt", "<=", firestore.Timestamp.fromDate(endOfDay))
+      .orderBy("createdAt", "desc")
       .get();
-    
-    return snapshot.docs.map(doc => ({
+
+    return snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
   } catch (error: any) {
-    console.error('Error getting meals by date:', error);
+    console.error("Error getting meals by date:", error);
     throw new Error(error.message);
   }
 };
@@ -454,31 +575,39 @@ export const getMealsByDate = async (userId: string, date: Date) => {
  * Listen to meals in real-time for a user
  * Returns an unsubscribe function
  */
-export const onMealsChanged = (userId: string, callback: (meals: any[]) => void, limit: number = 50) => {
+export const onMealsChanged = (
+  userId: string,
+  callback: (meals: any[]) => void,
+  limit: number = 50,
+) => {
   return firestore()
     .collection(FIREBASE_CONFIG.collections.users)
     .doc(userId)
     .collection(FIREBASE_CONFIG.collections.meals)
-    .orderBy('createdAt', 'desc')
+    .orderBy("createdAt", "desc")
     .limit(limit)
     .onSnapshot(
       (snapshot) => {
-        const meals = snapshot.docs.map(doc => ({
+        const meals = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
         callback(meals);
       },
       (error) => {
-        console.error('Error listening to meals:', error);
-      }
+        console.error("Error listening to meals:", error);
+      },
     );
 };
 
 /**
  * Update a meal entry
  */
-export const updateMeal = async (userId: string, mealId: string, updates: any) => {
+export const updateMeal = async (
+  userId: string,
+  mealId: string,
+  updates: any,
+) => {
   try {
     await firestore()
       .collection(FIREBASE_CONFIG.collections.users)
@@ -490,7 +619,7 @@ export const updateMeal = async (userId: string, mealId: string, updates: any) =
         updatedAt: firestore.FieldValue.serverTimestamp(),
       });
   } catch (error: any) {
-    console.error('Error updating meal:', error);
+    console.error("Error updating meal:", error);
     throw new Error(error.message);
   }
 };
@@ -507,7 +636,7 @@ export const deleteMeal = async (userId: string, mealId: string) => {
       .doc(mealId)
       .delete();
   } catch (error: any) {
-    console.error('Error deleting meal:', error);
+    console.error("Error deleting meal:", error);
     throw new Error(error.message);
   }
 };
@@ -522,24 +651,26 @@ export const deleteMeal = async (userId: string, mealId: string) => {
 export const uploadImage = async (
   userId: string,
   imageUri: string,
-  imageName: string = `meal_${Date.now()}.jpg`
+  imageName: string = `meal_${Date.now()}.jpg`,
 ) => {
   try {
     // React Native Firebase v9+ formatı
-    const storageReference = storage().ref(`users/${userId}/meals/${imageName}`);
-    console.log('Storage ref created:', `users/${userId}/meals/${imageName}`);
+    const storageReference = storage().ref(
+      `users/${userId}/meals/${imageName}`,
+    );
+    console.log("Storage ref created:", `users/${userId}/meals/${imageName}`);
 
     await storageReference.putFile(imageUri);
-    console.log('File uploaded successfully');
+    console.log("File uploaded successfully");
 
     const downloadURL = await storageReference.getDownloadURL();
-    console.log('Download URL obtained:', downloadURL);
+    console.log("Download URL obtained:", downloadURL);
 
     return downloadURL;
   } catch (error: any) {
-    console.error('Error uploading image:', error);
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
+    console.error("Error uploading image:", error);
+    console.error("Error code:", error.code);
+    console.error("Error message:", error.message);
     throw new Error(error.message);
   }
 };
@@ -552,7 +683,7 @@ export const deleteImage = async (imageUrl: string) => {
     const reference = storage().refFromURL(imageUrl);
     await reference.delete();
   } catch (error: any) {
-    console.error('Error deleting image:', error);
+    console.error("Error deleting image:", error);
     throw new Error(error.message);
   }
 };
@@ -567,7 +698,7 @@ export const deleteImage = async (imageUrl: string) => {
 export const uploadImageFromUri = async (
   userId: string,
   imageUri: string,
-  imageName: string = `meal_${Date.now()}.jpg`
+  imageName: string = `meal_${Date.now()}.jpg`,
 ) => {
   try {
     // Doğrudan URI'den Storage'a yükle
@@ -577,7 +708,7 @@ export const uploadImageFromUri = async (
 
     return downloadURL;
   } catch (error: any) {
-    console.error('Error uploading image from URI:', error);
+    console.error("Error uploading image from URI:", error);
     throw new Error(error.message);
   }
 };
@@ -593,9 +724,9 @@ export const addMealWithImage = async (
     protein?: number;
     carbs?: number;
     fat?: number;
-    mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+    mealType?: "breakfast" | "lunch" | "dinner" | "snack";
   },
-  imageUri?: string
+  imageUri?: string,
 ) => {
   try {
     let imageUrl;
@@ -613,7 +744,7 @@ export const addMealWithImage = async (
 
     return { mealId, imageUrl };
   } catch (error: any) {
-    console.error('Error adding meal with image:', error);
+    console.error("Error adding meal with image:", error);
     throw new Error(error.message);
   }
 };
@@ -639,19 +770,19 @@ const filterUndefinedValues = (obj: any): any => {
   }
 
   // Handle Firestore Timestamp objects
-  if (typeof obj === 'object' && obj && obj._type === 'timestamp') {
+  if (typeof obj === "object" && obj && obj._type === "timestamp") {
     return obj; // Keep Firestore timestamps as-is
   }
 
-  if (typeof obj !== 'object') {
+  if (typeof obj !== "object") {
     return obj;
   }
 
   // Handle arrays
   if (Array.isArray(obj)) {
     const filteredArray = obj
-      .map(item => filterUndefinedValues(item))
-      .filter(item => item !== null && item !== undefined);
+      .map((item) => filterUndefinedValues(item))
+      .filter((item) => item !== null && item !== undefined);
     return filteredArray.length > 0 ? filteredArray : null;
   }
 
@@ -669,8 +800,12 @@ const filterUndefinedValues = (obj: any): any => {
       }
 
       // Recursively filter nested objects
-      if (typeof value === 'object' && value !== null && !(value instanceof Date)) {
-        if (value && value._type === 'timestamp') {
+      if (
+        typeof value === "object" &&
+        value !== null &&
+        !(value instanceof Date)
+      ) {
+        if (value && value._type === "timestamp") {
           // Keep Firestore timestamps
           filtered[key] = value;
           hasValidValues = true;
@@ -693,7 +828,10 @@ const filterUndefinedValues = (obj: any): any => {
   return hasValidValues ? filtered : null;
 };
 
-export const saveOnboardingData = async (userId: string, onboardingData: any) => {
+export const saveOnboardingData = async (
+  userId: string,
+  onboardingData: any,
+) => {
   try {
     //console.log('Original onboarding data:', JSON.stringify(onboardingData, null, 2));
 
@@ -703,12 +841,12 @@ export const saveOnboardingData = async (userId: string, onboardingData: any) =>
 
     // If filtered data is null, create minimal structure
     if (filteredData === null) {
-      console.warn('All data was filtered out, creating minimal structure');
+      console.warn("All data was filtered out, creating minimal structure");
       const minimalData = {
         onboardingCompleted: true,
         onboardingCompletedAt: firestore.FieldValue.serverTimestamp(),
         lastUpdated: firestore.FieldValue.serverTimestamp(),
-        version: '1.0.0',
+        version: "1.0.0",
       };
 
       await firestore()
@@ -716,7 +854,10 @@ export const saveOnboardingData = async (userId: string, onboardingData: any) =>
         .doc(userId)
         .set(minimalData, { merge: true });
 
-      console.log('Minimal onboarding data saved successfully for user:', userId);
+      console.log(
+        "Minimal onboarding data saved successfully for user:",
+        userId,
+      );
       return;
     }
 
@@ -726,7 +867,7 @@ export const saveOnboardingData = async (userId: string, onboardingData: any) =>
       onboardingCompleted: true,
       onboardingCompletedAt: firestore.FieldValue.serverTimestamp(),
       lastUpdated: firestore.FieldValue.serverTimestamp(),
-      version: '1.0.0',
+      version: "1.0.0",
     };
 
     // Directly use the filtered data as the main document
@@ -744,9 +885,9 @@ export const saveOnboardingData = async (userId: string, onboardingData: any) =>
       .doc(userId)
       .set(cleanedFinalData || firestoreData, { merge: true });
 
-    console.log('Onboarding data saved successfully for user:', userId);
+    console.log("Onboarding data saved successfully for user:", userId);
   } catch (error: any) {
-    console.error('Error saving onboarding data:', error);
+    console.error("Error saving onboarding data:", error);
     throw new Error(`Failed to save onboarding data: ${error.message}`);
   }
 };
@@ -791,7 +932,7 @@ export const getOnboardingData = async (userId: string) => {
       version: data?.version,
     };
   } catch (error: any) {
-    console.error('Error getting onboarding data:', error);
+    console.error("Error getting onboarding data:", error);
     throw new Error(`Failed to get onboarding data: ${error.message}`);
   }
 };
@@ -810,7 +951,7 @@ export const updateOnboardingData = async (
     calculatedValues: any;
     commitment: any;
     account: any;
-  }>
+  }>,
 ) => {
   try {
     await firestore()
@@ -821,13 +962,12 @@ export const updateOnboardingData = async (
         lastUpdated: firestore.FieldValue.serverTimestamp(),
       });
 
-    console.log('Onboarding data updated successfully for user:', userId);
+    console.log("Onboarding data updated successfully for user:", userId);
   } catch (error: any) {
-    console.error('Error updating onboarding data:', error);
+    console.error("Error updating onboarding data:", error);
     throw new Error(`Failed to update onboarding data: ${error.message}`);
   }
 };
 
 // Export auth and firestore instances for direct use
 export { auth, firestore, retryWithBackoff };
-

@@ -17,10 +17,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/button';
-import PhoneInput from '../../components/ui/phone-input';
 import { useOnboarding } from '../../context/onboarding-context';
 import { useOnboardingSync } from '../../hooks/use-onboarding-sync';
-import { PhoneInputValue } from '@/types/ui';
 
 const CommitmentScreen = () => {
 
@@ -31,17 +29,12 @@ const CommitmentScreen = () => {
     firstName: profile.name || '',
     lastName: profile.lastName || '',
     email: '',
-    phone: {
-      countryCode: 'TR',
-      dialCode: '+90',
-      phoneNumber: '',
-    } as PhoneInputValue,
     isCommitmentAccepted: false,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (field: string, value: string | boolean | PhoneInputValue) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setCommitmentData(prev => ({
       ...prev,
       [field]: value,
@@ -104,9 +97,6 @@ const CommitmentScreen = () => {
         firstName: commitmentData.firstName,
         lastName: commitmentData.lastName,
         email: commitmentData.email,
-        phone: commitmentData.phone.phoneNumber
-          ? `${commitmentData.phone.dialCode} ${commitmentData.phone.phoneNumber}`
-          : '',
         commitmentStatement: commitmentData.isCommitmentAccepted ? 'Okudum, onaylıyorum' : '',
         timestamp: new Date().toISOString(),
       };
@@ -331,15 +321,6 @@ const CommitmentScreen = () => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <PhoneInput
-                value={commitmentData.phone}
-                onChange={(value) => handleInputChange('phone', value)}
-                label="Telefon (İsteğe Bağlı)"
-                defaultCountry="TR"
               />
             </View>
 
