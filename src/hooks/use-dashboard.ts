@@ -171,9 +171,28 @@ export const useDashboard = (): UseDashboardReturn => {
       });
     } catch (error) {
       console.error('Error initializing dashboard:', error);
+      // Safe error message extraction that won't crash
+      let errorMessage = 'Dashboard yüklenirken hata oluştu';
+      try {
+        if (error && typeof error === 'object') {
+          const code = (error as any).code;
+          const message = (error as any).message;
+          errorMessage = message || String(error);
+          if (code) {
+            errorMessage = `${code}: ${errorMessage}`;
+          }
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else {
+          errorMessage = String(error || errorMessage);
+        }
+      } catch (e) {
+        // Fallback to default message if error extraction fails
+        errorMessage = 'Dashboard yüklenirken hata oluştu';
+      }
       updateState({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Dashboard yüklenirken hata oluştu'
+        error: errorMessage
       });
     }
   }, [user, state.recentMeals]); // Added state.recentMeals dependency
@@ -252,7 +271,17 @@ export const useDashboard = (): UseDashboardReturn => {
       return newMeal;
     } catch (error) {
       console.error('Error adding meal to Firebase:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Öğün eklenemedi';
+      // Safe error message extraction
+      let errorMessage = 'Öğün eklenemedi';
+      try {
+        if (error && typeof error === 'object') {
+          errorMessage = (error as any).message || String(error);
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+      } catch (e) {
+        // Use default message
+      }
       updateState({ error: errorMessage });
       throw error;
     }
@@ -302,7 +331,17 @@ export const useDashboard = (): UseDashboardReturn => {
       console.log('✅ Meal successfully deleted from Firebase:', mealId);
     } catch (error) {
       console.error('Error deleting meal from Firebase:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Öğün silinemedi';
+      // Safe error message extraction
+      let errorMessage = 'Öğün silinemedi';
+      try {
+        if (error && typeof error === 'object') {
+          errorMessage = (error as any).message || String(error);
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+      } catch (e) {
+        // Use default message
+      }
       updateState({ error: errorMessage });
       throw error;
     }
@@ -358,7 +397,18 @@ export const useDashboard = (): UseDashboardReturn => {
 
       return mockLog;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Günlük güncellenemedi';
+      console.error('Error updating daily log:', error);
+      // Safe error message extraction
+      let errorMessage = 'Günlük güncellenemedi';
+      try {
+        if (error && typeof error === 'object') {
+          errorMessage = (error as any).message || String(error);
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+      } catch (e) {
+        // Use default message
+      }
       updateState({ error: errorMessage });
       throw error;
     }
@@ -423,6 +473,16 @@ export const useDashboard = (): UseDashboardReturn => {
       };
     } catch (error) {
       console.error('Error calculating streak data:', error);
+      // Safe error logging that won't crash
+      try {
+        if (error && typeof error === 'object') {
+          const code = (error as any).code;
+          const message = (error as any).message;
+          console.error('Streak calculation error details:', { code, message });
+        }
+      } catch (e) {
+        // Ignore logging errors
+      }
       return {
         currentStreak: 0,
         bestStreak: 0,
@@ -444,6 +504,16 @@ export const useDashboard = (): UseDashboardReturn => {
       await updateStreak();
     } catch (error) {
       console.error('Error refreshing streak:', error);
+      // Safe error logging
+      try {
+        if (error && typeof error === 'object') {
+          const code = (error as any).code;
+          const message = (error as any).message;
+          console.error('Refresh streak error details:', { code, message });
+        }
+      } catch (e) {
+        // Ignore logging errors
+      }
     }
   }, [updateStreak]);
 
@@ -454,6 +524,16 @@ export const useDashboard = (): UseDashboardReturn => {
       return null;
     } catch (error) {
       console.error('Error getting daily log:', error);
+      // Safe error logging
+      try {
+        if (error && typeof error === 'object') {
+          const code = (error as any).code;
+          const message = (error as any).message;
+          console.error('Get daily log error details:', { code, message });
+        }
+      } catch (e) {
+        // Ignore logging errors
+      }
       throw error;
     }
   }, []);
@@ -531,6 +611,16 @@ export const useDashboard = (): UseDashboardReturn => {
         });
     } catch (error) {
       console.error('Error getting recent meals:', error);
+      // Safe error logging
+      try {
+        if (error && typeof error === 'object') {
+          const code = (error as any).code;
+          const message = (error as any).message;
+          console.error('Get meals error details:', { code, message });
+        }
+      } catch (e) {
+        // Ignore logging errors
+      }
       return [];
     }
   }, [user]);
@@ -659,6 +749,16 @@ export const useDashboard = (): UseDashboardReturn => {
         updateState({ recentMeals: meals });
       }, (error) => {
         console.error('❌ Error in meals listener:', error);
+        // Safe error logging that won't crash
+        try {
+          if (error && typeof error === 'object') {
+            const code = (error as any).code;
+            const message = (error as any).message;
+            console.error('Meals listener error details:', { code, message });
+          }
+        } catch (e) {
+          // Ignore logging errors
+        }
       });
 
     // Store unsubscribe function

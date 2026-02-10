@@ -71,7 +71,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     const initializeAuth = async () => {
       // Pre-load firestore instance to ensure emulator is set up first
       try {
-        await getFirestore();
+        firestore(); // Initialize Firestore instance (react-native-firebase API)
         console.log("✅ Firestore instance loaded successfully");
       } catch (error) {
         console.warn("⚠️ Firestore pre-load failed:", error);

@@ -47,6 +47,7 @@ let emulatorsInitialized = false;
 // Flag to prevent multiple initialization attempts
 let isInitializing = false;
 
+
 /**
  * Helper function to retry Firestore operations with exponential backoff
  */
@@ -61,18 +62,36 @@ const retryWithBackoff = async <T>(
     try {
       return await operation();
     } catch (error: any) {
-      lastError = error;
+      // Store the error safely - handle null/undefined errors
+      lastError = error instanceof Error ? error : new Error(String(error || "Unknown error"));
+
       // More robust error checking - handle cases where error might be undefined or null
-      const errorCode = error?.code || error?.message || "";
-      const errorString = String(errorCode).toLowerCase();
+      // Use safe property access with multiple fallbacks
+      let errorInfo = "";
+      try {
+        if (error && typeof error === "object") {
+          // Try to get error code safely
+          const code = (error as any).code;
+          const message = (error as any).message;
+          errorInfo = String(code || message || "").toLowerCase();
+        } else {
+          errorInfo = String(error || "").toLowerCase();
+        }
+      } catch (e) {
+        // If we can't read error properties, use string representation
+        errorInfo = String(error).toLowerCase();
+      }
 
       const isUnavailableError =
-        errorString.includes("firestore/unavailable") ||
-        errorString.includes("unavailable") ||
-        errorString.includes("transient");
+        errorInfo.includes("firestore/unavailable") ||
+        errorInfo.includes("unavailable") ||
+        errorInfo.includes("transient") ||
+        errorInfo.includes("network") ||
+        errorInfo.includes("timeout");
 
       if (!isUnavailableError || attempt === maxRetries - 1) {
-        throw error;
+        // Throw a safe error object that won't crash Firebase's error handler
+        throw lastError;
       }
 
       const delay = initialDelay * Math.pow(2, attempt);
@@ -86,66 +105,6 @@ const retryWithBackoff = async <T>(
   throw lastError || new Error("Operation failed after retries");
 };
 
-/**
- * Verify that Firestore native module is actually ready
- * This is critical for New Architecture where native bridge may lag behind JS initialization
- */
-const verifyFirestoreNativeReady = async (
-  maxRetries = 10,
-  delayMs = 500,
-): Promise<boolean> => {
-  console.log("🔍 Verifying Firestore native module readiness...");
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      // Try a simple Firestore operation to verify native module is ready
-      // We don't need the collection to exist, we just need the native call to not throw unavailable
-      const testRef = firestore().collection("_health_check").doc("_test");
-
-      // This will fail if native module isn't ready with "unavailable" error
-      // We don't care if it succeeds or fails with other errors (permission, etc)
-      await testRef.get();
-
-      console.log(
-        `✅ Firestore native module ready (attempt ${attempt}/${maxRetries})`,
-      );
-      return true;
-    } catch (error: any) {
-      // More robust error checking - handle cases where error might be undefined or null
-      const errorCode = error?.code || error?.message || "";
-      const errorString = String(errorCode).toLowerCase();
-
-      const isUnavailableError =
-        errorString.includes("firestore/unavailable") ||
-        errorString.includes("unavailable");
-
-      if (isUnavailableError) {
-        console.log(
-          `⏳ Firestore native module not ready yet (attempt ${attempt}/${maxRetries}), retrying...`,
-        );
-
-        if (attempt < maxRetries) {
-          await new Promise((resolve) => setTimeout(resolve, delayMs));
-          continue;
-        } else {
-          console.error(
-            "❌ Firestore native module failed to become ready after all retries",
-          );
-          return false;
-        }
-      } else {
-        // Any other error means native module is responding (even if with an error)
-        // This is actually OK - it means the native bridge is working
-        console.log(
-          `✅ Firestore native module responding (attempt ${attempt}/${maxRetries})`,
-        );
-        return true;
-      }
-    }
-  }
-
-  return false;
-};
 
 export const initializeFirebaseEmulators = async () => {
   // Prevent concurrent initialization attempts
@@ -224,23 +183,12 @@ export const initializeFirebaseEmulators = async () => {
 
     // Android Emulator'de gRPC hatalarını (unavailable) önlemek için persistence kapatılır
     try {
-      firestore().settings({ persistence: false });
+      await firestore().settings({ persistence: false });
     } catch (settingsError: any) {
       // Ignore settings errors if already set
       console.log(
         "Firestore settings status:",
         settingsError?.message || "Already configured",
-      );
-    }
-
-    // 🚨 CRITICAL FOR NEW ARCHITECTURE: Wait for native module to be truly ready
-    // This prevents "firestore/unavailable" errors on first app start
-    console.log("⏳ Waiting for Firestore native module to be ready...");
-    const isNativeReady = await verifyFirestoreNativeReady(10, 500);
-
-    if (!isNativeReady) {
-      console.warn(
-        "⚠️ Firestore native module verification failed, but continuing anyway",
       );
     }
 
