@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions';
+import * as functions from "firebase-functions";
 /**
  * Gemini 2.5 Flash API ile yiyecek analizi yapan Firebase Function
  * POST /analyzeFood

@@ -1,0 +1,188 @@
+[debug] [2026-02-10T22:07:09.746Z] ----------------------------------------------------------------------
+[debug] [2026-02-10T22:07:09.749Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\furka\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only auth,functions,firestore,storage
+[debug] [2026-02-10T22:07:09.750Z] CLI Version:   15.5.1
+[debug] [2026-02-10T22:07:09.750Z] Platform:      win32
+[debug] [2026-02-10T22:07:09.750Z] Node Version:  v22.17.1
+[debug] [2026-02-10T22:07:09.750Z] Time:          Wed Feb 11 2026 01:07:09 GMT+0300 (GMT+03:00)
+[debug] [2026-02-10T22:07:09.750Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-02-10T22:07:11.270Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"react-native"}
+[debug] [2026-02-10T22:07:11.275Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-02-10T22:07:11.275Z] > authorizing via signed-in user (furkansln.011@gmail.com)
+[debug] [2026-02-10T22:07:11.378Z] java version "21.0.9" 2025-10-21 LTS
+
+[debug] [2026-02-10T22:07:11.379Z] Java(TM) SE Runtime Environment (build 21.0.9+7-LTS-338)
+Java HotSpot(TM) 64-Bit Server VM (build 21.0.9+7-LTS-338, mixed mode, sharing)
+
+[debug] [2026-02-10T22:07:11.390Z] Parsed Java major version: 21
+[info] i  emulators: Starting emulators: auth, functions, firestore, storage {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, functions, firestore, storage"}}
+[debug] [2026-02-10T22:07:11.409Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-02-10T22:07:11.409Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-02-10T22:07:11.409Z] [firestore] Firestore Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-02-10T22:07:11.409Z] [firestore.websocket] websocket server for firestore only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-02-10T22:07:11.409Z] [storage] Storage Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-02-10T22:07:11.409Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-02-10T22:07:11.413Z] Write emulator hub locator at C:\Users\furka\AppData\Local\Temp\hub-calories-app-185b6.json
+[debug] [2026-02-10T22:07:11.424Z] [functions] Functions Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-02-10T22:07:11.424Z] [eventarc] Eventarc Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-02-10T22:07:11.424Z] [tasks] Cloud Tasks Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-02-10T22:07:11.424Z] late-assigned ports for functions and eventarc emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}],"functions":[{"address":"127.0.0.1","family":"IPv4","port":5001}],"eventarc":[{"address":"127.0.0.1","family":"IPv4","port":9299}],"tasks":[{"address":"127.0.0.1","family":"IPv4","port":9499}]},"metadata":{"message":"late-assigned ports for functions and eventarc emulators"}}
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: apphosting, database, hosting, pubsub, dataconnect {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mapphosting, database, hosting, pubsub, dataconnect\u001b[22m"}}
+[debug] [2026-02-10T22:07:11.441Z] defaultcredentials: writing to file C:\Users\furka\AppData\Roaming\firebase\furkansln_011_gmail.com_application_default_credentials.json
+[debug] [2026-02-10T22:07:11.442Z] Setting GAC to C:\Users\furka\AppData\Roaming\firebase\furkansln_011_gmail.com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\furka\\AppData\\Roaming\\firebase\\furkansln_011_gmail.com_application_default_credentials.json"}}
+[debug] [2026-02-10T22:07:11.443Z] Checked if tokens are valid: true, expires at: 1770764715926
+[debug] [2026-02-10T22:07:11.443Z] Checked if tokens are valid: true, expires at: 1770764715926
+[debug] [2026-02-10T22:07:11.444Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/calories-app-185b6/adminSdkConfig [none]
+[debug] [2026-02-10T22:07:12.178Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/calories-app-185b6/adminSdkConfig 200
+[debug] [2026-02-10T22:07:12.178Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/calories-app-185b6/adminSdkConfig {"projectId":"calories-app-185b6","storageBucket":"calories-app-185b6.firebasestorage.app"}
+[debug] [2026-02-10T22:07:12.193Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-02-10T22:07:12.193Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2026-02-10T22:07:12.193Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","C:\\Users\\furka\\.cache\\firebase\\emulators\\cloud-firestore-emulator-v1.20.2.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","calories-app-185b6","--rules","D:\\Projeler\\CaloriesApp\\caloriesApp\\firestore.rules","--single_project_mode",true,"--functions_emulator","127.0.0.1:5001"],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\furka\\\\.cache\\\\firebase\\\\emulators\\\\cloud-firestore-emulator-v1.20.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"calories-app-185b6\",\"--rules\",\"D:\\\\Projeler\\\\CaloriesApp\\\\caloriesApp\\\\firestore.rules\",\"--single_project_mode\",true,\"--functions_emulator\",\"127.0.0.1:5001\"],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
+[info] +  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
+[debug] [2026-02-10T22:07:22.195Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"storage"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2026-02-10T22:07:23.569Z] Temp file directory for storage emulator: C:\Users\furka\AppData\Local\Temp/firebase/storage/blobs {"metadata":{"emulator":{"name":"storage"},"message":"Temp file directory for storage emulator: C:\\Users\\furka\\AppData\\Local\\Temp/firebase/storage/blobs"}}
+[info] i  functions: Watching "D:\Projeler\CaloriesApp\caloriesApp\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"D:\\Projeler\\CaloriesApp\\caloriesApp\\functions\" for Cloud Functions..."}}
+[debug] [2026-02-10T22:07:23.585Z] Validating nodejs source
+[debug] [2026-02-10T22:07:24.594Z] > [functions] package.json contents: {
+  "name": "functions",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "npm run build && firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "predeploy": "npm run build",
+    "test": "jest"
+  },
+  "keywords": [
+    "firebase",
+    "functions",
+    "gemini",
+    "ai",
+    "food-analysis",
+    "calorietrack"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "Firebase Functions for CaloriTrack app with Gemini 2.5 Flash API integration",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.13.2",
+    "firebase-admin": "^13.6.0",
+    "firebase-functions": "^7.0.1",
+    "resend": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-promise": "^7.1.0",
+    "firebase-functions-test": "^3.3.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": "20"
+  }
+}
+[debug] [2026-02-10T22:07:24.594Z] Building nodejs source
+[debug] [2026-02-10T22:07:24.595Z] Failed to find version of module node: reached end of search path D:\Projeler\CaloriesApp\caloriesApp\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "22". Using node@22 from host. 
+[debug] [2026-02-10T22:07:24.597Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-02-10T22:07:24.609Z] Found firebase-functions binary at 'D:\Projeler\CaloriesApp\caloriesApp\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8207
+
+[info] GEMINI_API_KEY exists: false
+GEMINI_API_KEY length: 0
+
+[debug] [2026-02-10T22:07:25.406Z] Got response from /__/functions.yaml {"endpoints":{"analyzeFood":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["us-central1"],"secretEnvironmentVariables":[{"key":"GEMINI_API_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"analyzeFood"},"sendEmailOTP":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["us-central1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"},{"key":"NODE_ENV"}],"labels":{},"callableTrigger":{},"entryPoint":"sendEmailOTP"},"verifyEmailOTP":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["us-central1"],"labels":{},"callableTrigger":{},"entryPoint":"verifyEmailOTP"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
+[info] +  functions: Loaded functions definitions from source: analyzeFood, sendEmailOTP, verifyEmailOTP. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: analyzeFood, sendEmailOTP, verifyEmailOTP."}}
+[info] +  functions[us-central1-analyzeFood]: http function initialized (http://127.0.0.1:5001/calories-app-185b6/us-central1/analyzeFood). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://127.0.0.1:5001/calories-app-185b6/us-central1/analyzeFood)."}}
+[info] +  functions[us-central1-sendEmailOTP]: http function initialized (http://127.0.0.1:5001/calories-app-185b6/us-central1/sendEmailOTP). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://127.0.0.1:5001/calories-app-185b6/us-central1/sendEmailOTP)."}}
+[info] +  functions[us-central1-verifyEmailOTP]: http function initialized (http://127.0.0.1:5001/calories-app-185b6/us-central1/verifyEmailOTP). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://127.0.0.1:5001/calories-app-185b6/us-central1/verifyEmailOTP)."}}
+[debug] [2026-02-10T22:07:29.455Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬─────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI             │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth      │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Functions      │ 127.0.0.1:5001 │ http://127.0.0.1:4000/functions │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Storage        │ 127.0.0.1:9199 │ http://127.0.0.1:4000/storage   │
+└────────────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500, 9150
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2026-02-10T22:17:11.781Z] >>> [apiv2][query] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast [none]
+[debug] [2026-02-10T22:17:11.784Z] >>> [apiv2][body] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast {"eventId":"dc3931ff-0d5a-4be5-8266-db6f5822fe7c","eventType":"providers/firebase.auth/eventTypes/user.create","resource":{"name":"projects/calories-app-185b6","service":"firebaseauth.googleapis.com"},"params":{},"timestamp":"2026-02-10T22:17:11.777Z","data":{"uid":"m58ULnkUwb83AbGb7EYeDiLm9xT0","metadata":{"creationTime":"2026-02-10T22:17:11.772Z","lastSignInTime":"2026-02-10T22:17:11.772Z"},"customClaims":{}}}
+[debug] [2026-02-10T22:17:11.816Z] <<< [apiv2][status] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast 200
+[debug] [2026-02-10T22:17:11.816Z] <<< [apiv2][body] POST http://127.0.0.1:5001/functions/projects/calories-app-185b6/trigger_multicast {"status":"multicast_acknowledged"}
+[debug] [2026-02-10T22:19:21.557Z] [work-queue] {"queuedWork":["/calories-app-185b6/us-central1/sendEmailOTP-2026-02-10T22:19:21.555Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2026-02-10T22:19:21.557Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/calories-app-185b6/us-central1/sendEmailOTP-2026-02-10T22:19:21.555Z"],"workRunningCount":1}
+[debug] [2026-02-10T22:19:21.559Z] Accepted request POST /calories-app-185b6/us-central1/sendEmailOTP --> us-central1-sendEmailOTP
+[debug] [2026-02-10T22:19:21.564Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-02-10T22:19:21.565Z] [functions] Got req.url=/calories-app-185b6/us-central1/sendEmailOTP, mapping to path=/ {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/calories-app-185b6/us-central1/sendEmailOTP, mapping to path=/"}}
+[info] i  functions: Trying to access secret RESEND_API_KEY@latest {"metadata":{"emulator":{"name":"functions"},"message":"Trying to access secret RESEND_API_KEY@latest"}}
+[debug] [2026-02-10T22:19:21.575Z] Checked if tokens are valid: true, expires at: 1770764715926
+[debug] [2026-02-10T22:19:21.575Z] Checked if tokens are valid: true, expires at: 1770764715926
+[info] i  functions: Trying to access secret NODE_ENV@latest {"metadata":{"emulator":{"name":"functions"},"message":"Trying to access secret NODE_ENV@latest"}}
+[debug] [2026-02-10T22:19:21.577Z] Checked if tokens are valid: true, expires at: 1770764715926
+[debug] [2026-02-10T22:19:21.577Z] Checked if tokens are valid: true, expires at: 1770764715926
+[debug] [2026-02-10T22:19:21.578Z] >>> [apiv2][query] GET https://secretmanager.googleapis.com/v1/projects/calories-app-185b6/secrets/RESEND_API_KEY/versions/latest:access [none]
+[debug] [2026-02-10T22:19:21.584Z] >>> [apiv2][query] GET https://secretmanager.googleapis.com/v1/projects/calories-app-185b6/secrets/NODE_ENV/versions/latest:access [none]
+[debug] [2026-02-10T22:19:22.040Z] <<< [apiv2][status] GET https://secretmanager.googleapis.com/v1/projects/calories-app-185b6/secrets/NODE_ENV/versions/latest:access 200
+[debug] [2026-02-10T22:19:22.040Z] <<< [apiv2][body] GET https://secretmanager.googleapis.com/v1/projects/calories-app-185b6/secrets/NODE_ENV/versions/latest:access {"name":"projects/258153475706/secrets/NODE_ENV/versions/1","payload":{"data":"ZGV2ZWxvcG1lbnQ=","dataCrc32c":"1817049586"}}
+[debug] [2026-02-10T22:19:22.166Z] <<< [apiv2][status] GET https://secretmanager.googleapis.com/v1/projects/calories-app-185b6/secrets/RESEND_API_KEY/versions/latest:access 200
+[debug] [2026-02-10T22:19:22.166Z] <<< [apiv2][body] GET https://secretmanager.googleapis.com/v1/projects/calories-app-185b6/secrets/RESEND_API_KEY/versions/latest:access {"name":"projects/258153475706/secrets/RESEND_API_KEY/versions/1","payload":{"data":"cmVfaE5qWHZwS2VfRFk5QVNINWdzejljRzM4RWo0aEpCSGZh","dataCrc32c":"3306767286"}}
+[debug] [2026-02-10T22:19:22.194Z] [worker-pool] addWorker(us-central1-sendEmailOTP) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] addWorker(us-central1-sendEmailOTP)"}}
+[debug] [2026-02-10T22:19:22.196Z] [worker-pool] Adding worker with key us-central1-sendEmailOTP, total=1 {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] Adding worker with key us-central1-sendEmailOTP, total=1"}}
+[debug] [2026-02-10T22:19:24.171Z] [runtime-status] [28212] Resolved module firebase-admin {"declared":true,"installed":true,"version":"13.6.1","resolution":"D:\\Projeler\\CaloriesApp\\caloriesApp\\functions\\node_modules\\firebase-admin\\lib\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[runtime-status] [28212] Resolved module firebase-admin {\"declared\":true,\"installed\":true,\"version\":\"13.6.1\",\"resolution\":\"D:\\\\Projeler\\\\CaloriesApp\\\\caloriesApp\\\\functions\\\\node_modules\\\\firebase-admin\\\\lib\\\\index.js\"}"}}
+[debug] [2026-02-10T22:19:24.172Z] [runtime-status] [28212] Resolved module firebase-functions {"declared":true,"installed":true,"version":"7.0.5","resolution":"D:\\Projeler\\CaloriesApp\\caloriesApp\\functions\\node_modules\\firebase-functions\\lib\\v2\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[runtime-status] [28212] Resolved module firebase-functions {\"declared\":true,\"installed\":true,\"version\":\"7.0.5\",\"resolution\":\"D:\\\\Projeler\\\\CaloriesApp\\\\caloriesApp\\\\functions\\\\node_modules\\\\firebase-functions\\\\lib\\\\v2\\\\index.js\"}"}}
+[debug] [2026-02-10T22:19:24.173Z] [runtime-status] [28212] Outgoing network have been stubbed. [{"name":"http","status":"mocked"},{"name":"http","status":"mocked"},{"name":"https","status":"mocked"},{"name":"https","status":"mocked"},{"name":"net","status":"mocked"}] {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[runtime-status] [28212] Outgoing network have been stubbed. [{\"name\":\"http\",\"status\":\"mocked\"},{\"name\":\"http\",\"status\":\"mocked\"},{\"name\":\"https\",\"status\":\"mocked\"},{\"name\":\"https\",\"status\":\"mocked\"},{\"name\":\"net\",\"status\":\"mocked\"}]"}}
+[debug] [2026-02-10T22:19:24.174Z] [runtime-status] [28212] Resolved module firebase-functions {"declared":true,"installed":true,"version":"7.0.5","resolution":"D:\\Projeler\\CaloriesApp\\caloriesApp\\functions\\node_modules\\firebase-functions\\lib\\v2\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[runtime-status] [28212] Resolved module firebase-functions {\"declared\":true,\"installed\":true,\"version\":\"7.0.5\",\"resolution\":\"D:\\\\Projeler\\\\CaloriesApp\\\\caloriesApp\\\\functions\\\\node_modules\\\\firebase-functions\\\\lib\\\\v2\\\\index.js\"}"}}
+[debug] [2026-02-10T22:19:24.174Z] [runtime-status] [28212] Detected firebase-functions v7+, skipping legacy stubs. {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[runtime-status] [28212] Detected firebase-functions v7+, skipping legacy stubs."}}
+[debug] [2026-02-10T22:19:24.175Z] [runtime-status] [28212] Resolved module firebase-admin {"declared":true,"installed":true,"version":"13.6.1","resolution":"D:\\Projeler\\CaloriesApp\\caloriesApp\\functions\\node_modules\\firebase-admin\\lib\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[runtime-status] [28212] Resolved module firebase-admin {\"declared\":true,\"installed\":true,\"version\":\"13.6.1\",\"resolution\":\"D:\\\\Projeler\\\\CaloriesApp\\\\caloriesApp\\\\functions\\\\node_modules\\\\firebase-admin\\\\lib\\\\index.js\"}"}}
+[debug] [2026-02-10T22:19:24.333Z] [runtime-status] [28212] Resolved module firebase-functions {"declared":true,"installed":true,"version":"7.0.5","resolution":"D:\\Projeler\\CaloriesApp\\caloriesApp\\functions\\node_modules\\firebase-functions\\lib\\v2\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[runtime-status] [28212] Resolved module firebase-functions {\"declared\":true,\"installed\":true,\"version\":\"7.0.5\",\"resolution\":\"D:\\\\Projeler\\\\CaloriesApp\\\\caloriesApp\\\\functions\\\\node_modules\\\\firebase-functions\\\\lib\\\\v2\\\\index.js\"}"}}
+[debug] [2026-02-10T22:19:24.879Z] [runtime-status] [28212] firebase-admin has been stubbed. {"adminResolution":{"declared":true,"installed":true,"version":"13.6.1","resolution":"D:\\Projeler\\CaloriesApp\\caloriesApp\\functions\\node_modules\\firebase-admin\\lib\\index.js"}} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[runtime-status] [28212] firebase-admin has been stubbed. {\"adminResolution\":{\"declared\":true,\"installed\":true,\"version\":\"13.6.1\",\"resolution\":\"D:\\\\Projeler\\\\CaloriesApp\\\\caloriesApp\\\\functions\\\\node_modules\\\\firebase-admin\\\\lib\\\\index.js\"}}"}}
+[debug] [2026-02-10T22:19:25.061Z] [runtime-status] [28212] initializeApp(DEFAULT) {"storageBucket":"calories-app-185b6.firebasestorage.app","projectId":"calories-app-185b6"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[runtime-status] [28212] initializeApp(DEFAULT) {\"storageBucket\":\"calories-app-185b6.firebasestorage.app\",\"projectId\":\"calories-app-185b6\"}"}}
+[info] >  GEMINI_API_KEY exists: false {"user":"GEMINI_API_KEY exists: false","metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"\u001b[90m> \u001b[39m GEMINI_API_KEY exists: false"}}
+[info] >  GEMINI_API_KEY length: 0 {"user":"GEMINI_API_KEY length: 0","metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"\u001b[90m> \u001b[39m GEMINI_API_KEY length: 0"}}
+[debug] [2026-02-10T22:19:25.068Z] [runtime-status] [28212] Functions runtime initialized. {"cwd":"D:\\Projeler\\CaloriesApp\\caloriesApp\\functions","node_version":"22.17.1"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[runtime-status] [28212] Functions runtime initialized. {\"cwd\":\"D:\\\\Projeler\\\\CaloriesApp\\\\caloriesApp\\\\functions\",\"node_version\":\"22.17.1\"}"}}
+[debug] [2026-02-10T22:19:25.069Z] [runtime-status] [28212] Listening to port: \\?\pipe\fire_emu_a2abee59db22d966 {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[runtime-status] [28212] Listening to port: \\\\?\\pipe\\fire_emu_a2abee59db22d966"}}
+[debug] [2026-02-10T22:19:25.148Z] [worker-us-central1-sendEmailOTP-baf504b6-0f64-4150-9615-573279ec56c6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[worker-us-central1-sendEmailOTP-baf504b6-0f64-4150-9615-573279ec56c6]: IDLE"}}
+[debug] [2026-02-10T22:19:25.148Z] [worker-pool] submitRequest(triggerId=us-central1-sendEmailOTP) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=us-central1-sendEmailOTP)"}}
+[info] i  functions: Beginning execution of "us-central1-sendEmailOTP" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"Beginning execution of \"us-central1-sendEmailOTP\""}}
+[debug] [2026-02-10T22:19:25.150Z] [worker-us-central1-sendEmailOTP-baf504b6-0f64-4150-9615-573279ec56c6]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[worker-us-central1-sendEmailOTP-baf504b6-0f64-4150-9615-573279ec56c6]: BUSY"}}
+[info] >  {"verifications":{"app":"VALID","auth":"VALID"},"logging.googleapis.com/labels":{"firebase-log-type":"callable-request-verification"},"severity":"DEBUG","message":"Callable request verification passed"} {"user":{"verifications":{"app":"VALID","auth":"VALID"},"logging.googleapis.com/labels":{"firebase-log-type":"callable-request-verification"},"severity":"DEBUG","message":"Callable request verification passed"},"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"\u001b[90m> \u001b[39m {\"verifications\":{\"app\":\"VALID\",\"auth\":\"VALID\"},\"logging.googleapis.com/labels\":{\"firebase-log-type\":\"callable-request-verification\"},\"severity\":\"DEBUG\",\"message\":\"Callable request verification passed\"}"}}
+[info] >  ❌ Error sending OTP: TypeError: Cannot read properties of undefined (reading 'serverTimestamp') {"user":"❌ Error sending OTP: TypeError: Cannot read properties of undefined (reading 'serverTimestamp')","metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"\u001b[90m> \u001b[39m ❌ Error sending OTP: TypeError: Cannot read properties of undefined (reading 'serverTimestamp')"}}
+[info] >      at D:\Projeler\CaloriesApp\caloriesApp\functions\lib\index.js:604:51 {"user":"    at D:\\Projeler\\CaloriesApp\\caloriesApp\\functions\\lib\\index.js:604:51","metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"\u001b[90m> \u001b[39m     at D:\\Projeler\\CaloriesApp\\caloriesApp\\functions\\lib\\index.js:604:51"}}
+[info] >      at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {"user":"    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)","metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"\u001b[90m> \u001b[39m     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)"}}
+[info] >      at async D:\Projeler\CaloriesApp\caloriesApp\functions\node_modules\firebase-functions\lib\common\providers\https.js:513:14 {"user":"    at async D:\\Projeler\\CaloriesApp\\caloriesApp\\functions\\node_modules\\firebase-functions\\lib\\common\\providers\\https.js:513:14","metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"\u001b[90m> \u001b[39m     at async D:\\Projeler\\CaloriesApp\\caloriesApp\\functions\\node_modules\\firebase-functions\\lib\\common\\providers\\https.js:513:14"}}
+[info] >      at async runFunction (C:\Users\furka\AppData\Roaming\npm\node_modules\firebase-tools\lib\emulator\functionsEmulatorRuntime.js:399:9) {"user":"    at async runFunction (C:\\Users\\furka\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\emulator\\functionsEmulatorRuntime.js:399:9)","metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"\u001b[90m> \u001b[39m     at async runFunction (C:\\Users\\furka\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\emulator\\functionsEmulatorRuntime.js:399:9)"}}
+[info] >      at async runHTTPS (C:\Users\furka\AppData\Roaming\npm\node_modules\firebase-tools\lib\emulator\functionsEmulatorRuntime.js:424:5) {"user":"    at async runHTTPS (C:\\Users\\furka\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\emulator\\functionsEmulatorRuntime.js:424:5)","metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"\u001b[90m> \u001b[39m     at async runHTTPS (C:\\Users\\furka\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\emulator\\functionsEmulatorRuntime.js:424:5)"}}
+[info] >      at async C:\Users\furka\AppData\Roaming\npm\node_modules\firebase-tools\lib\emulator\functionsEmulatorRuntime.js:585:21 {"user":"    at async C:\\Users\\furka\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\emulator\\functionsEmulatorRuntime.js:585:21","metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"\u001b[90m> \u001b[39m     at async C:\\Users\\furka\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\emulator\\functionsEmulatorRuntime.js:585:21"}}
+[debug] [2026-02-10T22:19:25.685Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "us-central1-sendEmailOTP" in 535.7759ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"Finished \"us-central1-sendEmailOTP\" in 535.7759ms"}}
+[debug] [2026-02-10T22:19:25.686Z] [worker-us-central1-sendEmailOTP-baf504b6-0f64-4150-9615-573279ec56c6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"[worker-us-central1-sendEmailOTP-baf504b6-0f64-4150-9615-573279ec56c6]: IDLE"}}
+[debug] [2026-02-10T22:19:25.686Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-02-10T22:19:25.687Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-sendEmailOTP"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-02-10T22:19:25.687Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}

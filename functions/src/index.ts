@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-import * as nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 admin.initializeApp();
 
@@ -620,6 +620,36 @@ export const analyzeFood = functions.https.onRequest(
 // EMAIL OTP AUTHENTICATION FUNCTIONS
 // ============================================================================
 
+// Email Configuration
+interface EmailConfig {
+  fromName: string;
+  fromAddress: string;
+}
+
+/**
+ * Get email configuration based on environment
+ * - Development: Uses @resend.dev (sends only to registered email)
+ * - Production: Uses verified custom domain
+ */
+function getEmailConfig(): EmailConfig {
+  const fromName = process.env.EMAIL_FROM_NAME || "CaloriTrack";
+  const nodeEnv = process.env.NODE_ENV || "development";
+
+  // Production: Use custom domain
+  if (nodeEnv === "production") {
+    const fromAddress = process.env.EMAIL_FROM_ADDRESS_PROD;
+    if (!fromAddress) {
+      throw new Error("EMAIL_FROM_ADDRESS_PROD is required in production");
+    }
+    return { fromName, fromAddress: `${fromName} <${fromAddress}>` };
+  }
+
+  // Development: Use Resend's default domain
+  const fromAddress =
+    process.env.EMAIL_FROM_ADDRESS_DEV || "onboarding@resend.dev";
+  return { fromName, fromAddress: `${fromName} <${fromAddress}>` };
+}
+
 // OTP Configuration
 const OTP_EXPIRY_MINUTES = 5;
 const OTP_RATE_LIMIT_SECONDS = 60;
@@ -635,40 +665,25 @@ function generateOTPCode(): string {
   return Math.floor(min + Math.random() * (max - min + 1)).toString();
 }
 
-/**
- * Create nodemailer transporter
- * In development (emulator), logs to console
- * In production, uses SMTP credentials from secrets
- */
-function createEmailTransporter() {
-  const smtpHost = process.env.SMTP_HOST;
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-  const smtpPort = parseInt(process.env.SMTP_PORT || "587", 10);
+// Lazy initialization of Resend client (to avoid errors during deploy analysis)
+let resendInstance: Resend | null = null;
 
-  if (!smtpHost || !smtpUser || !smtpPass) {
-    console.log(
-      "📧 SMTP not configured - emails will be logged to console only",
-    );
+function getResendClient(): Resend | null {
+  if (!process.env.RESEND_API_KEY) {
     return null;
   }
-
-  return nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpPort === 465,
-    auth: {
-      user: smtpUser,
-      pass: smtpPass,
-    },
-  });
+  if (!resendInstance) {
+    resendInstance = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendInstance;
 }
 
 /**
- * Send OTP email using nodemailer or log to console
+ * Send OTP email using Resend API
+ * In development (no API key), logs to console
  */
 async function sendOTPEmail(email: string, code: string): Promise<void> {
-  const transporter = createEmailTransporter();
+  const resend = getResendClient();
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -705,24 +720,32 @@ async function sendOTPEmail(email: string, code: string): Promise<void> {
     </html>
   `;
 
-  if (transporter) {
-    const smtpFrom =
-      process.env.SMTP_FROM ||
-      process.env.SMTP_USER ||
-      "noreply@caloritrack.app";
-    await transporter.sendMail({
-      from: `"CaloriTrack" <${smtpFrom}>`,
-      to: email,
-      subject: `${code} - CaloriTrack Dogrulama Kodunuz`,
-      html: htmlContent,
-    });
-    console.log(`📧 OTP email sent to ${email}`);
-  } else {
+  // Check if Resend API key is configured
+  if (!resend) {
     // Development mode: log OTP code to console
     console.log(`\n========================================`);
     console.log(`📧 OTP CODE for ${email}: ${code}`);
     console.log(`========================================\n`);
+    return;
   }
+
+  // Get email configuration based on environment
+  const { fromAddress } = getEmailConfig();
+
+  // Send email via Resend
+  const { data, error } = await resend.emails.send({
+    from: fromAddress,
+    to: [email],
+    subject: `${code} - CaloriTrack Dogrulama Kodunuz`,
+    html: htmlContent,
+  });
+
+  if (error) {
+    console.error("❌ Resend error:", error);
+    throw new Error(`Resend API error: ${error.message}`);
+  }
+
+  console.log(`📧 OTP email sent to ${email} via Resend (ID: ${data?.id})`);
 }
 
 /**
@@ -732,7 +755,7 @@ async function sendOTPEmail(email: string, code: string): Promise<void> {
 export const sendEmailOTP = functions.https.onCall(
   {
     region: "us-central1",
-    secrets: ["SMTP_HOST", "SMTP_USER", "SMTP_PASS", "SMTP_PORT", "SMTP_FROM"],
+    secrets: ["RESEND_API_KEY", "NODE_ENV"],
   },
   async (request) => {
     const { email, anonymousUid } = request.data;
