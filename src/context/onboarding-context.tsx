@@ -64,6 +64,10 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
 
+  // Unit preferences
+  const [heightUnit, setHeightUnit] = useState<'cm' | 'inches'>('cm');
+  const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs'>('kg');
+
   const [calculatedValues, setCalculatedValues] = useState<CalculatedValues>({
     bmr: 0,
     tdee: 0,
@@ -156,6 +160,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         isCompleted,
         lastUpdated: new Date().toISOString(),
         version: '1.0.0',
+        heightUnit,
+        weightUnit,
       };
 
       await AsyncStorage.setItem(STORAGE_KEYS.onboarding, JSON.stringify(onboardingData));
@@ -181,6 +187,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
         setCurrentStep(data.currentStep || 0);
         setCompletedSteps(data.completedSteps || []);
         setIsCompleted(data.isCompleted || false);
+        setHeightUnit(data.heightUnit || 'cm');
+        setWeightUnit(data.weightUnit || 'kg');
       } else {
         // No stored data, start fresh
         setIsCompleted(false);
@@ -483,6 +491,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     totalSteps: TOTAL_STEPS,
     completedSteps,
     isCompleted,
+    heightUnit,
+    weightUnit,
     updateProfile,
     updateGoals,
     updateActivity,
@@ -490,6 +500,8 @@ export const OnboardingProvider: React.FC<{ children: ReactNode }> = ({ children
     updatePreferences,
     updateCommitment,
     updateAccount,
+    setHeightUnit,
+    setWeightUnit,
     getCurrentStep,
     getProgressPercentage: getProgressPercentageFn,
     validateScreenName: validateScreenNameFn,

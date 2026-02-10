@@ -4,7 +4,7 @@ export interface UserProfile {
   lastName: string;
   age: number;
   dateOfBirth: string;
-  gender: 'male' | 'female' | 'other';
+  gender: "male" | "female" | "other";
   height: number; // cm
   currentWeight: number; // kg
   profilePhoto?: string;
@@ -12,7 +12,7 @@ export interface UserProfile {
 
 // Goals Types
 export interface Goals {
-  primaryGoal: 'weight_loss' | 'maintenance' | 'muscle_gain' | 'healthy_eating';
+  primaryGoal: "weight_loss" | "maintenance" | "muscle_gain" | "healthy_eating";
   targetWeight?: number;
   timeline: number; // weeks
   weeklyGoal: number; // kg per week
@@ -21,8 +21,13 @@ export interface Goals {
 
 // Activity Types
 export interface Activity {
-  level: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active';
-  occupation: 'office' | 'physical' | 'mixed';
+  level:
+    | "sedentary"
+    | "lightly_active"
+    | "moderately_active"
+    | "very_active"
+    | "extremely_active";
+  occupation: "office" | "physical" | "mixed";
   exerciseTypes: string[];
   exerciseFrequency: number; // per week
   sleepHours: number;
@@ -64,14 +69,14 @@ export interface Commitment {
 
 // Account Types
 export interface Account {
-  username: string;
+  username?: string;
   email: string;
-  passwordHash: string; // In real app, this should be hashed
+  passwordHash?: string;
   createdAt: string;
   preferences: {
     agreeToTerms: boolean;
     agreeToPrivacy: boolean;
-    subscribeToNewsletter: boolean;
+    subscribeToNewsletter?: boolean;
   };
 }
 
@@ -107,8 +112,8 @@ export interface Achievement {
   description: string;
   icon: string;
   unlockedAt: string;
-  category: 'streak' | 'nutrition' | 'weight' | 'activity' | 'milestone';
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  category: "streak" | "nutrition" | "weight" | "activity" | "milestone";
+  rarity: "common" | "rare" | "epic" | "legendary";
   progress?: {
     current: number;
     goal: number;
@@ -162,7 +167,7 @@ export interface DailyLog {
   activities: ActivityLog[];
   weight?: {
     value: number;
-    unit: 'kg' | 'lbs';
+    unit: "kg" | "lbs";
   };
   notes?: string;
   completed: boolean;
@@ -173,7 +178,7 @@ export interface DailyLog {
 export interface MealLog {
   id: string;
   name: string;
-  type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  type: "breakfast" | "lunch" | "dinner" | "snack";
   time: string; // HH:MM format
   calories: number;
   nutrition: {
@@ -187,17 +192,17 @@ export interface MealLog {
   };
   photo?: string;
   confidence?: number; // AI recognition confidence
-  method: 'camera' | 'manual' | 'barcode' | 'quickadd';
+  method: "camera" | "manual" | "barcode" | "quickadd";
   createdAt: string;
 }
 
 export interface ActivityLog {
   id: string;
-  type: 'exercise' | 'water' | 'weight' | 'custom';
+  type: "exercise" | "water" | "weight" | "custom";
   name: string;
   duration?: number; // minutes
   calories?: number;
-  intensity?: 'low' | 'medium' | 'high';
+  intensity?: "low" | "medium" | "high";
   value?: number; // for water glasses, weight, etc.
   unit?: string;
   notes?: string;
@@ -207,14 +212,14 @@ export interface ActivityLog {
 // Notification System
 export interface Notification {
   id: string;
-  type: 'achievement' | 'reminder' | 'milestone' | 'tip' | 'warning';
+  type: "achievement" | "reminder" | "milestone" | "tip" | "warning";
   title: string;
   message: string;
   data?: any; // Additional data for the notification
   read: boolean;
   createdAt: string;
   scheduledAt?: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
   actions?: NotificationAction[];
 }
 
@@ -270,8 +275,8 @@ export interface YearlyStats {
 }
 
 export interface ProgressTrend {
-  period: 'week' | 'month' | 'year';
-  metric: 'weight' | 'calories' | 'steps' | 'exercise';
+  period: "week" | "month" | "year";
+  metric: "weight" | "calories" | "steps" | "exercise";
   data: Array<{
     date: string;
     value: number;
@@ -281,7 +286,7 @@ export interface ProgressTrend {
 
 export interface UserInsight {
   id: string;
-  type: 'positive' | 'warning' | 'tip' | 'milestone';
+  type: "positive" | "warning" | "tip" | "milestone";
   title: string;
   description: string;
   data?: any;
@@ -360,22 +365,23 @@ export interface UserDocument {
 
 // User preferences for dashboard and notifications
 export interface UserDashboardPreferences {
-  theme: 'light' | 'dark' | 'auto';
+  theme: "light" | "dark" | "auto";
   units: {
-    weight: 'kg' | 'lbs';
-    distance: 'km' | 'miles';
-    temperature: 'celsius' | 'fahrenheit';
+    height: "cm" | "inches";
+    weight: "kg" | "lbs";
+    distance: "km" | "miles";
+    temperature: "celsius" | "fahrenheit";
   };
   dashboard: {
     showStreakCard: boolean;
     showProgressChart: boolean;
     showQuickStats: boolean;
-    defaultView: 'overview' | 'nutrition' | 'activity';
+    defaultView: "overview" | "nutrition" | "activity";
   };
   privacy: {
     showAchievements: boolean;
     showProgressCharts: boolean;
-    dataRetention: '30days' | '90days' | '1year' | 'forever';
+    dataRetention: "30days" | "90days" | "1year" | "forever";
   };
 }
 

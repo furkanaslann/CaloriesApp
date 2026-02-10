@@ -18,7 +18,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Button from "../../components/ui/button";
 import Input from "../../components/ui/input";
 import ProgressBar from "../../components/ui/progress-bar";
+import { UnitSelector } from "../../components/ui/unit-selector";
 import { useOnboarding } from "../../context/onboarding-context";
+import {
+  kgToLbs,
+  lbsToKg,
+  getWeightRange,
+  getQuickSelectWeights,
+  getWeightUnitLabel,
+} from "../../utils/unit-conversions";
 
 const WeightScreen = () => {
   const {
@@ -28,21 +36,42 @@ const WeightScreen = () => {
     previousStep,
     totalSteps,
     getCurrentStep,
+    weightUnit,
+    setWeightUnit,
   } = useOnboarding();
 
   const [weight, setWeight] = useState(profile.currentWeight?.toString() || "");
   const [isFocused, setIsFocused] = useState(false);
 
+  const handleWeightUnitChange = (newUnit: 'kg' | 'lbs') => {
+    if (weightUnit === newUnit || !weight) return;
+
+    // Mevcut değeri kg'ye çevir (iç depolama birimi)
+    const currentWeightKg = weightUnit === 'lbs'
+      ? lbsToKg(parseFloat(weight))
+      : parseFloat(weight);
+
+    setWeightUnit(newUnit);
+
+    // Yeni birime göre display değerini güncelle
+    if (newUnit === 'lbs') {
+      setWeight(kgToLbs(currentWeightKg).toFixed(1));
+    } else {
+      setWeight(currentWeightKg.toString());
+    }
+  };
+
   const validateWeight = (): boolean => {
     const weightValue = parseFloat(weight);
+    const { min, max } = getWeightRange(weightUnit);
 
     if (!weight || isNaN(weightValue)) {
       Alert.alert("Hata", "Lütfen geçerli bir kilo değeri girin.");
       return false;
     }
 
-    if (weightValue < 30 || weightValue > 300) {
-      Alert.alert("Hata", "Kilo değeri 30-300 kg aralığında olmalıdır.");
+    if (weightValue < min || weightValue > max) {
+      Alert.alert("Hata", `Kilo değeri ${min}-${max} ${weightUnit} aralığında olmalıdır.`);
       return false;
     }
 
@@ -52,7 +81,12 @@ const WeightScreen = () => {
   const handleNext = () => {
     if (!validateWeight()) return;
 
-    updateProfile({ currentWeight: parseFloat(weight) });
+    // Her zaman kg olarak kaydet
+    const weightInKg = weightUnit === 'lbs'
+      ? lbsToKg(parseFloat(weight))
+      : parseFloat(weight);
+
+    updateProfile({ currentWeight: weightInKg });
     nextStep();
     router.push("/onboarding/profile-photo");
   };
@@ -62,7 +96,7 @@ const WeightScreen = () => {
     router.back();
   };
 
-  const commonWeights = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
+  const commonWeights = getQuickSelectWeights(weightUnit);
 
   const styles = StyleSheet.create({
     container: {
@@ -101,6 +135,10 @@ const WeightScreen = () => {
       lineHeight: LightTheme.typography.base.lineHeight,
       maxWidth: 300,
     },
+    unitSelectorContainer: {
+      alignItems: "center",
+      marginBottom: LightTheme.spacing.md,
+    },
     inputContainer: {
       marginBottom: LightTheme.spacing["2xl"],
       alignItems: "center",
@@ -115,6 +153,12 @@ const WeightScreen = () => {
         ? LightTheme.colors.primary
         : LightTheme.semanticColors.border.primary,
       ...LightTheme.shadows.md,
+    },
+    inputSuffix: {
+      fontSize: LightTheme.typography.base.fontSize,
+      color: LightTheme.semanticColors.text.secondary,
+      marginLeft: LightTheme.spacing.sm,
+      fontWeight: "500",
     },
     quickSelectContainer: {
       marginBottom: LightTheme.spacing["2xl"],
@@ -211,8 +255,19 @@ const WeightScreen = () => {
             </View>
             <Text style={styles.title}>Kilonuz</Text>
             <Text style={styles.subtitle}>
-              Mevcut kilonuzu kilogram cinsinden girin.
+              Mevcut kilonuzu girin.
             </Text>
+          </View>
+
+          <View style={styles.unitSelectorContainer}>
+            <UnitSelector
+              options={[
+                { label: 'kg', value: 'kg' },
+                { label: 'lbs', value: 'lbs' },
+              ]}
+              selected={weightUnit}
+              onSelect={handleWeightUnitChange}
+            />
           </View>
 
           <View style={styles.inputContainer}>
@@ -221,7 +276,7 @@ const WeightScreen = () => {
                 label=""
                 value={weight}
                 onChangeText={setWeight}
-                placeholder="Örn: 70"
+                placeholder={weightUnit === 'lbs' ? "155" : "70"}
                 keyboardType="numeric"
                 autoFocus
                 onFocus={() => setIsFocused(true)}
@@ -237,6 +292,9 @@ const WeightScreen = () => {
                   height: "auto",
                 }}
               />
+              <Text style={styles.inputSuffix}>
+                {getWeightUnitLabel(weightUnit)}
+              </Text>
             </View>
           </View>
 

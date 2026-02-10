@@ -18,7 +18,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Button from "../../components/ui/button";
 import Input from "../../components/ui/input";
 import ProgressBar from "../../components/ui/progress-bar";
+import { UnitSelector } from "../../components/ui/unit-selector";
 import { useOnboarding } from "../../context/onboarding-context";
+import {
+  cmToInches,
+  inchesToCm,
+  getHeightRange,
+  getQuickSelectHeights,
+  getHeightUnitLabel,
+} from "../../utils/unit-conversions";
 
 const HeightScreen = () => {
   const {
@@ -28,21 +36,42 @@ const HeightScreen = () => {
     previousStep,
     totalSteps,
     getCurrentStep,
+    heightUnit,
+    setHeightUnit,
   } = useOnboarding();
 
   const [height, setHeight] = useState(profile.height?.toString() || "");
   const [isFocused, setIsFocused] = useState(false);
 
+  const handleHeightUnitChange = (newUnit: 'cm' | 'inches') => {
+    if (heightUnit === newUnit || !height) return;
+
+    // Mevcut değeri cm'e çevir (iç depolama birimi)
+    const currentHeightCm = heightUnit === 'inches'
+      ? inchesToCm(parseFloat(height))
+      : parseFloat(height);
+
+    setHeightUnit(newUnit);
+
+    // Yeni birime göre display değerini güncelle
+    if (newUnit === 'inches') {
+      setHeight(cmToInches(currentHeightCm).toFixed(1));
+    } else {
+      setHeight(currentHeightCm.toString());
+    }
+  };
+
   const validateHeight = (): boolean => {
     const heightValue = parseFloat(height);
+    const { min, max } = getHeightRange(heightUnit);
 
     if (!height || isNaN(heightValue)) {
       Alert.alert("Hata", "Lütfen geçerli bir boy değeri girin.");
       return false;
     }
 
-    if (heightValue < 100 || heightValue > 250) {
-      Alert.alert("Hata", "Boy değeri 100-250 cm aralığında olmalıdır.");
+    if (heightValue < min || heightValue > max) {
+      Alert.alert("Hata", `Boy değeri ${min}-${max} ${heightUnit} aralığında olmalıdır.`);
       return false;
     }
 
@@ -52,7 +81,12 @@ const HeightScreen = () => {
   const handleNext = () => {
     if (!validateHeight()) return;
 
-    updateProfile({ height: parseFloat(height) });
+    // Her zaman cm olarak kaydet
+    const heightInCm = heightUnit === 'inches'
+      ? inchesToCm(parseFloat(height))
+      : parseFloat(height);
+
+    updateProfile({ height: heightInCm });
     nextStep();
     router.push("/onboarding/weight");
   };
@@ -62,7 +96,7 @@ const HeightScreen = () => {
     router.back();
   };
 
-  const commonHeights = [150, 160, 165, 170, 175, 180, 185, 190, 195];
+  const commonHeights = getQuickSelectHeights(heightUnit);
 
   const styles = StyleSheet.create({
     container: {
@@ -100,6 +134,10 @@ const HeightScreen = () => {
       textAlign: "center",
       lineHeight: LightTheme.typography.base.lineHeight,
       maxWidth: 300,
+    },
+    unitSelectorContainer: {
+      alignItems: "center",
+      marginBottom: LightTheme.spacing.md,
     },
     inputContainer: {
       marginBottom: LightTheme.spacing["2xl"],
@@ -217,13 +255,24 @@ const HeightScreen = () => {
             </Text>
           </View>
 
+          <View style={styles.unitSelectorContainer}>
+            <UnitSelector
+              options={[
+                { label: 'cm', value: 'cm' },
+                { label: 'inç', value: 'inches' },
+              ]}
+              selected={heightUnit}
+              onSelect={handleHeightUnitChange}
+            />
+          </View>
+
           <View style={styles.inputContainer}>
             <View style={styles.inputWrapper}>
               <Input
                 label=""
                 value={height}
                 onChangeText={setHeight}
-                placeholder="175"
+                placeholder={heightUnit === 'inches' ? "69" : "175"}
                 keyboardType="numeric"
                 autoFocus
                 onFocus={() => setIsFocused(true)}
@@ -239,6 +288,9 @@ const HeightScreen = () => {
                   height: "auto",
                 }}
               />
+              <Text style={styles.inputSuffix}>
+                {getHeightUnitLabel(heightUnit)}
+              </Text>
             </View>
           </View>
 

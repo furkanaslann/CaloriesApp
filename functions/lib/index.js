@@ -36,10 +36,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.analyzeFood = void 0;
+exports.verifyEmailOTP = exports.sendEmailOTP = exports.analyzeFood = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const axios_1 = __importDefault(require("axios"));
+const nodemailer = __importStar(require("nodemailer"));
 admin.initializeApp();
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 // Get Gemini API key from Firebase Secrets Manager
@@ -349,6 +350,338 @@ exports.analyzeFood = functions.https.onRequest({
             data: (_h = error.response) === null || _h === void 0 ? void 0 : _h.data
         });
         res.status(500).json(createResponse(false, null, 'Failed to analyze food', 500));
+    }
+});
+// ============================================================================
+// EMAIL OTP AUTHENTICATION FUNCTIONS
+// ============================================================================
+// OTP Configuration
+const OTP_EXPIRY_MINUTES = 5;
+const OTP_RATE_LIMIT_SECONDS = 60;
+const OTP_CODE_LENGTH = 6;
+const OTP_COLLECTION = 'otpCodes';
+/**
+ * Generate a random 6-digit OTP code
+ */
+function generateOTPCode() {
+    const min = Math.pow(10, OTP_CODE_LENGTH - 1);
+    const max = Math.pow(10, OTP_CODE_LENGTH) - 1;
+    return Math.floor(min + Math.random() * (max - min + 1)).toString();
+}
+/**
+ * Create nodemailer transporter
+ * In development (emulator), logs to console
+ * In production, uses SMTP credentials from secrets
+ */
+function createEmailTransporter() {
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+    const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+    if (!smtpHost || !smtpUser || !smtpPass) {
+        console.log('📧 SMTP not configured - emails will be logged to console only');
+        return null;
+    }
+    return nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpPort === 465,
+        auth: {
+            user: smtpUser,
+            pass: smtpPass,
+        },
+    });
+}
+/**
+ * Send OTP email using nodemailer or log to console
+ */
+async function sendOTPEmail(email, code) {
+    const transporter = createEmailTransporter();
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .logo { text-align: center; font-size: 28px; font-weight: 700; color: #7C3AED; margin-bottom: 24px; }
+        .title { text-align: center; font-size: 20px; font-weight: 600; color: #1E293B; margin-bottom: 8px; }
+        .subtitle { text-align: center; font-size: 14px; color: #64748B; margin-bottom: 32px; }
+        .code-box { background: #F8F5FF; border: 2px solid #7C3AED; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px; }
+        .code { font-size: 36px; font-weight: 700; letter-spacing: 8px; color: #7C3AED; }
+        .expiry { text-align: center; font-size: 13px; color: #94A3B8; margin-bottom: 16px; }
+        .footer { text-align: center; font-size: 12px; color: #CBD5E1; margin-top: 32px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="logo">CaloriTrack</div>
+        <div class="title">Dogrulama Kodunuz</div>
+        <div class="subtitle">Hesabinizi dogrulamak icin asagidaki kodu kullanin</div>
+        <div class="code-box">
+          <div class="code">${code}</div>
+        </div>
+        <div class="expiry">Bu kod ${OTP_EXPIRY_MINUTES} dakika icinde gecersiz olacaktir.</div>
+        <div class="footer">
+          Bu e-postayi siz talep etmediyseniz, lutfen dikkate almayin.<br/>
+          CaloriTrack &copy; ${new Date().getFullYear()}
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+    if (transporter) {
+        const smtpFrom = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@caloritrack.app';
+        await transporter.sendMail({
+            from: `"CaloriTrack" <${smtpFrom}>`,
+            to: email,
+            subject: `${code} - CaloriTrack Dogrulama Kodunuz`,
+            html: htmlContent,
+        });
+        console.log(`📧 OTP email sent to ${email}`);
+    }
+    else {
+        // Development mode: log OTP code to console
+        console.log(`\n========================================`);
+        console.log(`📧 OTP CODE for ${email}: ${code}`);
+        console.log(`========================================\n`);
+    }
+}
+/**
+ * Send Email OTP - Callable Cloud Function
+ * Generates a 6-digit OTP, stores it in Firestore, and sends it via email
+ */
+exports.sendEmailOTP = functions.https.onCall({
+    region: "us-central1",
+    secrets: ["SMTP_HOST", "SMTP_USER", "SMTP_PASS", "SMTP_PORT", "SMTP_FROM"],
+}, async (request) => {
+    const { email, anonymousUid } = request.data;
+    // Validate email
+    if (!email || typeof email !== 'string') {
+        throw new functions.https.HttpsError('invalid-argument', 'Gecerli bir e-posta adresi gereklidir.');
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        throw new functions.https.HttpsError('invalid-argument', 'Gecerli bir e-posta adresi giriniz.');
+    }
+    const normalizedEmail = email.toLowerCase().trim();
+    try {
+        const db = admin.firestore();
+        // Rate limiting: Check if an OTP was sent recently
+        const recentOTPs = await db
+            .collection(OTP_COLLECTION)
+            .where('email', '==', normalizedEmail)
+            .where('createdAt', '>', new Date(Date.now() - OTP_RATE_LIMIT_SECONDS * 1000))
+            .limit(1)
+            .get();
+        if (!recentOTPs.empty) {
+            throw new functions.https.HttpsError('resource-exhausted', `Lutfen ${OTP_RATE_LIMIT_SECONDS} saniye bekleyip tekrar deneyin.`);
+        }
+        // Delete any existing OTP codes for this email
+        const existingOTPs = await db
+            .collection(OTP_COLLECTION)
+            .where('email', '==', normalizedEmail)
+            .get();
+        const batch = db.batch();
+        existingOTPs.docs.forEach(doc => batch.delete(doc.ref));
+        if (!existingOTPs.empty) {
+            await batch.commit();
+        }
+        // Generate OTP code
+        const code = generateOTPCode();
+        const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+        // Store OTP in Firestore
+        await db.collection(OTP_COLLECTION).add({
+            email: normalizedEmail,
+            code: code,
+            anonymousUid: anonymousUid || null,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            expiresAt: expiresAt,
+            verified: false,
+            attempts: 0,
+        });
+        // Send OTP email
+        await sendOTPEmail(normalizedEmail, code);
+        console.log(`✅ OTP sent successfully to ${normalizedEmail}`);
+        return { success: true, message: 'Dogrulama kodu gonderildi.' };
+    }
+    catch (error) {
+        // Re-throw HttpsError as-is
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        console.error('❌ Error sending OTP:', error);
+        throw new functions.https.HttpsError('internal', 'Dogrulama kodu gonderilemedi. Lutfen tekrar deneyin.');
+    }
+});
+/**
+ * Verify Email OTP - Callable Cloud Function
+ * Verifies the OTP code and returns a custom auth token
+ */
+exports.verifyEmailOTP = functions.https.onCall({
+    region: "us-central1",
+}, async (request) => {
+    var _a, _b;
+    const { email, code, anonymousUid } = request.data;
+    // Validate inputs
+    if (!email || typeof email !== 'string') {
+        throw new functions.https.HttpsError('invalid-argument', 'E-posta adresi gereklidir.');
+    }
+    if (!code || typeof code !== 'string') {
+        throw new functions.https.HttpsError('invalid-argument', 'Dogrulama kodu gereklidir.');
+    }
+    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedCode = code.trim();
+    try {
+        const db = admin.firestore();
+        // Find the OTP document
+        const otpQuery = await db
+            .collection(OTP_COLLECTION)
+            .where('email', '==', normalizedEmail)
+            .where('verified', '==', false)
+            .orderBy('createdAt', 'desc')
+            .limit(1)
+            .get();
+        if (otpQuery.empty) {
+            throw new functions.https.HttpsError('not-found', 'Dogrulama kodu bulunamadi. Lutfen yeni bir kod talep edin.');
+        }
+        const otpDoc = otpQuery.docs[0];
+        const otpData = otpDoc.data();
+        // Check expiry
+        const expiresAt = ((_b = (_a = otpData.expiresAt) === null || _a === void 0 ? void 0 : _a.toDate) === null || _b === void 0 ? void 0 : _b.call(_a)) || new Date(otpData.expiresAt);
+        if (new Date() > expiresAt) {
+            // Delete expired OTP
+            await otpDoc.ref.delete();
+            throw new functions.https.HttpsError('deadline-exceeded', 'Dogrulama kodu suresi dolmus. Lutfen yeni bir kod talep edin.');
+        }
+        // Check max attempts (5 attempts max)
+        if (otpData.attempts >= 5) {
+            await otpDoc.ref.delete();
+            throw new functions.https.HttpsError('resource-exhausted', 'Cok fazla basarisiz deneme. Lutfen yeni bir kod talep edin.');
+        }
+        // Increment attempt counter
+        await otpDoc.ref.update({ attempts: admin.firestore.FieldValue.increment(1) });
+        // Verify the code
+        if (otpData.code !== normalizedCode) {
+            const remainingAttempts = 4 - otpData.attempts;
+            throw new functions.https.HttpsError('permission-denied', `Yanlis dogrulama kodu. ${remainingAttempts > 0 ? remainingAttempts + ' deneme hakkiniz kaldi.' : 'Lutfen yeni bir kod talep edin.'}`);
+        }
+        // Code is correct! Mark as verified
+        await otpDoc.ref.update({ verified: true });
+        let uid;
+        // Case 1: Onboarding flow - anonymous user upgrading
+        if (anonymousUid) {
+            try {
+                // Update the anonymous user's email and mark as non-anonymous
+                await admin.auth().updateUser(anonymousUid, {
+                    email: normalizedEmail,
+                    emailVerified: true,
+                });
+                uid = anonymousUid;
+                console.log(`✅ Anonymous user ${anonymousUid} upgraded with email ${normalizedEmail}`);
+            }
+            catch (updateError) {
+                // If the anonymous user doesn't exist, check if email already has an account
+                if (updateError.code === 'auth/user-not-found') {
+                    try {
+                        const existingUser = await admin.auth().getUserByEmail(normalizedEmail);
+                        uid = existingUser.uid;
+                        console.log(`✅ Found existing user with email ${normalizedEmail}: ${uid}`);
+                    }
+                    catch (_c) {
+                        // Create a new user
+                        const newUser = await admin.auth().createUser({
+                            email: normalizedEmail,
+                            emailVerified: true,
+                        });
+                        uid = newUser.uid;
+                        console.log(`✅ Created new user with email ${normalizedEmail}: ${uid}`);
+                    }
+                }
+                else if (updateError.code === 'auth/email-already-exists') {
+                    // Email is already associated with another account
+                    const existingUser = await admin.auth().getUserByEmail(normalizedEmail);
+                    uid = existingUser.uid;
+                    // Migrate data from anonymous user to existing user
+                    try {
+                        const anonymousDoc = await db.collection('users').doc(anonymousUid).get();
+                        if (anonymousDoc.exists) {
+                            const anonymousData = anonymousDoc.data();
+                            // Merge anonymous user data into existing user (preserving existing data)
+                            await db.collection('users').doc(uid).set(Object.assign(Object.assign({}, anonymousData), { uid: uid, email: normalizedEmail, isAnonymous: false }), { merge: true });
+                            // Delete anonymous user document
+                            await db.collection('users').doc(anonymousUid).delete();
+                            console.log(`✅ Migrated data from anonymous ${anonymousUid} to existing user ${uid}`);
+                        }
+                    }
+                    catch (migrateError) {
+                        console.warn('⚠️ Data migration warning:', migrateError);
+                    }
+                }
+                else {
+                    throw updateError;
+                }
+            }
+        }
+        // Case 2: Sign-in flow - find or create user by email
+        else {
+            try {
+                const existingUser = await admin.auth().getUserByEmail(normalizedEmail);
+                uid = existingUser.uid;
+                console.log(`✅ Sign-in: Found existing user with email ${normalizedEmail}: ${uid}`);
+            }
+            catch (_d) {
+                // User doesn't exist - create new user
+                const newUser = await admin.auth().createUser({
+                    email: normalizedEmail,
+                    emailVerified: true,
+                });
+                uid = newUser.uid;
+                // Create initial user document
+                await db.collection('users').doc(uid).set({
+                    uid: uid,
+                    email: normalizedEmail,
+                    isAnonymous: false,
+                    onboardingCompleted: false,
+                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                });
+                console.log(`✅ Sign-in: Created new user with email ${normalizedEmail}: ${uid}`);
+            }
+        }
+        // Update user document with verified email
+        try {
+            await db.collection('users').doc(uid).set({
+                email: normalizedEmail,
+                emailVerified: true,
+                isAnonymous: false,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+        }
+        catch (dbError) {
+            console.warn('⚠️ Could not update user document:', dbError);
+        }
+        // Create custom auth token
+        const customToken = await admin.auth().createCustomToken(uid);
+        // Clean up OTP document
+        await otpDoc.ref.delete();
+        console.log(`✅ OTP verified successfully for ${normalizedEmail}, uid: ${uid}`);
+        return {
+            success: true,
+            token: customToken,
+            uid: uid,
+            email: normalizedEmail,
+            message: 'E-posta dogrulandi.',
+        };
+    }
+    catch (error) {
+        // Re-throw HttpsError as-is
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        console.error('❌ Error verifying OTP:', error);
+        throw new functions.https.HttpsError('internal', 'Dogrulama basarisiz oldu. Lutfen tekrar deneyin.');
     }
 });
 //# sourceMappingURL=index.js.map

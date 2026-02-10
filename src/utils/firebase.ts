@@ -12,6 +12,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
+import functions from "@react-native-firebase/functions";
 import storage from "@react-native-firebase/storage";
 import { Platform } from "react-native";
 
@@ -43,6 +44,9 @@ const EMULATOR_CONFIG = {
 // We'll initialize emulators in a separate function that can be called after Firebase is ready
 let emulatorsInitialized = false;
 
+// Flag to prevent multiple initialization attempts
+let isInitializing = false;
+
 /**
  * Helper function to retry Firestore operations with exponential backoff
  */
@@ -59,7 +63,7 @@ const retryWithBackoff = async <T>(
     } catch (error: any) {
       lastError = error;
       // More robust error checking - handle cases where error might be undefined or null
-      const errorCode = error?.code || error?.message || '';
+      const errorCode = error?.code || error?.message || "";
       const errorString = String(errorCode).toLowerCase();
 
       const isUnavailableError =
@@ -108,7 +112,7 @@ const verifyFirestoreNativeReady = async (
       return true;
     } catch (error: any) {
       // More robust error checking - handle cases where error might be undefined or null
-      const errorCode = error?.code || error?.message || '';
+      const errorCode = error?.code || error?.message || "";
       const errorString = String(errorCode).toLowerCase();
 
       const isUnavailableError =
@@ -144,77 +148,168 @@ const verifyFirestoreNativeReady = async (
 };
 
 export const initializeFirebaseEmulators = async () => {
-  if (IS_DEV && !emulatorsInitialized) {
+  // Prevent concurrent initialization attempts
+  if (isInitializing) {
+    console.log("⏳ Emulator initialization already in progress, waiting...");
+    // Wait a bit for the current initialization to complete
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    return emulatorsInitialized;
+  }
+
+  // Already initialized - return success
+  if (emulatorsInitialized) {
+    return true;
+  }
+
+  // Not in dev mode - nothing to do
+  if (!IS_DEV) {
+    return true;
+  }
+
+  // Start initialization
+  isInitializing = true;
+
+  try {
+    console.log("🔥 Initializing Firebase Emulators...");
+    console.log(`📱 Platform: ${Platform.OS}, Host: ${EMULATOR_CONFIG.host}`);
+
+    // 🔧 AsyncStorage conflict prevention for development
+    // Clear Firebase auth/firestore cached data to prevent ID mismatch with RevenueCat
     try {
-      console.log("🔥 Initializing Firebase Emulators...");
-      console.log(`📱 Platform: ${Platform.OS}, Host: ${EMULATOR_CONFIG.host}`);
-
-      // 🔧 AsyncStorage conflict prevention for development
-      // Clear Firebase auth/firestore cached data to prevent ID mismatch with RevenueCat
-      try {
-        const keysToRemove = [
-          "@ReactNativeFirebase:auth",
-          "@ReactNativeFirebase:firestore",
-          "com.techmodern.caloriesapp.android", // RevenueCat cache key
-        ];
-        await AsyncStorage.multiRemove(keysToRemove);
-        console.log(
-          "🧹 Cleared Firebase/RevenueCat AsyncStorage cache to prevent ID conflict",
-        );
-      } catch (clearError) {
-        console.warn("⚠️ Failed to clear AsyncStorage cache:", clearError);
-        // Continue anyway, this is not critical
-      }
-
-      // Connect to Auth Emulator
-      const authUrl = `http://${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.auth}`;
-      console.log("Connecting to Auth Emulator at:", authUrl);
-      auth().useEmulator(authUrl);
-
-      // Connect to Firestore Emulator
+      const keysToRemove = [
+        "@ReactNativeFirebase:auth",
+        "@ReactNativeFirebase:firestore",
+        "com.techmodern.caloriesapp.android", // RevenueCat cache key
+      ];
+      await AsyncStorage.multiRemove(keysToRemove);
       console.log(
-        "Connecting to Firestore Emulator at:",
-        `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.firestore}`,
+        "🧹 Cleared Firebase/RevenueCat AsyncStorage cache to prevent ID conflict",
       );
+    } catch (clearError) {
+      console.warn("⚠️ Failed to clear AsyncStorage cache:", clearError);
+      // Continue anyway, this is not critical
+    }
+
+    // Connect to Auth Emulator - use the static instance method
+    const authUrl = `http://${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.auth}`;
+    console.log("Connecting to Auth Emulator at:", authUrl);
+    try {
+      auth().useEmulator(authUrl);
+    } catch (authError: any) {
+      // Ignore if already initialized - this is normal in hot reload
+      console.log(
+        "Auth emulator status:",
+        authError?.message || "Already configured",
+      );
+    }
+
+    // Connect to Firestore Emulator - CRITICAL: Must be done BEFORE any Firestore access
+    console.log(
+      "Connecting to Firestore Emulator at:",
+      `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.firestore}`,
+    );
+    try {
       firestore().useEmulator(
         EMULATOR_CONFIG.host,
         EMULATOR_CONFIG.ports.firestore,
       );
-
-      // Android Emulator'de gRPC hatalarını (unavailable) önlemek için persistence kapatılır
-      firestore().settings({ persistence: false });
-
-      // 🚨 CRITICAL FOR NEW ARCHITECTURE: Wait for native module to be truly ready
-      // This prevents "firestore/unavailable" errors on first app start
-      console.log("⏳ Waiting for Firestore native module to be ready...");
-      const isNativeReady = await verifyFirestoreNativeReady(10, 500);
-
-      if (!isNativeReady) {
-        console.warn(
-          "⚠️ Firestore native module verification failed, but continuing anyway",
-        );
-      }
-
-      // Connect to Storage Emulator
+    } catch (firestoreError: any) {
+      // If emulator is already set, that's fine - continue
+      // This is expected during hot reload in development
       console.log(
-        "Connecting to Storage Emulator at:",
-        `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.storage}`,
+        "Firestore emulator status:",
+        firestoreError?.message || "Already configured",
       );
+    }
+
+    // Android Emulator'de gRPC hatalarını (unavailable) önlemek için persistence kapatılır
+    try {
+      firestore().settings({ persistence: false });
+    } catch (settingsError: any) {
+      // Ignore settings errors if already set
+      console.log(
+        "Firestore settings status:",
+        settingsError?.message || "Already configured",
+      );
+    }
+
+    // 🚨 CRITICAL FOR NEW ARCHITECTURE: Wait for native module to be truly ready
+    // This prevents "firestore/unavailable" errors on first app start
+    console.log("⏳ Waiting for Firestore native module to be ready...");
+    const isNativeReady = await verifyFirestoreNativeReady(10, 500);
+
+    if (!isNativeReady) {
+      console.warn(
+        "⚠️ Firestore native module verification failed, but continuing anyway",
+      );
+    }
+
+    // Connect to Functions Emulator
+    console.log(
+      "Connecting to Functions Emulator at:",
+      `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.functions}`,
+    );
+    try {
+      functions().useEmulator(
+        EMULATOR_CONFIG.host,
+        EMULATOR_CONFIG.ports.functions,
+      );
+    } catch (functionsError: any) {
+      console.log(
+        "Functions emulator status:",
+        functionsError?.message || "Already configured",
+      );
+    }
+
+    // Connect to Storage Emulator
+    console.log(
+      "Connecting to Storage Emulator at:",
+      `${EMULATOR_CONFIG.host}:${EMULATOR_CONFIG.ports.storage}`,
+    );
+    try {
       storage().useEmulator(
         EMULATOR_CONFIG.host,
         EMULATOR_CONFIG.ports.storage,
       );
+    } catch (storageError: any) {
+      // If emulator is already set, that's fine - continue
+      console.log(
+        "Storage emulator status:",
+        storageError?.message || "Already configured",
+      );
+    }
 
-      console.log("✅ Firebase Emulators initialized successfully");
+    console.log("✅ Firebase Emulators initialized successfully");
+    emulatorsInitialized = true;
+    return true;
+  } catch (error: any) {
+    // Even if there's an error, mark as initialized to avoid retry loops
+    // The app can still work with partial emulator configuration
+    console.error(
+      "❌ Firebase Emulator connection error:",
+      error?.message || error,
+    );
+
+    // Check if the error is about already being initialized - that's OK in dev
+    const errorStr = String(error).toLowerCase();
+    if (
+      errorStr.includes("already") ||
+      error?.code === "firestore/unknown" ||
+      errorStr.includes("initialized")
+    ) {
+      console.log(
+        "⚠️ Emulators may already be configured from previous session, continuing...",
+      );
       emulatorsInitialized = true;
       return true;
-    } catch (error) {
-      console.error("❌ Firebase Emulator connection failed:", error);
-      emulatorsInitialized = false;
-      return false;
     }
+
+    emulatorsInitialized = false;
+    return false;
+  } finally {
+    // Always reset the initializing flag
+    isInitializing = false;
   }
-  return emulatorsInitialized;
 };
 
 // ============================================================================
@@ -969,5 +1064,230 @@ export const updateOnboardingData = async (
   }
 };
 
+// ============================================================================
+// EMAIL OTP AUTHENTICATION FUNCTIONS
+// ============================================================================
+
+/**
+ * Send OTP verification code to email address
+ * Calls the sendEmailOTP Cloud Function
+ */
+export const sendOTPCode = async (
+  email: string,
+  anonymousUid?: string,
+): Promise<void> => {
+  try {
+    const sendOTP = functions().httpsCallable("sendEmailOTP");
+    const result = await sendOTP({ email, anonymousUid });
+    console.log("✅ OTP code sent:", result.data);
+  } catch (error: any) {
+    console.error("Error sending OTP code:", error);
+    // Extract meaningful error message from Firebase Functions error
+    const message =
+      error?.details?.message ||
+      error?.message ||
+      "Doğrulama kodu gönderilemedi.";
+    throw new Error(message);
+  }
+};
+
+/**
+ * Verify OTP code and sign in
+ * Calls the verifyEmailOTP Cloud Function, then signs in with custom token
+ */
+export const verifyOTPCode = async (
+  email: string,
+  code: string,
+  anonymousUid?: string,
+) => {
+  try {
+    const verifyOTP = functions().httpsCallable("verifyEmailOTP");
+    const result = await verifyOTP({ email, code, anonymousUid });
+
+    const { token, uid } = result.data as {
+      token: string;
+      uid: string;
+      email: string;
+    };
+
+    // Sign in with the custom token
+    const userCredential = await auth().signInWithCustomToken(token);
+    console.log(
+      "✅ Signed in with custom token, uid:",
+      userCredential.user.uid,
+    );
+
+    return userCredential.user;
+  } catch (error: any) {
+    console.error("Error verifying OTP code:", error);
+    const message =
+      error?.details?.message || error?.message || "Doğrulama başarısız oldu.";
+    throw new Error(message);
+  }
+};
+
+// ============================================================================
+// SOCIAL AUTHENTICATION FUNCTIONS
+// ============================================================================
+
+/**
+ * Sign in with Google
+ * Requires @react-native-google-signin/google-signin to be configured
+ */
+export const signInWithGoogle = async () => {
+  try {
+    const { GoogleSignin } =
+      await import("@react-native-google-signin/google-signin");
+
+    // Configure Google Sign-In with webClientId from Firebase Console
+    // TODO: Replace with your actual webClientId from google-services.json (client_type: 3)
+    // Go to Firebase Console > Authentication > Sign-in method > Google > Enable
+    // Then find the Web client ID in Firebase Console > Project Settings > General
+    GoogleSignin.configure({
+      webClientId: "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
+    });
+
+    // Check if device supports Google Play Services
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+    // Initiate Google Sign-In
+    const signInResult = await GoogleSignin.signIn();
+
+    // Get ID token (supports both v13+ and older versions)
+    let idToken = (signInResult as any).data?.idToken;
+    if (!idToken) {
+      idToken = (signInResult as any).idToken;
+    }
+    if (!idToken) {
+      throw new Error("Google Sign-In başarısız: ID token alınamadı.");
+    }
+
+    // Create Firebase credential
+    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+    // Check if there's an anonymous user to link
+    const currentUser = auth().currentUser;
+    if (currentUser && currentUser.isAnonymous) {
+      try {
+        // Try to link the anonymous account with Google credential
+        const userCredential =
+          await currentUser.linkWithCredential(googleCredential);
+        console.log(
+          "✅ Anonymous user linked with Google:",
+          userCredential.user.uid,
+        );
+
+        // Update Firestore document
+        await firestore()
+          .collection(FIREBASE_CONFIG.collections.users)
+          .doc(userCredential.user.uid)
+          .set(
+            {
+              email: userCredential.user.email,
+              displayName: userCredential.user.displayName,
+              isAnonymous: false,
+              updatedAt: firestore.FieldValue.serverTimestamp(),
+            },
+            { merge: true },
+          );
+
+        return userCredential.user;
+      } catch (linkError: any) {
+        console.warn(
+          "⚠️ Could not link anonymous user, signing in directly:",
+          linkError.code,
+        );
+        // If linking fails (e.g., credential already in use), sign in directly
+      }
+    }
+
+    // Sign in with Firebase credential
+    const userCredential = await auth().signInWithCredential(googleCredential);
+    console.log("✅ Signed in with Google:", userCredential.user.uid);
+
+    return userCredential.user;
+  } catch (error: any) {
+    console.error("Google Sign-In error:", error);
+    throw new Error(error.message || "Google ile giriş başarısız oldu.");
+  }
+};
+
+/**
+ * Sign in with Apple
+ * Requires @invertase/react-native-apple-authentication
+ * Only available on iOS
+ */
+export const signInWithApple = async () => {
+  try {
+    const { appleAuth } =
+      await import("@invertase/react-native-apple-authentication");
+
+    // Perform Apple Sign-In request
+    const appleAuthRequestResponse = await appleAuth.performRequest({
+      requestedOperation: appleAuth.Operation.LOGIN,
+      requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL],
+    });
+
+    // Ensure Apple returned a user identityToken
+    if (!appleAuthRequestResponse.identityToken) {
+      throw new Error("Apple Sign-In başarısız: identity token alınamadı.");
+    }
+
+    // Create Firebase credential
+    const { identityToken, nonce } = appleAuthRequestResponse;
+    const appleCredential = auth.AppleAuthProvider.credential(
+      identityToken,
+      nonce,
+    );
+
+    // Check if there's an anonymous user to link
+    const currentUser = auth().currentUser;
+    if (currentUser && currentUser.isAnonymous) {
+      try {
+        const userCredential =
+          await currentUser.linkWithCredential(appleCredential);
+        console.log(
+          "✅ Anonymous user linked with Apple:",
+          userCredential.user.uid,
+        );
+
+        // Update Firestore document
+        const displayName = appleAuthRequestResponse.fullName
+          ? `${appleAuthRequestResponse.fullName.givenName || ""} ${appleAuthRequestResponse.fullName.familyName || ""}`.trim()
+          : undefined;
+
+        await firestore()
+          .collection(FIREBASE_CONFIG.collections.users)
+          .doc(userCredential.user.uid)
+          .set(
+            {
+              email: userCredential.user.email,
+              displayName: displayName || userCredential.user.displayName,
+              isAnonymous: false,
+              updatedAt: firestore.FieldValue.serverTimestamp(),
+            },
+            { merge: true },
+          );
+
+        return userCredential.user;
+      } catch (linkError: any) {
+        console.warn(
+          "⚠️ Could not link anonymous user, signing in directly:",
+          linkError.code,
+        );
+      }
+    }
+
+    // Sign in with Firebase credential
+    const userCredential = await auth().signInWithCredential(appleCredential);
+    console.log("✅ Signed in with Apple:", userCredential.user.uid);
+
+    return userCredential.user;
+  } catch (error: any) {
+    console.error("Apple Sign-In error:", error);
+    throw new Error(error.message || "Apple ile giriş başarısız oldu.");
+  }
+};
+
 // Export auth and firestore instances for direct use
-export { auth, firestore, retryWithBackoff };
+export { auth, firestore, functions, retryWithBackoff };

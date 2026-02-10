@@ -11,7 +11,7 @@ import {
     LogBox,
     StyleSheet,
     Text,
-    View,
+    View
 } from "react-native";
 import "react-native-reanimated";
 
@@ -106,10 +106,12 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
           return;
         }
 
-        // Create anonymous user if no user exists
+        // No user at all → show sign-in screen
         if (!user) {
-          console.log("👤 App: No user found, creating anonymous user...");
-          await createAnonymousUser();
+          console.log("👤 App: No user found, routing to sign-in...");
+          router.replace("/auth/sign-in");
+          setCurrentRoute("/auth/sign-in");
+          setHasInitialized(true);
           return;
         }
 
@@ -119,11 +121,23 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
         );
         console.log("📊 App: userData state:", {
           exists: !!userData,
+          isAnonymous: user.isAnonymous,
           onboardingCompleted: userData?.onboardingCompleted,
           hasInitialized,
         });
 
-        // Check if user has completed onboarding
+        // Anonymous user → route to onboarding (they are in the middle of onboarding flow)
+        if (user.isAnonymous) {
+          if (!hasInitialized) {
+            console.log("🎯 App: Anonymous user - routing to onboarding");
+            router.replace("/onboarding/welcome");
+            setCurrentRoute("/onboarding/welcome");
+            setHasInitialized(true);
+          }
+          return;
+        }
+
+        // Non-anonymous user → check onboarding status
         let shouldShowDashboard = false;
 
         // Primary check: User context data (this should be reliable once loaded)
@@ -164,39 +178,36 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
                 console.log("❌ App: Onboarding not completed in Firestore");
               }
             } else {
-              console.log(
-                "⚠️ App: No user document found in Firestore yet - routing to onboarding",
-              );
+              console.log("⚠️ App: No user document found in Firestore yet");
             }
           } catch (error) {
             console.warn(
               "⚠️ App: Error checking Firestore after retries:",
               error,
             );
-            // If Firestore is unavailable, we'll route to onboarding as a safe default
-            // The user can complete onboarding and data will sync when Firestore is available
           }
         }
 
         // Route based on onboarding status
-        // Check if user is on onboarding screens and needs routing
         const isOnOnboarding = currentRoute?.startsWith("/onboarding");
+        const isOnAuth = currentRoute?.startsWith("/auth");
         const isOnPaywall = currentRoute === "/paywall";
         const isOnDashboard =
           currentRoute === "/dashboard" || currentRoute === "/(tabs)";
 
-        // Route if: not initialized OR user just completed onboarding and still on onboarding screens
+        // Route if: not initialized OR user just completed onboarding and still on onboarding/auth screens
         const shouldRoute =
-          !hasInitialized || (shouldShowDashboard && isOnOnboarding);
+          !hasInitialized ||
+          (shouldShowDashboard && (isOnOnboarding || isOnAuth));
 
         if (shouldRoute) {
           if (shouldShowDashboard) {
-            console.log(
-              "🎯 App: ROUTING TO PAYWALL - first time after onboarding",
-            );
+            console.log("🎯 App: ROUTING TO PAYWALL - onboarding completed");
             router.replace("/paywall");
             setCurrentRoute("/paywall");
           } else {
+            // Non-anonymous user without completed onboarding
+            // This could be a user who signed in via Google/Apple but hasn't done onboarding
             console.log(
               "🎯 App: ROUTING TO ONBOARDING - user needs to complete onboarding",
             );
@@ -207,24 +218,24 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
         }
       } catch (error) {
         console.error("❌ App: Error during initialization:", error);
-        // Safe fallback to onboarding
+        // Safe fallback to sign-in
         if (!hasInitialized) {
-          router.replace("/onboarding/welcome");
+          router.replace("/auth/sign-in");
           setHasInitialized(true);
         }
       }
     };
 
     // Run when loading is complete and we haven't initialized yet
-    // This will create anonymous user if needed or route based on existing user
     if (isLoading === false && !hasInitialized) {
       initializeApp();
     }
-  }, [isLoading, user, userData, hasInitialized, currentRoute]); // Added currentRoute to dependencies
+  }, [isLoading, user, userData, hasInitialized, currentRoute]);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
         <Stack.Screen name="dashboard" options={{ headerShown: false }} />
         <Stack.Screen name="paywall" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
@@ -248,10 +259,39 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [firebaseReady, setFirebaseReady] = useState(false);
 
+  // Suppress Firebase emulator "already initialized" errors in development
+  useEffect(() => {
+    if (__DEV__) {
+      const defaultHandler = ErrorUtils.getGlobalHandler?.();
+      ErrorUtils.setGlobalHandler((error: any, isFatal?: boolean) => {
+        const errorStr = String(error?.message || error).toLowerCase();
+        // Suppress Firebase emulator re-initialization errors
+        if (
+          errorStr.includes("firestore") &&
+          (errorStr.includes("already") ||
+            errorStr.includes("initialized") ||
+            errorStr.includes("unknown"))
+        ) {
+          console.log(
+            "🔧 Suppressed Firebase emulator error (already initialized)",
+          );
+          return;
+        }
+        // Use default handler for other errors
+        defaultHandler?.(error, isFatal);
+      });
+    }
+  }, []);
+
   // Initialize Firebase Emulators before rendering providers
   useEffect(() => {
     const initializeFirebase = async () => {
-      await initializeFirebaseEmulators();
+      try {
+        await initializeFirebaseEmulators();
+      } catch (error) {
+        console.warn("Firebase emulator initialization note:", error);
+        // Continue even if emulator setup fails - app will use production config
+      }
       setFirebaseReady(true);
     };
 

@@ -29,6 +29,10 @@ export interface OnboardingContextType {
   completedSteps: number[];
   isCompleted: boolean;
 
+  // Unit preferences
+  heightUnit: 'cm' | 'inches';
+  weightUnit: 'kg' | 'lbs';
+
   // Actions
   updateProfile: (data: Partial<UserProfile>) => void;
   updateGoals: (data: Partial<Goals>) => void;
@@ -37,6 +41,8 @@ export interface OnboardingContextType {
   updatePreferences: (data: Partial<Preferences>) => void;
   updateCommitment: (data: Partial<Commitment>) => void;
   updateAccount: (data: Partial<Account>) => void;
+  setHeightUnit: (unit: 'cm' | 'inches') => void;
+  setWeightUnit: (unit: 'kg' | 'lbs') => void;
   getCurrentStep: (screenName: ScreenName) => number;
   getProgressPercentage: (currentStep: number) => number;
   validateScreenName: (screenName: string) => boolean;
@@ -64,6 +70,8 @@ export interface OnboardingStorage {
   isCompleted: boolean;
   lastUpdated: string;
   version: string;
+  heightUnit?: 'cm' | 'inches';
+  weightUnit?: 'kg' | 'lbs';
 }
 
 // Screen navigation types
