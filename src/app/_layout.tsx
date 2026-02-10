@@ -106,13 +106,23 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
           return;
         }
 
-        // No user at all → show sign-in screen
+        // No user at all → auto-create anonymous user and go to onboarding
         if (!user) {
-          console.log("👤 App: No user found, routing to sign-in...");
-          router.replace("/auth/sign-in");
-          setCurrentRoute("/auth/sign-in");
-          setHasInitialized(true);
-          return;
+          console.log("👤 App: No user found - auto-creating anonymous user...");
+          try {
+            await createAnonymousUser();
+            console.log("✅ App: Anonymous user created, routing to onboarding");
+            router.replace("/onboarding/welcome");
+            setCurrentRoute("/onboarding/welcome");
+            setHasInitialized(true);
+            return;
+          } catch (error) {
+            console.error("❌ App: Failed to create anonymous user:", error);
+            // Fallback to sign-in if auto-creation fails
+            router.replace("/auth/sign-in");
+            setHasInitialized(true);
+            return;
+          }
         }
 
         console.log(
