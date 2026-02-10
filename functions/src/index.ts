@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as admin from "firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
 import { Resend } from "resend";
 
@@ -132,7 +133,7 @@ interface GeminiRequest {
 }
 
 interface FirestoreAnalysisData extends FoodAnalysisResponse {
-  timestamp: admin.firestore.FieldValue;
+  timestamp: FieldValue;
   user_id: string;
   image_hash?: string;
 }
@@ -580,7 +581,7 @@ export const analyzeFood = functions.https.onRequest(
       try {
         const analysisData: FirestoreAnalysisData = {
           ...analysisResult,
-          timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          timestamp: FieldValue.serverTimestamp(),
           user_id:
             userId ||
             req.headers.authorization?.replace("Bearer ", "") ||
@@ -821,7 +822,7 @@ export const sendEmailOTP = functions.https.onCall(
         email: normalizedEmail,
         code: code,
         anonymousUid: anonymousUid || null,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
         expiresAt: expiresAt,
         verified: false,
         attempts: 0,
@@ -919,7 +920,7 @@ export const verifyEmailOTP = functions.https.onCall(
 
       // Increment attempt counter
       await otpDoc.ref.update({
-        attempts: admin.firestore.FieldValue.increment(1),
+        attempts: FieldValue.increment(1),
       });
 
       // Verify the code
@@ -1036,8 +1037,8 @@ export const verifyEmailOTP = functions.https.onCall(
             email: normalizedEmail,
             isAnonymous: false,
             onboardingCompleted: false,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
           });
           console.log(
             `✅ Sign-in: Created new user with email ${normalizedEmail}: ${uid}`,
@@ -1052,7 +1053,7 @@ export const verifyEmailOTP = functions.https.onCall(
             email: normalizedEmail,
             emailVerified: true,
             isAnonymous: false,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
           },
           { merge: true },
         );

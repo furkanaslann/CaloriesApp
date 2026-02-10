@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyEmailOTP = exports.sendEmailOTP = exports.analyzeFood = void 0;
 const axios_1 = __importDefault(require("axios"));
 const admin = __importStar(require("firebase-admin"));
+const firestore_1 = require("firebase-admin/firestore");
 const functions = __importStar(require("firebase-functions"));
 const resend_1 = require("resend");
 admin.initializeApp();
@@ -420,7 +421,7 @@ exports.analyzeFood = functions.https.onRequest({
         }
         // Firebase'e kaydet
         try {
-            const analysisData = Object.assign(Object.assign({}, analysisResult), { timestamp: admin.firestore.FieldValue.serverTimestamp(), user_id: userId ||
+            const analysisData = Object.assign(Object.assign({}, analysisResult), { timestamp: firestore_1.FieldValue.serverTimestamp(), user_id: userId ||
                     ((_f = req.headers.authorization) === null || _f === void 0 ? void 0 : _f.replace("Bearer ", "")) ||
                     "anonymous" });
             await admin.firestore().collection("food_analysis").add(analysisData);
@@ -601,7 +602,7 @@ exports.sendEmailOTP = functions.https.onCall({
             email: normalizedEmail,
             code: code,
             anonymousUid: anonymousUid || null,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdAt: firestore_1.FieldValue.serverTimestamp(),
             expiresAt: expiresAt,
             verified: false,
             attempts: 0,
@@ -667,7 +668,7 @@ exports.verifyEmailOTP = functions.https.onCall({
         }
         // Increment attempt counter
         await otpDoc.ref.update({
-            attempts: admin.firestore.FieldValue.increment(1),
+            attempts: firestore_1.FieldValue.increment(1),
         });
         // Verify the code
         if (otpData.code !== normalizedCode) {
@@ -763,8 +764,8 @@ exports.verifyEmailOTP = functions.https.onCall({
                     email: normalizedEmail,
                     isAnonymous: false,
                     onboardingCompleted: false,
-                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-                    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    createdAt: firestore_1.FieldValue.serverTimestamp(),
+                    updatedAt: firestore_1.FieldValue.serverTimestamp(),
                 });
                 console.log(`✅ Sign-in: Created new user with email ${normalizedEmail}: ${uid}`);
             }
@@ -775,7 +776,7 @@ exports.verifyEmailOTP = functions.https.onCall({
                 email: normalizedEmail,
                 emailVerified: true,
                 isAnonymous: false,
-                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firestore_1.FieldValue.serverTimestamp(),
             }, { merge: true });
         }
         catch (dbError) {
