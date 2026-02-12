@@ -13,7 +13,8 @@
     "deploy": "npm run build && firebase deploy --only functions",
     "logs": "firebase functions:log",
     "predeploy": "npm run build",
-    "test": "jest"
+    "test": "jest",
+    "seed:emulator": "npm run build && node lib/scripts/seedEmulator.js"
   },
   "keywords": [
     "firebase",

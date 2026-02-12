@@ -25,6 +25,7 @@ import {
     initializeFirebaseEmulators,
     retryWithBackoff,
 } from "@/utils/firebase";
+import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 
 export const unstable_settings = {
@@ -89,6 +90,46 @@ LogBox.ignoreLogs([
   "deprecated",
 ]);
 
+/**
+ * Auto-login with test user in development mode (emulator only)
+ * This allows seamless testing with pre-seeded data
+ */
+const autoLoginInDev = async (): Promise<boolean> => {
+  if (!__DEV__) return false;
+
+  const currentUser = auth().currentUser;
+  
+  // Already logged in with a permanent account, skip
+  if (currentUser && !currentUser.isAnonymous) {
+    console.log("🔧 DEV: Already logged in with permanent account, skipping auto-login");
+    return false;
+  }
+
+  // Sign out anonymous user first
+  if (currentUser && currentUser.isAnonymous) {
+    console.log("🔧 DEV: Signing out anonymous user for auto-login...");
+    try {
+      await auth().signOut();
+    } catch (error) {
+      console.warn("⚠️ DEV: Error signing out anonymous user:", error);
+    }
+  }
+
+  try {
+    console.log("🔧 DEV: Auto-login with test user...");
+    await auth().signInWithEmailAndPassword(
+      "test@example.com",
+      "DevTest123!"
+    );
+    console.log("✅ DEV: Auto-login successful");
+    return true;
+  } catch (error: any) {
+    console.warn("⚠️ DEV: Auto-login failed:", error.message);
+    console.warn("   Make sure you've run: npm run seed:emulator");
+    return false;
+  }
+};
+
 function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
   const colorScheme = useColorScheme();
   const { isLoading, user, createAnonymousUser, userData } = useUser();
@@ -104,6 +145,21 @@ function RootLayoutNav({ initialRoute }: { initialRoute?: string }) {
         if (isLoading) {
           console.log("⏳ App: Still loading user data...");
           return;
+        }
+
+        // DEV MODE: Auto-login with test user if no user or anonymous user
+        if (__DEV__ && (!user || user.isAnonymous)) {
+          console.log("🔧 DEV: Attempting auto-login with test user...");
+          const didLogin = await autoLoginInDev();
+          if (didLogin) {
+            console.log("✅ DEV: Auto-login completed, waiting for user context to update...");
+            // UserProvider will pick up the new user via onAuthStateChanged
+            // Don't continue routing - let the next useEffect handle it
+            return;
+          } else if (!user) {
+            console.log("⚠️ DEV: Auto-login failed, creating anonymous user as fallback...");
+            // Continue with anonymous user creation below
+          }
         }
 
         // No user at all → auto-create anonymous user and go to onboarding
