@@ -309,11 +309,32 @@ async function createOrUpdateTestUser() {
         createdAt: firestore_1.FieldValue.serverTimestamp(),
     }, { merge: true });
     console.log(`✅ Firestore document for ${TEST_USER_ID} created/updated.`);
+    // 3. Generate and store Firebase Custom Token
+    const customToken = await admin.auth().createCustomToken(TEST_USER_ID);
+    await userRef.update({
+        customToken: customToken,
+        customTokenCreatedAt: firestore_1.FieldValue.serverTimestamp(),
+    });
+    console.log(`✅ Custom Token generated and stored for ${TEST_USER_ID}`);
+    console.log(`   Token: ${customToken.substring(0, 50)}...`);
     console.log("\n========================================");
     console.log("🔐 AUTO-LOGIN CREDENTIALS FOR DEV:");
     console.log(`   Email: ${testEmail}`);
     console.log(`   Password: ${testPassword}`);
+    console.log(`   UID: ${TEST_USER_ID}`);
+    console.log(`   Custom Token: ${customToken.substring(0, 30)}...`);
+    console.log("   (Full token stored in Firestore)");
     console.log("========================================\n");
+}
+/**
+ * Test kullanıcısının custom token'ını Firestore'dan alır.
+ * Test amaçlı kullanılabilir - token'ı console'da görmek veya
+ * API testlerinde Authorization header olarak kullanmak için.
+ */
+async function getTestUserCustomToken() {
+    const userDoc = await db.collection("users").doc(TEST_USER_ID).get();
+    const data = userDoc.data();
+    return (data === null || data === void 0 ? void 0 : data.customToken) || null;
 }
 async function clearExistingMeals() {
     const mealsCol = db
