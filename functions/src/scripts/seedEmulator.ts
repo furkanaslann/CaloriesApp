@@ -46,7 +46,8 @@ if (!admin.apps.length) {
   // Auth emulator'a bağlan (eğer FIRESTORE_EMULATOR_HOST varsa, Auth da emulator'dadır)
   if (isEmulator) {
     // Auth emulator default port 9099
-    const authEmulatorHost = process.env.FIREBASE_AUTH_EMULATOR_HOST || "localhost:9099";
+    const authEmulatorHost =
+      process.env.FIREBASE_AUTH_EMULATOR_HOST || "localhost:9099";
     process.env.FIREBASE_AUTH_EMULATOR_HOST = authEmulatorHost;
     console.log(`Using Auth Emulator at ${authEmulatorHost}`);
   }
@@ -170,9 +171,10 @@ function getMealTime(type: MealType): string {
   }
 }
 
-function buildNutritionAndCalories(
-  type: MealType,
-): { calories: number; nutrition: Nutrition } {
+function buildNutritionAndCalories(type: MealType): {
+  calories: number;
+  nutrition: Nutrition;
+} {
   let calRange: [number, number];
 
   switch (type) {
@@ -288,7 +290,7 @@ async function createOrUpdateTestUser(): Promise<void> {
   try {
     const existingUser = await admin.auth().getUser(TEST_USER_ID);
     console.log(`Auth user ${TEST_USER_ID} already exists, updating...`);
-    
+
     // Kullanıcı varsa güncelle
     await admin.auth().updateUser(TEST_USER_ID, {
       email: testEmail,
@@ -317,6 +319,7 @@ async function createOrUpdateTestUser(): Promise<void> {
   await userRef.set(
     {
       uid: TEST_USER_ID,
+      // isPremium: true,
       email: testEmail,
       displayName: "Test User",
       isAnonymous: false,
@@ -385,10 +388,7 @@ async function getTestUserCustomToken(): Promise<string | null> {
 }
 
 async function clearExistingMeals(): Promise<void> {
-  const mealsCol = db
-    .collection("users")
-    .doc(TEST_USER_ID)
-    .collection("meals");
+  const mealsCol = db.collection("users").doc(TEST_USER_ID).collection("meals");
 
   console.log("Clearing existing meals for", TEST_USER_ID);
 
@@ -426,10 +426,7 @@ async function seedMeals(): Promise<void> {
     console.log(`Seeding ${meals.length} meals for ${dateStr}...`);
 
     const batch = db.batch();
-    const colRef = db
-      .collection("users")
-      .doc(TEST_USER_ID)
-      .collection("meals");
+    const colRef = db.collection("users").doc(TEST_USER_ID).collection("meals");
 
     meals.forEach((meal) => {
       const docRef = colRef.doc();
@@ -460,4 +457,3 @@ run()
     console.error("Error while running seed script:", error);
     process.exit(1);
   });
-

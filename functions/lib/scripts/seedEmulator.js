@@ -278,6 +278,7 @@ async function createOrUpdateTestUser() {
     const userRef = db.collection("users").doc(TEST_USER_ID);
     await userRef.set({
         uid: TEST_USER_ID,
+        // isPremium: true,
         email: testEmail,
         displayName: "Test User",
         isAnonymous: false,
@@ -337,10 +338,7 @@ async function getTestUserCustomToken() {
     return (data === null || data === void 0 ? void 0 : data.customToken) || null;
 }
 async function clearExistingMeals() {
-    const mealsCol = db
-        .collection("users")
-        .doc(TEST_USER_ID)
-        .collection("meals");
+    const mealsCol = db.collection("users").doc(TEST_USER_ID).collection("meals");
     console.log("Clearing existing meals for", TEST_USER_ID);
     const batchSize = 500;
     // eslint-disable-next-line no-constant-condition
@@ -368,10 +366,7 @@ async function seedMeals() {
         }
         console.log(`Seeding ${meals.length} meals for ${dateStr}...`);
         const batch = db.batch();
-        const colRef = db
-            .collection("users")
-            .doc(TEST_USER_ID)
-            .collection("meals");
+        const colRef = db.collection("users").doc(TEST_USER_ID).collection("meals");
         meals.forEach((meal) => {
             const docRef = colRef.doc();
             batch.set(docRef, meal);

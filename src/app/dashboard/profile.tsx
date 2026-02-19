@@ -3,15 +3,19 @@
  * Minimal. Cool. Aesthetic.
  */
 
-import BottomNavigation from '@/components/navigation/BottomNavigation';
-import { FIREBASE_CONFIG } from '@/constants/firebase';
-import { BORDER_RADIUS, COLORS, SHADOWS, SPACING, TYPOGRAPHY } from '@/constants/theme';
-import { useUser } from '@/context/user-context';
-import { Ionicons } from '@expo/vector-icons';
-import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import BottomNavigation from "@/components/navigation/BottomNavigation";
+import { FIREBASE_CONFIG } from "@/constants/firebase";
+import {
+  BORDER_RADIUS,
+  COLORS,
+  SHADOWS,
+  SPACING,
+  TYPOGRAPHY,
+} from "@/constants/theme";
+import { useUser } from "@/context/user-context";
+import firestore from "@react-native-firebase/firestore";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -19,14 +23,14 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextStyle,
   TextInput,
+  TextStyle,
   TouchableOpacity,
-  View
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const ProfileDashboardScreen = () => {
   const router = useRouter();
@@ -38,26 +42,26 @@ const ProfileDashboardScreen = () => {
     totalDays: 0,
     totalCalories: 0,
     goalsCompleted: 0,
-    currentStreak: 0
+    currentStreak: 0,
   });
 
   const [editForm, setEditForm] = useState({
-    firstName: userData?.profile?.name || '',
-    lastName: userData?.profile?.lastName || '',
-    phone: userData?.commitment?.phone || '',
-    age: userData?.profile?.age?.toString() || '',
-    height: userData?.profile?.height?.toString() || '',
-    currentWeight: userData?.profile?.currentWeight?.toString() || '',
-    targetWeight: userData?.goals?.targetWeight?.toString() || '',
-    primaryGoal: userData?.goals?.primaryGoal || '',
-    weeklyGoal: userData?.goals?.weeklyGoal?.toString() || '',
-    timeline: userData?.goals?.timeline || ''
+    firstName: userData?.profile?.name || "",
+    lastName: userData?.profile?.lastName || "",
+    phone: userData?.commitment?.phone || "",
+    age: userData?.profile?.age?.toString() || "",
+    height: userData?.profile?.height?.toString() || "",
+    currentWeight: userData?.profile?.currentWeight?.toString() || "",
+    targetWeight: userData?.goals?.targetWeight?.toString() || "",
+    primaryGoal: userData?.goals?.primaryGoal || "",
+    weeklyGoal: userData?.goals?.weeklyGoal?.toString() || "",
+    timeline: userData?.goals?.timeline || "",
   });
 
   const goalOptions = [
-    { value: 'weight_loss', label: 'Kilo Verme', icon: '🏃‍♂️' },
-    { value: 'muscle_gain', label: 'Kas Kazanma', icon: '💪' },
-    { value: 'maintenance', label: 'Koruma', icon: '⚖️' }
+    { value: "weight_loss", label: "Kilo Verme", icon: "🏃‍♂️" },
+    { value: "muscle_gain", label: "Kas Kazanma", icon: "💪" },
+    { value: "maintenance", label: "Koruma", icon: "⚖️" },
   ];
 
   // Handle edit profile
@@ -65,10 +69,9 @@ const ProfileDashboardScreen = () => {
     setShowEditModal(true);
   };
 
-  
   // Handle settings
   const handleSettings = () => {
-    router.push('/dashboard/settings');
+    router.push("/dashboard/settings");
   };
 
   // Handle save profile
@@ -79,25 +82,28 @@ const ProfileDashboardScreen = () => {
       setLoading(true);
 
       const updateData = {
-        'profile.name': editForm.firstName,
-        'profile.lastName': editForm.lastName,
-        'profile.age': parseInt(editForm.age) || null,
-        'profile.height': parseFloat(editForm.height) || null,
-        'profile.currentWeight': parseFloat(editForm.currentWeight) || null,
-        'commitment.phone': editForm.phone,
-        'goals.targetWeight': parseFloat(editForm.targetWeight) || null,
-        'goals.primaryGoal': editForm.primaryGoal,
-        'goals.weeklyGoal': parseFloat(editForm.weeklyGoal) || null,
-        'goals.timeline': editForm.timeline,
+        "profile.name": editForm.firstName,
+        "profile.lastName": editForm.lastName,
+        "profile.age": parseInt(editForm.age) || null,
+        "profile.height": parseFloat(editForm.height) || null,
+        "profile.currentWeight": parseFloat(editForm.currentWeight) || null,
+        "commitment.phone": editForm.phone,
+        "goals.targetWeight": parseFloat(editForm.targetWeight) || null,
+        "goals.primaryGoal": editForm.primaryGoal,
+        "goals.weeklyGoal": parseFloat(editForm.weeklyGoal) || null,
+        "goals.timeline": editForm.timeline,
       };
 
-      await firestore().collection(FIREBASE_CONFIG.collections.users).doc(user.uid).update(updateData);
+      await firestore()
+        .collection(FIREBASE_CONFIG.collections.users)
+        .doc(user.uid)
+        .update(updateData);
       await refreshUserData();
       setShowEditModal(false);
-      Alert.alert('Başarılı', 'Profiliniz başarıyla güncellendi.');
+      Alert.alert("Başarılı", "Profiliniz başarıyla güncellendi.");
     } catch (error) {
-      console.error('Error updating profile:', error);
-      Alert.alert('Hata', 'Profil güncellenirken bir hata oluştu.');
+      console.error("Error updating profile:", error);
+      Alert.alert("Hata", "Profil güncellenirken bir hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -105,29 +111,25 @@ const ProfileDashboardScreen = () => {
 
   // Handle sign out
   const handleSignOut = () => {
-    Alert.alert(
-      'Çıkış Yap',
-      'Çıkmak istediğinizden emin misiniz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Çıkış Yap',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setLoading(true);
-              await signOut();
-              router.replace('/onboarding/welcome');
-            } catch (error) {
-              console.error('Sign out error:', error);
-              Alert.alert('Hata', 'Çıkış yapılamadı. Lütfen tekrar deneyin.');
-            } finally {
-              setLoading(false);
-            }
+    Alert.alert("Çıkış Yap", "Çıkmak istediğinizden emin misiniz?", [
+      { text: "İptal", style: "cancel" },
+      {
+        text: "Çıkış Yap",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            setLoading(true);
+            await signOut();
+            router.replace("/onboarding/welcome");
+          } catch (error) {
+            console.error("Sign out error:", error);
+            Alert.alert("Hata", "Çıkış yapılamadı. Lütfen tekrar deneyin.");
+          } finally {
+            setLoading(false);
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   // Create theme object that matches expected structure
@@ -138,22 +140,28 @@ const ProfileDashboardScreen = () => {
         primary: COLORS.textPrimary,
         secondary: COLORS.textSecondary,
         tertiary: COLORS.textTertiary,
-        onPrimary: '#FFFFFF'
+        onPrimary: "#FFFFFF",
       },
       border: { primary: COLORS.border },
     },
     colors: {
       primary: COLORS.primary,
       gradientStart: COLORS.primary,
-      gradientEnd: '#EC4899',
-      success: '#10B981',
-      warning: '#F59E0B',
-      danger: '#EF4444',
+      gradientEnd: "#EC4899",
+      success: "#10B981",
+      warning: "#F59E0B",
+      danger: "#EF4444",
     },
     textStyles: {
-      onboardingHero: { fontSize: TYPOGRAPHY.fontSizes['4xl'] },
-      onboardingTitle: { fontSize: TYPOGRAPHY.fontSizes['3xl'], fontWeight: '600' },
-      onboardingSubtitle: { fontSize: TYPOGRAPHY.fontSizes['xl'], fontWeight: '500' },
+      onboardingHero: { fontSize: TYPOGRAPHY.fontSizes["4xl"] },
+      onboardingTitle: {
+        fontSize: TYPOGRAPHY.fontSizes["3xl"],
+        fontWeight: "600",
+      },
+      onboardingSubtitle: {
+        fontSize: TYPOGRAPHY.fontSizes["xl"],
+        fontWeight: "500",
+      },
       onboardingDescription: { fontSize: TYPOGRAPHY.fontSizes.base },
     },
     spacing: {
@@ -163,8 +171,8 @@ const ProfileDashboardScreen = () => {
       md: SPACING[3],
       lg: SPACING[4],
       xl: SPACING[5],
-      '2xl': SPACING[6],
-      '4xl': SPACING[12],
+      "2xl": SPACING[6],
+      "4xl": SPACING[12],
     },
     borderRadius: BORDER_RADIUS,
     shadows: SHADOWS,
@@ -174,28 +182,28 @@ const ProfileDashboardScreen = () => {
   // Get user display name
   const getDisplayName = () => {
     if (userData?.profile?.name) {
-      return `${userData.profile.name} ${userData.profile.lastName || ''}`;
+      return `${userData.profile.name} ${userData.profile.lastName || ""}`;
     }
     if (user?.displayName) {
       return user.displayName;
     }
     if (user?.email) {
-      return user.email.split('@')[0];
+      return user.email.split("@")[0];
     }
-    return 'Kullanıcı';
+    return "Kullanıcı";
   };
 
   // Get formatted join date
   const getJoinDate = () => {
     if (userData?.createdAt) {
       const date = new Date(userData.createdAt);
-      return date.toLocaleDateString('tr-TR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
+      return date.toLocaleDateString("tr-TR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
       });
     }
-    return 'Bilinmiyor';
+    return "Bilinmiyor";
   };
 
   // Calculate stats from user data
@@ -219,10 +227,10 @@ const ProfileDashboardScreen = () => {
 
         const foodLogsSnapshot = await firestore()
           .collection(FIREBASE_CONFIG.collections.foodLogs)
-          .where('userId', '==', user.uid)
+          .where("userId", "==", user.uid)
           .get();
 
-        foodLogsSnapshot.forEach(doc => {
+        foodLogsSnapshot.forEach((doc) => {
           const log = doc.data();
           if (log.calories) {
             totalCalories += log.calories;
@@ -233,7 +241,8 @@ const ProfileDashboardScreen = () => {
         if (userData.goals?.targetWeight && userData.progress?.currentWeight) {
           const currentWeight = userData.progress.currentWeight;
           const targetWeight = userData.goals.targetWeight;
-          const startingWeight = userData.progress.startingWeight || currentWeight;
+          const startingWeight =
+            userData.progress.startingWeight || currentWeight;
 
           // Calculate progress percentage
           const totalGoal = Math.abs(startingWeight - targetWeight);
@@ -248,10 +257,10 @@ const ProfileDashboardScreen = () => {
           totalDays,
           totalCalories: Math.round(totalCalories),
           goalsCompleted,
-          currentStreak: userData.progress?.timeOnApp || 0
+          currentStreak: userData.progress?.timeOnApp || 0,
         });
       } catch (error) {
-        console.error('Error calculating stats:', error);
+        console.error("Error calculating stats:", error);
       }
     };
 
@@ -260,92 +269,129 @@ const ProfileDashboardScreen = () => {
 
   const profileSections = [
     {
-      title: 'Kişisel Bilgiler',
+      title: "Kişisel Bilgiler",
       items: [
-        { label: 'Ad Soyad', value: getDisplayName(), icon: '👤' },
-        { label: 'E-posta', value: user?.email || 'Bilinmiyor', icon: '📧' },
-        { label: 'Kullanıcı ID', value: user?.uid || 'Bilinmiyor', icon: '🔑' },
-        { label: 'Telefon', value: userData?.commitment?.phone || 'Belirtilmemiş', icon: '📱' },
+        { label: "Ad Soyad", value: getDisplayName(), icon: "👤" },
+        { label: "E-posta", value: user?.email || "Bilinmiyor", icon: "📧" },
+        { label: "Kullanıcı ID", value: user?.uid || "Bilinmiyor", icon: "🔑" },
         {
-          label: 'Doğum Tarihi',
-          value: userData?.profile?.dateOfBirth || 'Belirtilmemiş',
-          icon: '🎂'
+          label: "Telefon",
+          value: userData?.commitment?.phone || "Belirtilmemiş",
+          icon: "📱",
         },
         {
-          label: 'Yaş',
-          value: userData?.profile?.age ? `${userData.profile.age} yaş` : 'Belirtilmemiş',
-          icon: '🎂'
+          label: "Doğum Tarihi",
+          value: userData?.profile?.dateOfBirth || "Belirtilmemiş",
+          icon: "🎂",
         },
-      ]
+        {
+          label: "Yaş",
+          value: userData?.profile?.age
+            ? `${userData.profile.age} yaş`
+            : "Belirtilmemiş",
+          icon: "🎂",
+        },
+      ],
     },
     {
-      title: 'Sağlık Bilgileri',
+      title: "Sağlık Bilgileri",
       items: [
         {
-          label: 'Boy',
-          value: userData?.profile?.height ? `${userData.profile.height} cm` : 'Belirtilmemiş',
-          icon: '📏'
+          label: "Boy",
+          value: userData?.profile?.height
+            ? `${userData.profile.height} cm`
+            : "Belirtilmemiş",
+          icon: "📏",
         },
         {
-          label: 'Mevcut Kilo',
-          value: userData?.profile?.currentWeight ? `${userData.profile.currentWeight} kg` : 'Belirtilmemiş',
-          icon: '⚖️'
+          label: "Mevcut Kilo",
+          value: userData?.profile?.currentWeight
+            ? `${userData.profile.currentWeight} kg`
+            : "Belirtilmemiş",
+          icon: "⚖️",
         },
         {
-          label: 'Hedef Kilo',
-          value: userData?.goals?.targetWeight ? `${userData.goals.targetWeight} kg` : 'Belirtilmemiş',
-          icon: '🎯'
+          label: "Hedef Kilo",
+          value: userData?.goals?.targetWeight
+            ? `${userData.goals.targetWeight} kg`
+            : "Belirtilmemiş",
+          icon: "🎯",
         },
         {
-          label: 'Aktivite Seviyesi',
-          value: userData?.activity?.level === 'sedentary' ? 'Düşük' :
-                userData?.activity?.level === 'lightly_active' ? 'Hafif Aktif' :
-                userData?.activity?.level === 'moderately_active' ? 'Orta Aktif' :
-                userData?.activity?.level === 'very_active' ? 'Çok Aktif' : 'Bilinmiyor',
-          icon: '🏃'
+          label: "Aktivite Seviyesi",
+          value:
+            userData?.activity?.level === "sedentary"
+              ? "Düşük"
+              : userData?.activity?.level === "lightly_active"
+                ? "Hafif Aktif"
+                : userData?.activity?.level === "moderately_active"
+                  ? "Orta Aktif"
+                  : userData?.activity?.level === "very_active"
+                    ? "Çok Aktif"
+                    : "Bilinmiyor",
+          icon: "🏃",
         },
         {
-          label: 'Cinsiyet',
-          value: userData?.profile?.gender === 'male' ? 'Erkek' :
-                userData?.profile?.gender === 'female' ? 'Kadın' : 'Belirtilmemiş',
-          icon: '⚧️'
-        }
-      ]
+          label: "Cinsiyet",
+          value:
+            userData?.profile?.gender === "male"
+              ? "Erkek"
+              : userData?.profile?.gender === "female"
+                ? "Kadın"
+                : "Belirtilmemiş",
+          icon: "⚧️",
+        },
+      ],
     },
     {
-      title: 'Hedefler',
+      title: "Hedefler",
       items: [
         {
-          label: 'Ana Hedef',
-          value: userData?.goals?.primaryGoal === 'weight_loss' ? 'Kilo Verme' :
-                userData?.goals?.primaryGoal === 'muscle_gain' ? 'Kas Kazanma' :
-                userData?.goals?.primaryGoal === 'maintenance' ? 'Koruma' : 'Belirtilmemiş',
-          icon: '🏆'
+          label: "Ana Hedef",
+          value:
+            userData?.goals?.primaryGoal === "weight_loss"
+              ? "Kilo Verme"
+              : userData?.goals?.primaryGoal === "muscle_gain"
+                ? "Kas Kazanma"
+                : userData?.goals?.primaryGoal === "maintenance"
+                  ? "Koruma"
+                  : "Belirtilmemiş",
+          icon: "🏆",
         },
         {
-          label: 'Haftalık Hedef',
-          value: userData?.goals?.weeklyGoal ? `${userData.goals.weeklyGoal} kg` : 'Belirtilmemiş',
-          icon: '📊'
+          label: "Haftalık Hedef",
+          value: userData?.goals?.weeklyGoal
+            ? `${userData.goals.weeklyGoal} kg`
+            : "Belirtilmemiş",
+          icon: "📊",
         },
         {
-          label: 'Günlük Kalori Hedefi',
-          value: userData?.calculatedValues?.dailyCalorieGoal ? `${userData.calculatedValues.dailyCalorieGoal} kcal` : 'Belirtilmemiş',
-          icon: '🔥'
+          label: "Günlük Kalori Hedefi",
+          value: userData?.calculatedValues?.dailyCalorieGoal
+            ? `${userData.calculatedValues.dailyCalorieGoal} kcal`
+            : "Belirtilmemiş",
+          icon: "🔥",
         },
         {
-          label: 'Beslenme Tipi',
-          value: userData?.diet?.type === 'omnivore' ? 'Her Şeyden Yer' :
-                userData?.diet?.type === 'vegetarian' ? 'Vejetaryen' :
-                userData?.diet?.type === 'vegan' ? 'Vegan' :
-                userData?.diet?.type === 'pescatarian' ? 'Pesketaryen' : 'Belirtilmemiş',
-          icon: '🥗'
+          label: "Beslenme Tipi",
+          value:
+            userData?.diet?.type === "omnivore"
+              ? "Her Şeyden Yer"
+              : userData?.diet?.type === "vegetarian"
+                ? "Vejetaryen"
+                : userData?.diet?.type === "vegan"
+                  ? "Vegan"
+                  : userData?.diet?.type === "pescatarian"
+                    ? "Pesketaryen"
+                    : "Belirtilmemiş",
+          icon: "🥗",
         },
         {
-          label: 'Katılım Tarihi',
+          label: "Katılım Tarihi",
           value: getJoinDate(),
-          icon: '📅'
-        }
-      ]
+          icon: "📅",
+        },
+      ],
     },
   ];
 
@@ -359,29 +405,31 @@ const ProfileDashboardScreen = () => {
       flex: 1,
     },
     scrollContent: {
-      paddingBottom: theme.spacing['2xl'],
+      paddingBottom: theme.spacing["2xl"],
     },
     header: {
-      paddingHorizontal: theme.spacing['2xl'],
-      paddingTop: theme.spacing['4xl'],
-      paddingBottom: theme.spacing['2xl'],
+      paddingHorizontal: theme.spacing["2xl"],
+      paddingTop: theme.spacing["4xl"],
+      paddingBottom: theme.spacing["2xl"],
     },
     title: {
       fontSize: theme.textStyles.onboardingTitle?.fontSize || 30,
-      fontWeight: (theme.textStyles.onboardingTitle?.fontWeight || '600') as TextStyle['fontWeight'],
+      fontWeight: (theme.textStyles.onboardingTitle?.fontWeight ||
+        "600") as TextStyle["fontWeight"],
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.sm,
     },
     subtitle: {
       fontSize: theme.textStyles.onboardingSubtitle?.fontSize || 18,
-      fontWeight: (theme.textStyles.onboardingSubtitle?.fontWeight || '400') as TextStyle['fontWeight'],
+      fontWeight: (theme.textStyles.onboardingSubtitle?.fontWeight ||
+        "400") as TextStyle["fontWeight"],
       color: theme.semanticColors.text.secondary,
     },
     content: {
-      paddingHorizontal: theme.spacing['2xl'],
+      paddingHorizontal: theme.spacing["2xl"],
     },
     section: {
-      marginBottom: theme.spacing['2xl'],
+      marginBottom: theme.spacing["2xl"],
     },
 
     // Profile Header
@@ -390,10 +438,10 @@ const ProfileDashboardScreen = () => {
       borderRadius: theme.borderRadius.lg,
       borderWidth: 1,
       borderColor: theme.semanticColors.border.primary,
-      padding: theme.spacing['2xl'],
-      alignItems: 'center',
-      marginBottom: theme.spacing['2xl'],
-      shadowColor: '#000',
+      padding: theme.spacing["2xl"],
+      alignItems: "center",
+      marginBottom: theme.spacing["2xl"],
+      shadowColor: "#000",
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.05,
       shadowRadius: 2,
@@ -404,8 +452,8 @@ const ProfileDashboardScreen = () => {
       height: 80,
       borderRadius: theme.borderRadius.full,
       backgroundColor: `${theme.colors.primary}20`,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       marginBottom: theme.spacing.lg,
     },
     avatarText: {
@@ -413,16 +461,16 @@ const ProfileDashboardScreen = () => {
     },
     name: {
       fontSize: 20,
-      fontWeight: '700' as TextStyle['fontWeight'],
+      fontWeight: "700" as TextStyle["fontWeight"],
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.sm,
-      textAlign: 'center',
+      textAlign: "center",
     },
     email: {
       fontSize: 14,
       color: theme.semanticColors.text.secondary,
       marginBottom: theme.spacing.md,
-      textAlign: 'center',
+      textAlign: "center",
     },
     levelBadge: {
       backgroundColor: `${theme.colors.warning}20`,
@@ -433,7 +481,7 @@ const ProfileDashboardScreen = () => {
     },
     levelText: {
       fontSize: 12,
-      fontWeight: '600' as TextStyle['fontWeight'],
+      fontWeight: "600" as TextStyle["fontWeight"],
       color: theme.colors.warning,
     },
     memberInfo: {
@@ -443,21 +491,21 @@ const ProfileDashboardScreen = () => {
 
     // Stats Grid
     statsGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
-      marginBottom: theme.spacing['2xl'],
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+      marginBottom: theme.spacing["2xl"],
     },
     statCard: {
-      width: (width - theme.spacing['2xl'] * 2 - theme.spacing.md) / 2,
+      width: (width - theme.spacing["2xl"] * 2 - theme.spacing.md) / 2,
       backgroundColor: theme.semanticColors.background.primary,
       borderRadius: theme.borderRadius.lg,
       borderWidth: 1,
       borderColor: theme.semanticColors.border.primary,
       padding: theme.spacing.lg,
-      alignItems: 'center',
+      alignItems: "center",
       marginBottom: theme.spacing.md,
-      shadowColor: '#000',
+      shadowColor: "#000",
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.05,
       shadowRadius: 2,
@@ -469,14 +517,14 @@ const ProfileDashboardScreen = () => {
     },
     statValue: {
       fontSize: 18,
-      fontWeight: '700' as TextStyle['fontWeight'],
+      fontWeight: "700" as TextStyle["fontWeight"],
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.xs,
     },
     statLabel: {
       fontSize: 10,
       color: theme.semanticColors.text.tertiary,
-      textAlign: 'center',
+      textAlign: "center",
     },
 
     // Profile Sections
@@ -487,7 +535,7 @@ const ProfileDashboardScreen = () => {
       borderColor: theme.semanticColors.border.primary,
       padding: theme.spacing.lg,
       marginBottom: theme.spacing.md,
-      shadowColor: '#000',
+      shadowColor: "#000",
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.05,
       shadowRadius: 2,
@@ -495,20 +543,20 @@ const ProfileDashboardScreen = () => {
     },
     sectionTitle: {
       fontSize: 16,
-      fontWeight: '600' as TextStyle['fontWeight'],
+      fontWeight: "600" as TextStyle["fontWeight"],
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.lg,
     },
     profileItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       marginBottom: theme.spacing.md,
     },
     itemIcon: {
       fontSize: 16,
       marginRight: theme.spacing.md,
       width: 20,
-      textAlign: 'center',
+      textAlign: "center",
     },
     itemInfo: {
       flex: 1,
@@ -520,36 +568,39 @@ const ProfileDashboardScreen = () => {
     },
     itemValue: {
       fontSize: 14,
-      fontWeight: '600' as TextStyle['fontWeight'],
+      fontWeight: "600" as TextStyle["fontWeight"],
       color: theme.semanticColors.text.primary,
     },
 
     // Action Buttons
     actionButtons: {
-      marginBottom: theme.spacing['4xl'],
+      marginBottom: theme.spacing["4xl"],
     },
     actionButton: {
       backgroundColor: theme.colors.primary,
       borderRadius: theme.borderRadius.lg,
       paddingVertical: theme.spacing.md,
       paddingHorizontal: theme.spacing.lg,
-      alignItems: 'center',
+      alignItems: "center",
       marginBottom: theme.spacing.md,
-      shadowColor: '#000',
+      shadowColor: "#000",
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.1,
       shadowRadius: 6,
       elevation: 3,
     },
     secondaryButton: {
-      backgroundColor: 'transparent',
+      backgroundColor: "transparent",
       borderWidth: 1,
       borderColor: theme.semanticColors.border.primary,
+      shadowOpacity: 0,
+      elevation: 0,
+      shadowColor: "transparent",
     },
     actionButtonText: {
       fontSize: 16,
-      fontWeight: '600' as TextStyle['fontWeight'],
-      color: theme.semanticColors.onPrimary,
+      fontWeight: "600" as TextStyle["fontWeight"],
+      color: "white",
     },
     secondaryButtonText: {
       color: theme.semanticColors.text.primary,
@@ -558,26 +609,26 @@ const ProfileDashboardScreen = () => {
     // Modal Styles
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'flex-end',
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      justifyContent: "flex-end",
     },
     modalContainer: {
       backgroundColor: theme.semanticColors.background.primary,
       borderTopLeftRadius: theme.borderRadius.xl,
       borderTopRightRadius: theme.borderRadius.xl,
-      maxHeight: '90%',
+      maxHeight: "90%",
     },
     modalHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
       padding: theme.spacing.lg,
       borderBottomWidth: 1,
       borderBottomColor: theme.semanticColors.border.primary,
     },
     modalTitle: {
       fontSize: 18,
-      fontWeight: '600' as TextStyle['fontWeight'],
+      fontWeight: "600" as TextStyle["fontWeight"],
       color: theme.semanticColors.text.primary,
     },
     modalClose: {
@@ -587,14 +638,14 @@ const ProfileDashboardScreen = () => {
     },
     modalContent: {
       padding: theme.spacing.lg,
-      maxHeight: '70%',
+      maxHeight: "70%",
     },
     inputGroup: {
       marginBottom: theme.spacing.lg,
     },
     inputLabel: {
       fontSize: 14,
-      fontWeight: '500' as TextStyle['fontWeight'],
+      fontWeight: "500" as TextStyle["fontWeight"],
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.sm,
     },
@@ -609,25 +660,25 @@ const ProfileDashboardScreen = () => {
       color: theme.semanticColors.text.primary,
     },
     inputRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      justifyContent: "space-between",
     },
     inputHalf: {
-      width: '48%',
+      width: "48%",
     },
     goalsSection: {
       marginTop: theme.spacing.xl,
     },
     sectionLabel: {
       fontSize: 16,
-      fontWeight: '600' as TextStyle['fontWeight'],
+      fontWeight: "600" as TextStyle["fontWeight"],
       color: theme.semanticColors.text.primary,
       marginBottom: theme.spacing.lg,
     },
     pickerButton: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
       backgroundColor: theme.semanticColors.background.primary,
       borderWidth: 1,
       borderColor: theme.semanticColors.border.primary,
@@ -636,8 +687,8 @@ const ProfileDashboardScreen = () => {
       paddingVertical: theme.spacing.sm,
     },
     pickerContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
     },
     pickerText: {
       fontSize: 16,
@@ -654,20 +705,20 @@ const ProfileDashboardScreen = () => {
       borderColor: theme.semanticColors.border.primary,
       borderRadius: theme.borderRadius.md,
       marginTop: theme.spacing.xs,
-      position: 'absolute',
-      top: '100%',
+      position: "absolute",
+      top: "100%",
       left: 0,
       right: 0,
       zIndex: 1000,
-      shadowColor: '#000',
+      shadowColor: "#000",
       shadowOffset: { width: 0, height: 10 },
       shadowOpacity: 0.1,
       shadowRadius: 15,
       elevation: 5,
     },
     dropdownItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       paddingHorizontal: theme.spacing.md,
       paddingVertical: theme.spacing.sm,
     },
@@ -699,7 +750,7 @@ const ProfileDashboardScreen = () => {
       fontSize: 16,
     },
     modalButtons: {
-      flexDirection: 'row',
+      flexDirection: "row",
       padding: theme.spacing.lg,
       borderTopWidth: 1,
       borderTopColor: theme.semanticColors.border.primary,
@@ -709,10 +760,10 @@ const ProfileDashboardScreen = () => {
       flex: 1,
       paddingVertical: theme.spacing.md,
       borderRadius: theme.borderRadius.lg,
-      alignItems: 'center',
+      alignItems: "center",
     },
     modalCancelButton: {
-      backgroundColor: 'transparent',
+      backgroundColor: "transparent",
       borderWidth: 1,
       borderColor: theme.semanticColors.border.primary,
     },
@@ -721,7 +772,7 @@ const ProfileDashboardScreen = () => {
     },
     modalButtonText: {
       fontSize: 16,
-      fontWeight: '600' as TextStyle['fontWeight'],
+      fontWeight: "600" as TextStyle["fontWeight"],
     },
     modalCancelText: {
       color: theme.semanticColors.text.primary,
@@ -747,10 +798,12 @@ const ProfileDashboardScreen = () => {
           {/* Profile Header */}
           <View style={styles.profileHeader}>
             <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>{getDisplayName().charAt(0).toUpperCase()}</Text>
+              <Text style={styles.avatarText}>
+                {getDisplayName().charAt(0).toUpperCase()}
+              </Text>
             </View>
             <Text style={styles.name}>{getDisplayName()}</Text>
-            <Text style={styles.email}>{user?.email || 'Bilinmiyor'}</Text>
+            <Text style={styles.email}>{user?.email || "Bilinmiyor"}</Text>
             <View style={styles.levelBadge}>
               <Text style={styles.levelText}>Aktif Üye</Text>
             </View>
@@ -768,7 +821,9 @@ const ProfileDashboardScreen = () => {
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statIcon}>🔥</Text>
-              <Text style={styles.statValue}>{userStats.totalCalories.toLocaleString('tr-TR')}</Text>
+              <Text style={styles.statValue}>
+                {userStats.totalCalories.toLocaleString("tr-TR")}
+              </Text>
               <Text style={styles.statLabel}>Kalori Kaydedilen</Text>
             </View>
             <View style={styles.statCard}>
@@ -778,7 +833,9 @@ const ProfileDashboardScreen = () => {
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statIcon}>⚡</Text>
-              <Text style={styles.statValue}>{userStats.currentStreak} gün</Text>
+              <Text style={styles.statValue}>
+                {userStats.currentStreak} gün
+              </Text>
               <Text style={styles.statLabel}>Uygulamada Geçen Süre</Text>
             </View>
           </View>
@@ -813,7 +870,11 @@ const ProfileDashboardScreen = () => {
               onPress={handleSettings}
               disabled={loading}
             >
-              <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>⚙️ Ayarlar</Text>
+              <Text
+                style={[styles.actionButtonText, styles.secondaryButtonText]}
+              >
+                ⚙️ Ayarlar
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.actionButton, styles.secondaryButton]}
@@ -821,7 +882,11 @@ const ProfileDashboardScreen = () => {
               disabled={loading}
               delayLongPress={1000} // 1 saniye sonra long press tetiklenir
             >
-              <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>🚪 Çıkış Yap (Uzun Bas)</Text>
+              <Text
+                style={[styles.actionButtonText, styles.secondaryButtonText]}
+              >
+                🚪 Çıkış Yap (Uzun Bas)
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -849,7 +914,10 @@ const ProfileDashboardScreen = () => {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+            <ScrollView
+              style={styles.modalContent}
+              showsVerticalScrollIndicator={false}
+            >
               {/* İsim ve Soyisim */}
               <View style={styles.inputRow}>
                 <View style={[styles.inputGroup, styles.inputHalf]}>
@@ -857,7 +925,9 @@ const ProfileDashboardScreen = () => {
                   <TextInput
                     style={styles.input}
                     value={editForm.firstName}
-                    onChangeText={(text) => setEditForm(prev => ({ ...prev, firstName: text }))}
+                    onChangeText={(text) =>
+                      setEditForm((prev) => ({ ...prev, firstName: text }))
+                    }
                     placeholder="Adınız"
                   />
                 </View>
@@ -866,7 +936,9 @@ const ProfileDashboardScreen = () => {
                   <TextInput
                     style={styles.input}
                     value={editForm.lastName}
-                    onChangeText={(text) => setEditForm(prev => ({ ...prev, lastName: text }))}
+                    onChangeText={(text) =>
+                      setEditForm((prev) => ({ ...prev, lastName: text }))
+                    }
                     placeholder="Soyadınız"
                   />
                 </View>
@@ -878,7 +950,9 @@ const ProfileDashboardScreen = () => {
                 <TextInput
                   style={styles.input}
                   value={editForm.phone}
-                  onChangeText={(text) => setEditForm(prev => ({ ...prev, phone: text }))}
+                  onChangeText={(text) =>
+                    setEditForm((prev) => ({ ...prev, phone: text }))
+                  }
                   placeholder="+90 5XX XXX XX XX"
                   keyboardType="phone-pad"
                 />
@@ -891,7 +965,9 @@ const ProfileDashboardScreen = () => {
                   <TextInput
                     style={styles.input}
                     value={editForm.age}
-                    onChangeText={(text) => setEditForm(prev => ({ ...prev, age: text }))}
+                    onChangeText={(text) =>
+                      setEditForm((prev) => ({ ...prev, age: text }))
+                    }
                     placeholder="25"
                     keyboardType="numeric"
                   />
@@ -901,7 +977,9 @@ const ProfileDashboardScreen = () => {
                   <TextInput
                     style={styles.input}
                     value={editForm.height}
-                    onChangeText={(text) => setEditForm(prev => ({ ...prev, height: text }))}
+                    onChangeText={(text) =>
+                      setEditForm((prev) => ({ ...prev, height: text }))
+                    }
                     placeholder="175"
                     keyboardType="numeric"
                   />
@@ -915,7 +993,9 @@ const ProfileDashboardScreen = () => {
                   <TextInput
                     style={styles.input}
                     value={editForm.currentWeight}
-                    onChangeText={(text) => setEditForm(prev => ({ ...prev, currentWeight: text }))}
+                    onChangeText={(text) =>
+                      setEditForm((prev) => ({ ...prev, currentWeight: text }))
+                    }
                     placeholder="72.5"
                     keyboardType="numeric"
                   />
@@ -925,7 +1005,9 @@ const ProfileDashboardScreen = () => {
                   <TextInput
                     style={styles.input}
                     value={editForm.targetWeight}
-                    onChangeText={(text) => setEditForm(prev => ({ ...prev, targetWeight: text }))}
+                    onChangeText={(text) =>
+                      setEditForm((prev) => ({ ...prev, targetWeight: text }))
+                    }
                     placeholder="70"
                     keyboardType="numeric"
                   />
@@ -947,19 +1029,43 @@ const ProfileDashboardScreen = () => {
                       {editForm.primaryGoal ? (
                         <>
                           <Text style={styles.selectedIcon}>
-                            {goalOptions.find(opt => opt.value === editForm.primaryGoal)?.icon}
+                            {
+                              goalOptions.find(
+                                (opt) => opt.value === editForm.primaryGoal,
+                              )?.icon
+                            }
                           </Text>
                           <Text style={styles.pickerText}>
-                            {goalOptions.find(opt => opt.value === editForm.primaryGoal)?.label}
+                            {
+                              goalOptions.find(
+                                (opt) => opt.value === editForm.primaryGoal,
+                              )?.label
+                            }
                           </Text>
                         </>
                       ) : (
-                        <Text style={[styles.pickerText, { color: theme.semanticColors.text.tertiary }]}>
+                        <Text
+                          style={[
+                            styles.pickerText,
+                            { color: theme.semanticColors.text.tertiary },
+                          ]}
+                        >
                           Ana Hedef Seçin
                         </Text>
                       )}
                     </View>
-                    <Text style={[styles.pickerArrow, { transform: [{ rotate: showGoalPicker ? '180deg' : '0deg' }] }]}>▼</Text>
+                    <Text
+                      style={[
+                        styles.pickerArrow,
+                        {
+                          transform: [
+                            { rotate: showGoalPicker ? "180deg" : "0deg" },
+                          ],
+                        },
+                      ]}
+                    >
+                      ▼
+                    </Text>
                   </TouchableOpacity>
 
                   {/* Dropdown Listesi */}
@@ -971,16 +1077,23 @@ const ProfileDashboardScreen = () => {
                           style={[
                             styles.dropdownItem,
                             index === 0 && styles.dropdownItemFirst,
-                            index === goalOptions.length - 1 && styles.dropdownItemLast,
-                            editForm.primaryGoal === option.value && styles.dropdownItemSelected
+                            index === goalOptions.length - 1 &&
+                              styles.dropdownItemLast,
+                            editForm.primaryGoal === option.value &&
+                              styles.dropdownItemSelected,
                           ]}
                           onPress={() => {
-                            setEditForm(prev => ({ ...prev, primaryGoal: option.value }));
+                            setEditForm((prev) => ({
+                              ...prev,
+                              primaryGoal: option.value,
+                            }));
                             setShowGoalPicker(false);
                           }}
                         >
                           <Text style={styles.dropdownIcon}>{option.icon}</Text>
-                          <Text style={styles.dropdownLabel}>{option.label}</Text>
+                          <Text style={styles.dropdownLabel}>
+                            {option.label}
+                          </Text>
                           {editForm.primaryGoal === option.value && (
                             <Text style={styles.dropdownCheck}>✓</Text>
                           )}
@@ -997,7 +1110,9 @@ const ProfileDashboardScreen = () => {
                     <TextInput
                       style={styles.input}
                       value={editForm.weeklyGoal}
-                      onChangeText={(text) => setEditForm(prev => ({ ...prev, weeklyGoal: text }))}
+                      onChangeText={(text) =>
+                        setEditForm((prev) => ({ ...prev, weeklyGoal: text }))
+                      }
                       placeholder="0.5"
                       keyboardType="numeric"
                     />
@@ -1007,7 +1122,9 @@ const ProfileDashboardScreen = () => {
                     <TextInput
                       style={styles.input}
                       value={editForm.timeline}
-                      onChangeText={(text) => setEditForm(prev => ({ ...prev, timeline: text }))}
+                      onChangeText={(text) =>
+                        setEditForm((prev) => ({ ...prev, timeline: text }))
+                      }
                       placeholder="3 ay"
                     />
                   </View>
@@ -1021,7 +1138,9 @@ const ProfileDashboardScreen = () => {
                 onPress={() => setShowEditModal(false)}
                 disabled={loading}
               >
-                <Text style={[styles.modalButtonText, styles.modalCancelText]}>İptal</Text>
+                <Text style={[styles.modalButtonText, styles.modalCancelText]}>
+                  İptal
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.modalSaveButton]}
@@ -1029,7 +1148,7 @@ const ProfileDashboardScreen = () => {
                 disabled={loading}
               >
                 <Text style={[styles.modalButtonText, styles.modalSaveText]}>
-                  {loading ? 'Kaydediliyor...' : 'Kaydet'}
+                  {loading ? "Kaydediliyor..." : "Kaydet"}
                 </Text>
               </TouchableOpacity>
             </View>
